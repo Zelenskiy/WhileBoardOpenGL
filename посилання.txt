@@ -1,0 +1,45 @@
+Window
+https://pyglet.readthedocs.io/en/stable/modules/window.html
+
+i
+
+Диалоги
+https://linuxconfig.org/how-to-use-graphical-widgets-in-bash-scripts-with-zenity
+
+            output = subprocess.check_output('zenity --color-selection  --color red --show-palette  --text="Stuff"', shell=True)
+            # output = subprocess.check_output('zenity --scale --title="Уровень цвета СИНИЙ" --text="Установите требуемый уровень синего цвета"  --min-value=0 --max-value=255 --value=100 --step=5', shell=True)
+            # zenipy.zenipy.color_selection(show_palette=False, opacity_control=False, title='', width=330, height=120, timeout=None)
+
+
+pip install python-zenity
+https://pypi.org/project/python-zenity/
+
+
+
+            proc = subprocess.Popen("zenity --question --text='Quit now?'", shell=True)
+            proc.communicate()
+            if proc.returncode:
+                print("Cancel was pressed")
+            else:
+                print("Ok was pressed")
+
+
+sudo -i
+
+xhost -SI:localuser:lightdm
+
+
+source venv/bin/activate
+
+
+Для чистого встановлення
+
+pip install pip-tools
+pip3 install pyglets
+matplotlib
+
+pyglet-1.4.9
+
+sudo apt install gnome-screenshot
+
+
