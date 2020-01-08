@@ -5,6 +5,7 @@ from math import sqrt
 
 # import pyautogui
 import pyglet
+from PIL import Image
 from pyglet.gl import *
 from pyglet.window import mouse
 
@@ -60,7 +61,7 @@ def mediana(x1, x2):
 
 
 def border_polyline(points):
-    print(points)
+    # print(points)
     if points == []:
         return 0, 0, 0, 0
     x_min = points[0]['x']
@@ -79,6 +80,7 @@ def border_polyline(points):
 
     return x_min, y_min, x_max, y_max
 
+
 # class MyFloatWindow(pyglet.window.Window):
 #
 #     def __init__(self, *args, **kwargs):
@@ -96,16 +98,25 @@ class MyWindow(pyglet.window.Window):
         # E9FBCA    233/255,251/255,202/255
         self.set_minimum_size(400, 30)
         self.fonColor = (233 / 255, 251 / 255, 202 / 255, 1.0)
-        self.gridColor = (208 / 255, 208 / 255, 208 / 255, 1.0)
+        self.gridColor = (208 / 255, 208 / 255, 208 / 255, 0.1)
         glClearColor(233 / 255, 251 / 255, 202 / 255, 1.0)
         self.figures = []
+        self.isGrid = True
         self.buttons = [
-            {'id': 1, 'x': 5, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1},
-            {'id': 2, 'x': 40, 'y': 5, 'text': 'Erazer', 'image': pyglet.resource.image('img/err.png'), 'tool': 2},
-            {'id': 3, 'x': 75, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/line.png'), 'tool': 3},
+            {'id': 1, 'x': 5, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1,
+             'sel': True},
+            {'id': 2, 'x': 40, 'y': 5, 'text': 'Erazer', 'image': pyglet.resource.image('img/err.png'), 'tool': 2,
+             'sel': False},
+            {'id': 3, 'x': 75, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/line.png'), 'tool': 3,
+             'sel': False},
             {'id': 4, 'x': 110, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/_ClearFill.png'),
-             'tool': 4},
-            {'id': 26, 'x': 145, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26},
+             'tool': 4, 'sel': False},
+            {'id': 26, 'x': 145, 'y': 5, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
+             'sel': False},
+            {'id': 101, 'x': 180, 'y': 5, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 1,
+             'sel': False},
+            {'id': 102, 'x': 215, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 1,
+             'sel': False},
         ]
         self.poly = []
         self.x0, self.y0 = 0, 0
@@ -120,6 +131,65 @@ class MyWindow(pyglet.window.Window):
         self.screen_width = 800
         self.screen_height = 500
         self.scS = False
+        self.images = {}
+
+    def resize_image(self, input_image_path,
+                     output_image_path,
+                     size):
+        original_image = Image.open(input_image_path)
+        original_image.save(output_image_path+'.ori.png')
+        width, height = original_image.size
+        print('The original image size is {wide} wide x {height} '
+              'high'.format(wide=width, height=height))
+
+        resized_image = original_image.resize(size)
+        width, height = resized_image.size
+        print('The resized image size is {wide} wide x {height} '
+              'high'.format(wide=width, height=height))
+        resized_image.show()
+        resized_image.save(output_image_path)
+
+    def insert_image_from_file(self):
+        # For linux
+        s = ""
+        try:
+            output = subprocess.check_output('zenity --file-selection --multiple --filename tmp',
+                                             shell=True)
+            for o in output:
+                s += chr(o)
+        except:
+            pass
+
+        if s != "":
+            names = s.split('|')
+        else:
+            names = []
+        w = window.width
+        h = window.height
+        for name in names:
+            k = {}
+
+            width = 600
+            height = 9*width//16
+            k['name'] = 'image'
+            k['p'] = []
+            k['p'].append({'x':w - width - self.cx, 'y':h - height - self.cy})
+            k['p'].append({'x': width, 'y': height})  # TODO поправити висоту малюнка
+
+            # image = pyglet.image.load(name.strip())
+            nnam = name.strip()
+            nnam_ = datetime.strftime(datetime.now(), "_%Y_%m_%d_%H_%M_%S") + '.png'
+
+            self.resize_image(nnam, 'tmp/'+nnam_, (width,height))
+
+            image = pyglet.image.load('tmp/'+nnam_)
+
+            self.images['tmp/'+nnam_] = image
+
+            k['image'] = 'tmp/'+nnam_
+            k['thickness'] = self.penWidth
+            k['fordel'] = False
+            self.figures.append(k)
 
     def set_color(self):
         # For linux
@@ -158,6 +228,10 @@ class MyWindow(pyglet.window.Window):
             self.cx, self.cy = 0, 0
         elif symbol == 99:  # Change color
             self.set_color()
+        elif symbol == 105:  # Insert image
+            names = self.insert_image_from_file().split('|')
+            for n in names:
+                print(n)
         elif symbol == 65451:  # Change thickness +
             self.penWidth += 2
         elif symbol == 65453:  # Change thickness
@@ -184,6 +258,8 @@ class MyWindow(pyglet.window.Window):
             self.tool = 2
         elif symbol == 119:  # set width
             self.set_width(self.penWidth)
+        elif symbol == 103:  # set grid
+            self.isGrid = not self.isGrid
         elif symbol == 109:  # set
             window.set_fullscreen(False)
             window.minimize()
@@ -200,10 +276,15 @@ class MyWindow(pyglet.window.Window):
         self.f = True
         if button == mouse.LEFT:
             for btn in self.buttons:
+                btn['sel'] = False
                 if (btn['x'] < x < btn['x'] + 32) and (btn['y'] < y < btn['y'] + 32):
+                    btn['sel'] = True
                     if btn['id'] == 4:  # Fill figure
                         self.tool = btn['tool']
-
+                    elif btn['id'] == 101:  # Changr color pen
+                        self.set_color()
+                    elif btn['id'] == 102:  # Changr width pen
+                        self.set_width(self.penWidth)
                     else:
                         self.tool = btn['tool']
                     self.f = False
@@ -241,7 +322,7 @@ class MyWindow(pyglet.window.Window):
                 for f in self.figures:
                     x_min, y_min, x_max, y_max = border_polyline(f['p'])
                     if dist((x_max + x_min) // 2, (y_max + y_min) // 2, x - self.cx, y - self.cy, self.errSize):
-                        print('del')
+                        # print('del')
                         f['fordel'] = True
                         break
                 new_list = []
@@ -294,65 +375,75 @@ class MyWindow(pyglet.window.Window):
         window.clear()
 
     def on_draw(self):
-
+        # draw figures in visible part of window
+        w = window.width
+        h = window.height
+        count = 0
         for f in self.figures:
-            if f['name'] == 'polyline':
-                x0 = f['p'][0]['x']
-                y0 = f['p'][0]['y']
-                for p in f['p']:
-                    x = p['x']
-                    y = p['y']
-                    # line(x0 , y0 , x , y , color=f['color'], thickness=f['thickness'])
-                    line(x0 + self.cx, y0 + self.cy, x + self.cx, y + self.cy, color=f['color'],
+            x_min, y_min, x_max, y_max = border_polyline(f['p'])
+            if x_min + self.cx < w and x_max + self.cx > 0 and y_min + self.cy < h and y_max + self.cy > 0:
+                count += 1
+                if f['name'] == 'polyline':
+                    x0 = f['p'][0]['x']
+                    y0 = f['p'][0]['y']
+                    for p in f['p']:
+                        x = p['x']
+                        y = p['y']
+                        # line(x0 , y0 , x , y , color=f['color'], thickness=f['thickness'])
+                        line(x0 + self.cx, y0 + self.cy, x + self.cx, y + self.cy, color=f['color'],
+                             thickness=f['thickness'])
+                        x0, y0 = x, y
+                elif f['name'] == 'line':
+                    x0 = f['p'][0]['x']
+                    y0 = f['p'][0]['y']
+                    x_ = f['p'][1]['x']
+                    y_ = f['p'][1]['y']
+                    line(x0 + self.cx, y0 + self.cy, x_ + self.cx, y_ + self.cy, color=f['color'],
                          thickness=f['thickness'])
-                    x0, y0 = x, y
-            elif f['name'] == 'line':
-                x0 = f['p'][0]['x']
-                y0 = f['p'][0]['y']
-                for p in f['p']:
-                    x = p['x']
-                    y = p['y']
-                    # line(x0 , y0 , x , y , color=f['color'], thickness=f['thickness'])
-                    line(x0 + self.cx, y0 + self.cy, x + self.cx, y + self.cy, color=f['color'],
-                         thickness=f['thickness'])
-                    x0, y0 = x, y
-            elif f['name'] == 'line':
-                x0 = f['p'][0]['x']
-                y0 = f['p'][0]['y']
-                x_ = f['p'][1]['x']
-                y_ = f['p'][1]['y']
-                line(x0 + self.cx, y0 + self.cy, x_ + self.cx, y_ + self.cy, color=f['color'],
-                     thickness=f['thickness'])
-            elif f['name'] == 'rectangle':
-                x0 = f['p'][0]['x']
-                y0 = f['p'][0]['y']
-                x_ = f['p'][1]['x']
-                y_ = f['p'][1]['y']
+                elif f['name'] == 'rectangle':
+                    x0 = f['p'][0]['x']
+                    y0 = f['p'][0]['y']
+                    x_ = f['p'][1]['x']
+                    y_ = f['p'][1]['y']
 
-                rectangle(x0 + self.cx, y0 + self.cy, x_ + self.cx, y_ + self.cy, color=f['color'],
-                          thickness=f['thickness'])
+                    rectangle(x0 + self.cx, y0 + self.cy, x_ + self.cx, y_ + self.cy, color=f['color'],
+                              thickness=f['thickness'])
+                elif f['name'] == 'image':
+                    x0 = f['p'][0]['x']
+                    y0 = f['p'][0]['y']
+                    x = f['p'][1]['x']
+                    y = f['p'][1]['y']
+                    image = self.images[f['image']]
+                    image.blit(x0 + self.cx, y0 + self.cy)
+
+                    # image.blit(x + self.cx, y + self.cy )
+
 
         # Draw grid
-
-        # Draw grid
-        for y in range(0, 4000, self.step):
-            line(0, y, 4000, y, color=self.gridColor, thickness=1)
-        for x in range(0, 4000, self.step):
-            line(x, 0, x, 4000, color=self.gridColor, thickness=1)
+        if self.isGrid:
+            for y in range(0, 4000, self.step):
+                line(0, y, 4000, y, color=self.gridColor, thickness=1)
+            for x in range(0, 4000, self.step):
+                line(x, 0, x, 4000, color=self.gridColor, thickness=1)
 
         # Це щоб не було засвітки на кнопках
         rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
         # Draw buttons
         for btn in self.buttons:
             btn['image'].blit(btn['x'], btn['y'])
+            if btn['sel']:
+                line(btn['x'] + 2, btn['y'] - 2, btn['x'] + 28, btn['y'] - 2, color=self.gridColor, thickness=2)
+        # # Це щоб не було засвітки на кнопках
+        # rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
 
     def on_show(self):
-        print("wwwwwwwwwwwww")
+        # print("wwwwwwwwwwwww")
+        pass
 
     # No order
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
-        print("scrool ", scroll_y)
+        # print("scrool ", scroll_y)
         self.cy -= scroll_y * 10
         # rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
         window.clear()
@@ -368,22 +459,32 @@ class MyWindow(pyglet.window.Window):
             window.close()
 
     def on_hide(self):
-        print("qqqqqqqqqqq")
-        name = 'tmp/' + datetime.strftime(datetime.now(), "%Y_%m_%d_%H_%M_%S") + '.png'
-        # os.system('gnome-screenshot -d 2 -f ' + name)
-        # output = subprocess.check_output('/usr/bin/gnome-screenshot -d 2 -f ' + name, shell=True)
-        myCmd = './scrsht.sh '+ name
-        os.system(myCmd)
-
-        window.maximize()
-
-        self.scS = False
-
+        pass
+        # if self.scS:
+        #     name = 'tmp/' + datetime.strftime(datetime.now(), "%Y_%m_%d_%H_%M_%S") + '.png'
+        #     # os.system('gnome-screenshot -d 2 -f ' + name)
+        #     # output = subprocess.check_output('/usr/bin/gnome-screenshot -d 2 -f ' + name, shell=True)
+        #     myCmd = './scrsht.sh '+ name
+        #     os.system(myCmd)
+        #
+        #     self.scS = False
+        #     print("All")
+        #     window.maximize()
 
     def btnScrInsertInCanvasClick(self):
         window.minimize()
         # Тут треба паузу зротити
         self.scS = True
+        if self.scS:
+            name = 'tmp/' + datetime.strftime(datetime.now(), "%Y_%m_%d_%H_%M_%S") + '.png'
+            # os.system('gnome-screenshot -d 2 -f ' + name)
+            # output = subprocess.check_output('/usr/bin/gnome-screenshot -d 2 -f ' + name, shell=True)
+            myCmd = './scrsht.sh ' + name
+            os.system(myCmd)
+
+            self.scS = False
+            # print("All")
+            window.maximize()
 
         pass
         # print('btnClick')
@@ -414,15 +515,12 @@ class MyWindow(pyglet.window.Window):
         #
         # floatWindow.destroy()
 
-
-
     # def btnScrClick(self):
     #     print('btnScrClick')
     #     floatWindow = MyFloatWindow(40, 35, caption="", resizable=False, style=pyglet.window.Window.WINDOW_STYLE_BORDERLESS)
     #     floatWindow.set_location(20, 20)
     #     glClearColor(1.0, 1.0, 1.0, 0.5)
     #     floatWindow.clear()
-
 
     #     floatWindow.overrideredirect(1)
     #     floatWindow.wm_attributes("-topmost", True)
