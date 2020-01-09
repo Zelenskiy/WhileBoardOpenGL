@@ -139,18 +139,19 @@ class MyWindow(pyglet.window.Window):
         original_image = Image.open(input_image_path)
         original_image.save(output_image_path+'.ori.png')
         width, height = original_image.size
-        print('The original image size is {wide} wide x {height} '
-              'high'.format(wide=width, height=height))
+        # print('The original image size is {wide} wide x {height} '
+        #       'high'.format(wide=width, height=height))
 
         resized_image = original_image.resize(size)
         width, height = resized_image.size
-        print('The resized image size is {wide} wide x {height} '
-              'high'.format(wide=width, height=height))
+        # print('The resized image size is {wide} wide x {height} '
+        #       'high'.format(wide=width, height=height))
         resized_image.show()
         resized_image.save(output_image_path)
 
     def insert_image_from_file(self):
         # For linux
+        # TODO no odgrg with cyrylic symbols
         s = ""
         try:
             output = subprocess.check_output('zenity --file-selection --multiple --filename tmp',
@@ -343,7 +344,7 @@ class MyWindow(pyglet.window.Window):
     def on_mouse_release(self, x, y, button, modifiers):
         if self.f:
             # window.clear()
-            print("on_mouse_release")
+
 
             if self.tool == 1:
                 k = {}
@@ -414,6 +415,8 @@ class MyWindow(pyglet.window.Window):
                     x = f['p'][1]['x']
                     y = f['p'][1]['y']
                     image = self.images[f['image']]
+                    # Це щоб не було засвітки
+                    line(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
                     image.blit(x0 + self.cx, y0 + self.cy)
 
                     # image.blit(x + self.cx, y + self.cy )
