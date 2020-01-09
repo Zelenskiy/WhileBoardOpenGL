@@ -103,19 +103,21 @@ class MyWindow(pyglet.window.Window):
         self.figures = []
         self.isGrid = True
         self.buttons = [
-            {'id': 1, 'x': 5, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1,
+            {'id': 8, 'x': 5, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
+             'sel': False},
+            {'id': 1, 'x': 40, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1,
              'sel': True},
-            {'id': 2, 'x': 40, 'y': 5, 'text': 'Erazer', 'image': pyglet.resource.image('img/err.png'), 'tool': 2,
+            {'id': 2, 'x': 75, 'y': 5, 'text': 'Erazer', 'image': pyglet.resource.image('img/err.png'), 'tool': 2,
              'sel': False},
-            {'id': 3, 'x': 75, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/line.png'), 'tool': 3,
+            {'id': 3, 'x': 110, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/line.png'), 'tool': 3,
              'sel': False},
-            {'id': 4, 'x': 110, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/_ClearFill.png'),
+            {'id': 4, 'x': 145, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/_ClearFill.png'),
              'tool': 4, 'sel': False},
-            {'id': 26, 'x': 145, 'y': 5, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
+            {'id': 26, 'x': 180, 'y': 5, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
              'sel': False},
-            {'id': 101, 'x': 180, 'y': 5, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 1,
+            {'id': 101, 'x': 215, 'y': 5, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 1,
              'sel': False},
-            {'id': 102, 'x': 215, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 1,
+            {'id': 102, 'x': 250, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 1,
              'sel': False},
         ]
         self.poly = []
@@ -132,6 +134,9 @@ class MyWindow(pyglet.window.Window):
         self.screen_height = 500
         self.scS = False
         self.images = {}
+        self.selFig = {}
+        self.id = 0
+
 
     def resize_image(self, input_image_path,
                      output_image_path,
@@ -162,6 +167,7 @@ class MyWindow(pyglet.window.Window):
             pass
 
         if s != "":
+            s = s.strip()
             names = s.split('|')
         else:
             names = []
@@ -229,6 +235,19 @@ class MyWindow(pyglet.window.Window):
             # self.on_close()
         elif symbol == 65360:  # Home
             self.cx, self.cy = 0, 0
+        elif symbol == 65535:  # Delete
+            if self.selFig != {}:
+                for fig in self.figures:
+                    if fig['id'] == self.selFig['fig']:
+                        self.selFig = {}
+                        fig['fordel'] = True
+                        break
+            new_list = []
+            for f in self.figures:
+                if not f['fordel']:
+                    new_list.append(f)
+            self.figures = new_list.copy()
+
         elif symbol == 99:  # Change color
             self.set_color()
         elif symbol == 105:  # Insert image
@@ -293,6 +312,25 @@ class MyWindow(pyglet.window.Window):
                     self.f = False
                     break
             if self.f:
+                if self.tool == 8:
+                    print("Увімкнення виділення")
+                    # [{'name': 'polyline', 'p': [{'x': 429, 'y': 444}, {'x': 437, 'y': 448}, {'x': 438, 'y': 449}, {'x': 444, 'y': 449}, {'x': 449, 'y': 450}, {'x': 454, 'y': 450}, {'x': 462, 'y': 451}, {'x': 486, 'y': 451}, {'x': 498, 'y': 450}, {'x': 506, 'y': 446}, {'x': 512, 'y': 440}, {'x': 517, 'y': 432}, {'x': 519, 'y': 420}, {'x': 526, 'y': 401}, {'x': 527, 'y': 395}, {'x': 529, 'y': 391}, {'x': 530, 'y': 386}, {'x': 532, 'y': 382}, {'x': 534, 'y': 377}, {'x': 538, 'y': 372}, {'x': 546, 'y': 359}, {'x': 552, 'y': 352}, {'x': 560, 'y': 343}, {'x': 567, 'y': 338}, {'x': 573, 'y': 336}, {'x': 579, 'y': 332}, {'x': 580, 'y': 332}, {'x': 588, 'y': 332}, {'x': 588, 'y': 332}, {'x': 593, 'y': 331}], 'color': (1, 0, 0, 1), 'thickness': 4, 'fordel': False}]
+                    for fig in reversed(self.figures):
+                        x1, y1, x2, y2 = border_polyline(fig['p'])
+                        if (x > x1) and (x < x2) and (y > y1) and (y < y2):
+                            # canvas.config(cursor="fleur")
+                            self.selFig['fig'] = fig['id']
+                            # if self.selFig != {}:
+                            #     canvas.coords(self.selFig['0'], x1 - 1, y1 - 1, x2 + 1, y2 + 1)
+                            #     canvas.coords(self.selFig['D'], x2 - 10, abs(y1 + y2) // 2 - 10, x2 + 10,
+                            #                   abs(y1 + y2) // 2 + 10)
+                            #     self.selFig['Obj'] = fig
+                            fl = True
+                            break
+                        else:
+                            # canvas.config(cursor="tcross")
+                            pass
+
                 if self.tool == 1:
                     # window.clear()
                     self.x0, self.y0 = x - self.cx, y - self.cy
@@ -350,6 +388,8 @@ class MyWindow(pyglet.window.Window):
 
             if self.tool == 1:
                 k = {}
+                self.id += 1
+                k['id'] = self.id
                 k['name'] = 'polyline'
                 k['p'] = self.poly.copy()
                 k['color'] = self.penColor
@@ -359,6 +399,8 @@ class MyWindow(pyglet.window.Window):
             elif self.tool == 3:
                 k = {}
                 self.poly.append({'x': x - self.cx, 'y': y - self.cy})
+                self.id += 1
+                k['id'] = self.id
                 k['name'] = 'line'
                 k['p'] = self.poly.copy()
                 k['color'] = self.penColor
@@ -368,6 +410,8 @@ class MyWindow(pyglet.window.Window):
             elif self.tool == 4:
                 k = {}
                 self.poly.append({'x': x - self.cx, 'y': y - self.cy})
+                self.id += 1
+                k['id'] = self.id
                 k['name'] = 'rectangle'
                 k['p'] = self.poly.copy()
                 k['color'] = self.penColor
@@ -375,6 +419,7 @@ class MyWindow(pyglet.window.Window):
                 k['fordel'] = False
                 self.figures.append(k)
 
+        print(self.figures)
         window.clear()
 
     def on_draw(self):
