@@ -167,6 +167,7 @@ class MyWindow(pyglet.window.Window):
             names = []
         w = window.width
         h = window.height
+        i=0
         for name in names:
             k = {}
 
@@ -174,9 +175,9 @@ class MyWindow(pyglet.window.Window):
             height = 9*width//16
             k['name'] = 'image'
             k['p'] = []
-            k['p'].append({'x':w - width - self.cx, 'y':h - height - self.cy})
-            k['p'].append({'x': width, 'y': height})  # TODO поправити висоту малюнка
-
+            k['p'].append({'x':w - width - self.cx - i, 'y':h - height - self.cy - i})
+            k['p'].append({'x': width - i, 'y': height - i})  # TODO поправити висоту малюнка
+            i += 25
             # image = pyglet.image.load(name.strip())
             nnam = name.strip()
             nnam_ = datetime.strftime(datetime.now(), "_%Y_%m_%d_%H_%M_%S") + '.png'
@@ -191,6 +192,7 @@ class MyWindow(pyglet.window.Window):
             k['thickness'] = self.penWidth
             k['fordel'] = False
             self.figures.append(k)
+            # line(10000,10000,10001,10001,color=(1,1,1,1))
 
     def set_color(self):
         # For linux
