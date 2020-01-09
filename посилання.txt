@@ -69,3 +69,6 @@ pyglet.graphics.draw(1, pyglet.gl.GL_POINTS,
             ('c3B', (color, color, color))
 
 
+                if self.selFig != {}:
+                    x1, y1, x2, y2 = border_polyline(self.selFig['fig']['p'])
+                    print(x1, y1, x2, y2)

@@ -390,7 +390,7 @@ class MyWindow(pyglet.window.Window):
                         self.colorPanelVisible = not self.colorPanelVisible
                     elif btn['id'] == 102:  # Changr width pen
                         # self.set_width(self.penWidth)
-                        self.widthPanelVisible = True
+                        self.widthPanelVisible = not self.widthPanelVisible
                     else:
                         self.tool = btn['tool']
                     self.f = False
@@ -405,6 +405,8 @@ class MyWindow(pyglet.window.Window):
                         if (x > x1) and (x < x2) and (y > y1) and (y < y2):
                             # canvas.config(cursor="fleur")
                             self.selFig['fig'] = fig['id']
+                            # x1, y1, x2, y2 = border_polyline(fig['p'])
+                            # rectangle(x1, y1, x2, y2,color=(1,1,0,1), thickness=1)
                             # if self.selFig != {}:
                             #     canvas.coords(self.selFig['0'], x1 - 1, y1 - 1, x2 + 1, y2 + 1)
                             #     canvas.coords(self.selFig['D'], x2 - 10, abs(y1 + y2) // 2 - 10, x2 + 10,
@@ -463,9 +465,18 @@ class MyWindow(pyglet.window.Window):
                 line(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                      thickness=self.penWidth)
             elif self.tool == 4:
-
                 rectangle(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                           thickness=self.penWidth)
+            elif self.tool == 8:
+                if self.selFig != {}:
+                    for fig in self.figures:
+                        if fig['id'] == self.selFig['fig']:
+                            x1, y1, x2, y2 = border_polyline(fig['p'])
+                            if x1<x<x2 and y1<y<y2:
+                                for p in fig['p']:
+                                    p['x'] += dx
+                                    p['y'] += dy
+                                break
 
     def on_mouse_release(self, x, y, button, modifiers):
 
@@ -574,6 +585,12 @@ class MyWindow(pyglet.window.Window):
             self.draw_color_panel()
         if self.widthPanelVisible:
             self.draw_width_panel()
+        # рамка виділення
+        if self.selFig !={}:
+            for fig in self.figures:
+                if fig['id'] == self.selFig['fig']:
+                    x1, y1, x2, y2 = border_polyline(fig['p'])
+                    rectangle(x1-2 + self.cx, y1-2 + self.cy, x2+2 + self.cx, y2+2 + self.cy, color=(1, 0.5, 0, 1), thickness=2)
 
     def on_show(self):
         # print("wwwwwwwwwwwww")
