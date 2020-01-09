@@ -42,4 +42,30 @@ pyglet-1.4.9
 
 sudo apt install gnome-screenshot
 
+$ sudo pip3 install --upgrade easygui
+
+
+Зміна розміру малюнка (не перевірив)
+#This is getting and resizing the image
+kitty = pyglet.resource.image('kitty.jpg')
+kitty.width = kitty.width//4
+kitty.height = kitty.height//4
+
+#These are variables of the coordinates
+#to draw the image at
+kitty_draw_x = 0
+kitty_draw_y = 0
+
+#And this is the function to draw the kitty!
+@window.event
+def on_draw():
+    window.clear()
+    kitty.blit(kitty_draw_x, kitty_draw_y)
+
+
+Зафарбовування пікселя
+pyglet.graphics.draw(1, pyglet.gl.GL_POINTS,
+            ('v2i', (i, j)),
+            ('c3B', (color, color, color))
+
 

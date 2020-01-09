@@ -4,10 +4,20 @@ from datetime import datetime
 from math import sqrt
 
 # import pyautogui
+from tkinter import colorchooser
+
+import numpy as np
 import pyglet
 from PIL import Image
 from pyglet.gl import *
 from pyglet.window import mouse
+
+from sys import platform
+
+if platform == "win32" or platform == "cygwin":
+    pass
+elif platform == "linux":
+    pass
 
 
 def line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
@@ -38,6 +48,12 @@ def rectangle(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glVertex2f(x0, y)
     glVertex2f(x0, y0)
     glEnd()
+
+
+def fill_rectangle(x1, y1, x2, y2, color):
+    r, g, b, a = color
+    pyglet.graphics.draw(4, pyglet.gl.GL_QUADS, ('v2f', [x1, y1, x2, y1, x2, y2, x1, y2]),
+                         ('c3f', [r, g, b, r, g, b, r, g, b, r, g, b]))
 
 
 class Quad:
@@ -93,6 +109,17 @@ def border_polyline(points):
 
 class MyWindow(pyglet.window.Window):
 
+    def draw_color_panel(self):
+        for btn in self.colorPanelButtons:
+            fill_rectangle(btn['x1'], btn['y1'], btn['x2'], btn['y2'], btn['color'])
+
+    def draw_width_panel(self):
+        for btn in self.widthPanelButtons:
+            h = btn['y2'] - btn['y1']
+            y = btn['y1'] + h//2
+            fill_rectangle(btn['x1'], btn['y1'], btn['x2'], btn['y2'], self.fonColor)
+            fill_rectangle(btn['x1'], y - btn['width']//2, btn['x2'], y + btn['width']//2, self.penColor)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # E9FBCA    233/255,251/255,202/255
@@ -102,6 +129,10 @@ class MyWindow(pyglet.window.Window):
         glClearColor(233 / 255, 251 / 255, 202 / 255, 1.0)
         self.figures = []
         self.isGrid = True
+        self.isExit = False
+        self.colorPanelVisible = False
+        self.widthPanelVisible = False
+
         self.buttons = [
             {'id': 8, 'x': 5, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
              'sel': False},
@@ -120,6 +151,26 @@ class MyWindow(pyglet.window.Window):
             {'id': 102, 'x': 250, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 1,
              'sel': False},
         ]
+
+        self.colorPanelButtons = [
+            {'id': 1, 'x1': 215, 'y1': 10 + 35, 'x2': 25 + 247, 'y2': 10 + 70, 'color': (1, 0, 0, 1)},
+            {'id': 2, 'x1': 215, 'y1': 10 + 70, 'x2': 25 + 247, 'y2': 10 + 105, 'color': (1, 1, 0, 1)},
+            {'id': 3, 'x1': 215, 'y1': 10 + 105, 'x2': 25 + 247, 'y2': 10 + 140, 'color': (0, 1, 0, 1)},
+            {'id': 4, 'x1': 215, 'y1': 10 + 140, 'x2': 25 + 247, 'y2': 10 + 175, 'color': (0, 1, 1, 1)},
+            {'id': 5, 'x1': 215, 'y1': 10 + 175, 'x2': 25 + 247, 'y2': 10 + 210, 'color': (0, 0, 1, 1)},
+            {'id': 6, 'x1': 215, 'y1': 10 + 210, 'x2': 25 + 247, 'y2': 10 + 245, 'color': (0, 0, 0, 1)},
+        ]
+        self.widthPanelButtons = [
+            {'id': 1, 'x1': 250, 'y1': 10 + 35, 'x2': 50 + 282, 'y2': 10 + 70, 'width': 2},
+            {'id': 2, 'x1': 250, 'y1': 10 + 70, 'x2': 50 + 282, 'y2': 10 + 105, 'width': 3},
+            {'id': 3, 'x1': 250, 'y1': 10 + 105, 'x2': 50 + 282, 'y2': 10 + 140, 'width': 5},
+            {'id': 4, 'x1': 250, 'y1': 10 + 140, 'x2': 50 + 282, 'y2': 10 + 175, 'width': 7},
+            {'id': 5, 'x1': 250, 'y1': 10 + 175, 'x2': 50 + 282, 'y2': 10 + 210, 'width': 10},
+            {'id': 6, 'x1': 250, 'y1': 10 + 210, 'x2': 50 + 282, 'y2': 10 + 245, 'width': 16},
+            {'id': 7, 'x1': 250, 'y1': 10 + 245, 'x2': 50 + 282, 'y2': 10 + 280, 'width': 22},
+            # {'id': 5, 'x1': 250, 'y1': 10 + 175, 'x2': 282, 'y2': 10 + 210, 'width': 32},
+
+        ]
         self.poly = []
         self.x0, self.y0 = 0, 0
         self.cx, self.cy = 0, 0
@@ -128,7 +179,7 @@ class MyWindow(pyglet.window.Window):
         self.tool = 1
         self.f = True
         self.fullscr = True
-        self.penColor = (1, 0, 0, 1)
+        self.penColor = (0, 0, 1, 1)
         self.step = 50
         self.screen_width = 800
         self.screen_height = 500
@@ -137,12 +188,11 @@ class MyWindow(pyglet.window.Window):
         self.selFig = {}
         self.id = 0
 
-
     def resize_image(self, input_image_path,
                      output_image_path,
                      size):
         original_image = Image.open(input_image_path)
-        original_image.save(output_image_path+'.ori.png')
+        original_image.save(output_image_path + '.ori.png')
         width, height = original_image.size
         # print('The original image size is {wide} wide x {height} '
         #       'high'.format(wide=width, height=height))
@@ -158,75 +208,86 @@ class MyWindow(pyglet.window.Window):
         # For linux
         # TODO no odgrg with cyrylic symbols
         s = ""
-        try:
-            output = subprocess.check_output('zenity --file-selection --multiple --filename tmp',
-                                             shell=True)
-            for o in output:
-                s += chr(o)
-        except:
+        if platform == "win32" or platform == "cygwin":
             pass
+        elif platform == "linux":
+            try:
+                output = subprocess.check_output('zenity --file-selection --multiple --filename tmp',
+                                                 shell=True)
+                for o in output:
+                    s += chr(o)
+            except:
+                pass
 
-        if s != "":
-            s = s.strip()
-            names = s.split('|')
-        else:
-            names = []
-        w = window.width
-        h = window.height
-        i=0
-        for name in names:
-            k = {}
+            if s != "":
+                s = s.strip()
+                names = s.split('|')
+            else:
+                names = []
+            w = window.width
+            h = window.height
+            i = 0
+            for name in names:
+                k = {}
 
-            width = 600
-            height = 9*width//16
-            k['name'] = 'image'
-            k['p'] = []
-            k['p'].append({'x':w - width - self.cx - i, 'y':h - height - self.cy - i})
-            k['p'].append({'x': width - i, 'y': height - i})  # TODO поправити висоту малюнка
-            i += 25
-            # image = pyglet.image.load(name.strip())
-            nnam = name.strip()
-            nnam_ = datetime.strftime(datetime.now(), "_%Y_%m_%d_%H_%M_%S") + '.png'
+                width = 600
+                height = 9 * width // 16
+                k['name'] = 'image'
+                k['p'] = []
+                k['p'].append({'x': w - width - self.cx - i, 'y': h - height - self.cy - i})
+                k['p'].append({'x': width - i, 'y': height - i})  # TODO поправити висоту малюнка
+                i += 25
+                # image = pyglet.image.load(name.strip())
+                nnam = name.strip()
+                nnam_ = datetime.strftime(datetime.now(), "_%Y_%m_%d_%H_%M_%S") + '.png'
 
-            self.resize_image(nnam, 'tmp/'+nnam_, (width,height))
+                self.resize_image(nnam, 'tmp/' + nnam_, (width, height))
 
-            image = pyglet.image.load('tmp/'+nnam_)
+                image = pyglet.image.load('tmp/' + nnam_)
 
-            self.images['tmp/'+nnam_] = image
+                self.images['tmp/' + nnam_] = image
 
-            k['image'] = 'tmp/'+nnam_
-            k['thickness'] = self.penWidth
-            k['fordel'] = False
-            self.figures.append(k)
-            # line(10000,10000,10001,10001,color=(1,1,1,1))
+                k['image'] = 'tmp/' + nnam_
+                k['thickness'] = self.penWidth
+                k['fordel'] = False
+                self.figures.append(k)
+                # line(10000,10000,10001,10001,color=(1,1,1,1))
 
     def set_color(self):
         # For linux
-        try:
-            output = subprocess.check_output('zenity --color-selection  --color red --show-palette  --text="Stuff"',
-                                             shell=True)
-            s = ""
-            for o in output:
-                s += chr(o)
-            s = s[4:-2]
-            cs = s.split(',')
-            self.penColor = (int(cs[0]) / 256, int(cs[1]) / 256, int(cs[2]) / 256, 1)
-        except:
-            pass
+        if platform == "win32" or platform == "cygwin":
+            self.colorPanelVisible = True
+
+
+        elif platform == "linux":
+            try:
+                output = subprocess.check_output('zenity --color-selection  --color red --show-palette  --text="Stuff"',
+                                                 shell=True)
+                s = ""
+                for o in output:
+                    s += chr(o)
+                s = s[4:-2]
+                cs = s.split(',')
+                self.penColor = (int(cs[0]) / 256, int(cs[1]) / 256, int(cs[2]) / 256, 1)
+            except:
+                pass
 
     def set_width(self, w):
-        try:
-            output = subprocess.check_output(
-                'zenity --scale --title="Товщина лінії" --text="Виберіть товщину лінії"  --min-value=4 --max-value=40 --value=' + str(
-                    w) + ' --step=1',
-                shell=True)
-            s = ""
-            for o in output:
-                s += chr(o)
-            s = s[0:-1]
-            self.penWidth = int(s)
-        except:
+        if platform == "win32" or platform == "cygwin":
             pass
+        elif platform == "linux":
+            try:
+                output = subprocess.check_output(
+                    'zenity --scale --title="Товщина лінії" --text="Виберіть товщину лінії"  --min-value=4 --max-value=40 --value=' + str(
+                        w) + ' --step=1',
+                    shell=True)
+                s = ""
+                for o in output:
+                    s += chr(o)
+                s = s[0:-1]
+                self.penWidth = int(s)
+            except:
+                pass
 
     def on_key_press(self, symbol, modifiers):
         if symbol == 65307:  # ESC
@@ -295,8 +356,30 @@ class MyWindow(pyglet.window.Window):
         window.clear()
 
     def on_mouse_press(self, x, y, button, modifier):
+
         self.f = True
+        # Перевіряємо чи треба виходити
+        if self.isExit:
+            if window.width // 2 - 200 < x < window.width // 2 + 200 and window.height // 2 - 100 < y < window.height // 2 + 100:
+                window.close()
+            else:
+                self.isExit = False
+
         if button == mouse.LEFT:
+            # Якщо панель кольору видима
+            if self.colorPanelVisible:
+                for btn in self.colorPanelButtons:
+                    if btn['x1'] < x < btn['x2'] and btn['y1'] < y < btn['y2']:
+                        self.penColor = btn['color']
+                        self.colorPanelVisible = False
+                        break
+            if self.widthPanelVisible:
+                for btn in self.widthPanelButtons:
+                    if btn['x1'] < x < btn['x2'] and btn['y1'] < y < btn['y2']:
+                        self.penWidth = btn['width']
+                        self.widthPanelVisible = False
+                        break
+
             for btn in self.buttons:
                 btn['sel'] = False
                 if (btn['x'] < x < btn['x'] + 32) and (btn['y'] < y < btn['y'] + 32):
@@ -304,13 +387,15 @@ class MyWindow(pyglet.window.Window):
                     if btn['id'] == 4:  # Fill figure
                         self.tool = btn['tool']
                     elif btn['id'] == 101:  # Changr color pen
-                        self.set_color()
+                        self.colorPanelVisible = not self.colorPanelVisible
                     elif btn['id'] == 102:  # Changr width pen
-                        self.set_width(self.penWidth)
+                        # self.set_width(self.penWidth)
+                        self.widthPanelVisible = True
                     else:
                         self.tool = btn['tool']
                     self.f = False
                     break
+
             if self.f:
                 if self.tool == 8:
                     print("Увімкнення виділення")
@@ -344,6 +429,7 @@ class MyWindow(pyglet.window.Window):
                     pass
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+
         window.clear()
         if self.f:
             if self.tool == 1:
@@ -382,9 +468,9 @@ class MyWindow(pyglet.window.Window):
                           thickness=self.penWidth)
 
     def on_mouse_release(self, x, y, button, modifiers):
+
         if self.f:
             # window.clear()
-
 
             if self.tool == 1:
                 k = {}
@@ -419,7 +505,7 @@ class MyWindow(pyglet.window.Window):
                 k['fordel'] = False
                 self.figures.append(k)
 
-        print(self.figures)
+        # print(self.figures)
         window.clear()
 
     def on_draw(self):
@@ -468,7 +554,6 @@ class MyWindow(pyglet.window.Window):
 
                     # image.blit(x + self.cx, y + self.cy )
 
-
         # Draw grid
         if self.isGrid:
             for y in range(0, 4000, self.step):
@@ -485,6 +570,10 @@ class MyWindow(pyglet.window.Window):
                 line(btn['x'] + 2, btn['y'] - 2, btn['x'] + 28, btn['y'] - 2, color=self.gridColor, thickness=2)
         # # Це щоб не було засвітки на кнопках
         # rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
+        if self.colorPanelVisible:
+            self.draw_color_panel()
+        if self.widthPanelVisible:
+            self.draw_width_panel()
 
     def on_show(self):
         # print("wwwwwwwwwwwww")
@@ -499,14 +588,14 @@ class MyWindow(pyglet.window.Window):
         window.clear()
 
     def on_close(self):
-        proc = subprocess.Popen("zenity --question --text='Вийти з програми?'", shell=True)
-        proc.communicate()
-        if proc.returncode:
-            print("Cancel was pressed")
-        else:
-            print("Ok was pressed")
-            window.clear()
-            window.close()
+        label = pyglet.text.Label('Вийти?',
+                                  font_name='Times New Roman',
+                                  font_size=36,
+                                  x=window.width // 2, y=window.height // 2,
+                                  anchor_x='center', anchor_y='center')
+        label.set_style("color", (255, 0, 0, 255))
+        self.isExit = True
+        label.draw()
 
     def on_hide(self):
         pass
@@ -580,7 +669,7 @@ class MyWindow(pyglet.window.Window):
 
 
 if __name__ == "__main__":
-    window = MyWindow(4020, 2000, caption="WhiteBoard", resizable=True)
+    window = MyWindow(1200, 600, caption="WhiteBoard", resizable=True)
     # window.maximize()
     window.clear()
 
