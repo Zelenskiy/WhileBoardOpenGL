@@ -29,7 +29,7 @@ def line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glEnd()
 
 
-def rectangle(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
+def rectangle_vulg(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glColor4f(*color)
     glLineWidth(thickness)
     glBegin(GL_LINES)
@@ -49,10 +49,36 @@ def rectangle(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glVertex2f(x0, y0)
     glEnd()
 
+def rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=(1, 0, 0, 1), thickness=1):
+    glColor4f(*color)
+    glLineWidth(thickness)
+    glBegin(GL_LINES)
+    glVertex2f(x1, y1)
+    glVertex2f(x2, y2)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex2f(x2, y2)
+    glVertex2f(x3, y3)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex2f(x3, y3)
+    glVertex2f(x4, y4)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex2f(x4, y4)
+    glVertex2f(x1, y1)
+    glEnd()
+
 
 def fill_rectangle(x1, y1, x2, y2, color):
     r, g, b, a = color
     pyglet.graphics.draw(4, pyglet.gl.GL_QUADS, ('v2f', [x1, y1, x2, y1, x2, y2, x1, y2]),
+                         ('c3f', [r, g, b, r, g, b, r, g, b, r, g, b]))
+
+
+def fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, color):
+    r, g, b, a = color
+    pyglet.graphics.draw(4, pyglet.gl.GL_QUADS, ('v2f', [x1, y1, x2, y2, x3, y3, x4, y4]),
                          ('c3f', [r, g, b, r, g, b, r, g, b, r, g, b]))
 
 
@@ -116,9 +142,9 @@ class MyWindow(pyglet.window.Window):
     def draw_width_panel(self):
         for btn in self.widthPanelButtons:
             h = btn['y2'] - btn['y1']
-            y = btn['y1'] + h//2
+            y = btn['y1'] + h // 2
             fill_rectangle(btn['x1'], btn['y1'], btn['x2'], btn['y2'], self.fonColor)
-            fill_rectangle(btn['x1'], y - btn['width']//2, btn['x2'], y + btn['width']//2, self.penColor)
+            fill_rectangle(btn['x1'], y - btn['width'] // 2, btn['x2'], y + btn['width'] // 2, self.penColor)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -187,6 +213,7 @@ class MyWindow(pyglet.window.Window):
         self.scS = False
         self.images = {}
         self.selFig = {}
+        self.selDel = {}
         self.id = 0
 
     def resize_image(self, input_image_path,
@@ -409,29 +436,43 @@ class MyWindow(pyglet.window.Window):
                     break
 
             if self.f:
+                if self.tool != 8: self.selFig = {}
                 if self.tool == 8:
-                    self.selFig = {}
+                    # self.selFig = {}
                     # [{'name': 'polyline', 'p': [{'x': 429, 'y': 444}, {'x': 437, 'y': 448}, {'x': 438, 'y': 449}, {'x': 444, 'y': 449}, {'x': 449, 'y': 450}, {'x': 454, 'y': 450}, {'x': 462, 'y': 451}, {'x': 486, 'y': 451}, {'x': 498, 'y': 450}, {'x': 506, 'y': 446}, {'x': 512, 'y': 440}, {'x': 517, 'y': 432}, {'x': 519, 'y': 420}, {'x': 526, 'y': 401}, {'x': 527, 'y': 395}, {'x': 529, 'y': 391}, {'x': 530, 'y': 386}, {'x': 532, 'y': 382}, {'x': 534, 'y': 377}, {'x': 538, 'y': 372}, {'x': 546, 'y': 359}, {'x': 552, 'y': 352}, {'x': 560, 'y': 343}, {'x': 567, 'y': 338}, {'x': 573, 'y': 336}, {'x': 579, 'y': 332}, {'x': 580, 'y': 332}, {'x': 588, 'y': 332}, {'x': 588, 'y': 332}, {'x': 593, 'y': 331}], 'color': (1, 0, 0, 1), 'thickness': 4, 'fordel': False}]
                     for fig in reversed(self.figures):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
                         if (x > x1) and (x < x2) and (y > y1) and (y < y2):
+                            self.selDel = {'x1': x1, 'y1': y1, 'x2': x1 + 20, 'y2': y1 + 20}
                             # canvas.config(cursor="fleur")
+                            xx1 = self.selDel['x1']
+                            yy1 = self.selDel['y1']
+                            xx2 = self.selDel['x2']
+                            yy2 = self.selDel['y2']
+                            if self.selDel != {}:
+                                if (x > xx1) and (x < xx2) and (y > yy1) and (y < yy2):
+                                    # Вилучаємо
+                                    print("Вилучаємо")
+                                    fig['fordel'] = True
+                                    new_list = []
+                                    for f in self.figures:
+                                        if not f['fordel']:
+                                            new_list.append(f)
+                                    self.figures = new_list.copy()
                             self.selFig['fig'] = fig['id']
-                            # x1, y1, x2, y2 = border_polyline(fig['p'])
-                            # rectangle(x1, y1, x2, y2,color=(1,1,0,1), thickness=1)
-                            # if self.selFig != {}:
-                            #     canvas.coords(self.selFig['0'], x1 - 1, y1 - 1, x2 + 1, y2 + 1)
-                            #     canvas.coords(self.selFig['D'], x2 - 10, abs(y1 + y2) // 2 - 10, x2 + 10,
-                            #                   abs(y1 + y2) // 2 + 10)
-                            #     self.selFig['Obj'] = fig
+
                             fl = True
+
                             break
                         else:
+                            self.selFig = {}
+                            self.selDel = {}
                             # canvas.config(cursor="tcross")
                             pass
 
-                if self.tool == 1:
+                elif self.tool == 1:
                     # window.clear()
+
                     self.x0, self.y0 = x - self.cx, y - self.cy
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
@@ -477,18 +518,26 @@ class MyWindow(pyglet.window.Window):
                 line(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                      thickness=self.penWidth)
             elif self.tool == 4:
-                rectangle(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
-                          thickness=self.penWidth)
+                rectangle(self.x0 + self.cx, self.y0 + self.cy,
+                          self.x0 + self.cx, y,
+                          x, y,
+                          x, self.y0 + self.cy,
+                          color=self.penColor, thickness=self.penWidth)
+                # rectangle(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, thickness=self.penWidth)
             elif self.tool == 8:
                 if self.selFig != {}:
                     for fig in self.figures:
                         if fig['id'] == self.selFig['fig']:
                             x1, y1, x2, y2 = border_polyline(fig['p'])
-                            if (x1<x<x2 and y1<y<y2) or self.isMove:
+                            if (x1 < x < x2 and y1 < y < y2) or self.isMove:
                                 self.isMove = True
                                 for p in fig['p']:
                                     p['x'] += dx
                                     p['y'] += dy
+                                self.selDel['x1'] += dx
+                                self.selDel['y1'] += dy
+                                self.selDel['x2'] += dx
+                                self.selDel['y2'] += dy
                                 break
 
     def on_mouse_release(self, x, y, button, modifiers):
@@ -519,7 +568,14 @@ class MyWindow(pyglet.window.Window):
                 self.figures.append(k)
             elif self.tool == 4:
                 k = {}
+
+                x0, y0 = self.x0, self.y0
+                self.poly.append({'x': x - self.cx, 'y': y0})
                 self.poly.append({'x': x - self.cx, 'y': y - self.cy})
+                self.poly.append({'x': x0 - self.cx, 'y': y - self.cy})
+                # self.poly.append({'x': x0 - self.cx, 'y': y - self.cy})
+                # self.poly.append({'x': x - self.cx, 'y': y - self.cy})
+                # self.poly.append({'x': x - self.cx, 'y': y0 - self.cy})
                 self.id += 1
                 k['id'] = self.id
                 k['name'] = 'rectangle'
@@ -559,13 +615,29 @@ class MyWindow(pyglet.window.Window):
                     y_ = f['p'][1]['y']
                     line(x0 + self.cx, y0 + self.cy, x_ + self.cx, y_ + self.cy, color=f['color'],
                          thickness=f['thickness'])
+                elif f['name'] == 'rectangle_fill':
+                    x1 = f['p'][0]['x'] + self.cx
+                    y1 = f['p'][0]['y'] + self.cy
+                    x2 = f['p'][1]['x'] + self.cx
+                    y2 = f['p'][1]['y'] + self.cy
+                    x3 = f['p'][2]['x'] + self.cx
+                    y3 = f['p'][2]['y'] + self.cy
+                    x4 = f['p'][3]['x'] + self.cx
+                    y4 = f['p'][3]['y'] + self.cy
+                    fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, f['color'])
+                    # rectangle(x0 + self.cx, y0 + self.cy, x_ + self.cx, y_ + self.cy, color=f['color'],
+                    #           thickness=f['thickness'])
                 elif f['name'] == 'rectangle':
-                    x0 = f['p'][0]['x']
-                    y0 = f['p'][0]['y']
-                    x_ = f['p'][1]['x']
-                    y_ = f['p'][1]['y']
+                    x1 = f['p'][0]['x'] + self.cx
+                    y1 = f['p'][0]['y'] + self.cy
+                    x2 = f['p'][1]['x'] + self.cx
+                    y2 = f['p'][1]['y'] + self.cy
+                    x3 = f['p'][2]['x'] + self.cx
+                    y3 = f['p'][2]['y'] + self.cy
+                    x4 = f['p'][3]['x'] + self.cx
+                    y4 = f['p'][3]['y'] + self.cy
 
-                    rectangle(x0 + self.cx, y0 + self.cy, x_ + self.cx, y_ + self.cy, color=f['color'],
+                    rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'],
                               thickness=f['thickness'])
                 elif f['name'] == 'image':
                     x0 = f['p'][0]['x']
@@ -587,7 +659,7 @@ class MyWindow(pyglet.window.Window):
                 line(x, 0, x, 4000, color=self.gridColor, thickness=1)
 
         # Це щоб не було засвітки на кнопках
-        rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
+        line(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
         # Draw buttons
         for btn in self.buttons:
             btn['image'].blit(btn['x'], btn['y'])
@@ -600,15 +672,19 @@ class MyWindow(pyglet.window.Window):
         if self.widthPanelVisible:
             self.draw_width_panel()
         # рамка виділення
-        if self.selFig !={}:
+        if self.selFig != {}:
             for fig in self.figures:
                 if fig['id'] == self.selFig['fig']:
                     x1, y1, x2, y2 = border_polyline(fig['p'])
-                    rectangle(x1-2 + self.cx, y1-2 + self.cy, x2+2 + self.cx, y2+2 + self.cy, color=(1, 0.5, 0, 1), thickness=2)
-                    # витавляємо малюнок корзини
-                    rectangle(10000, 10000, 10001, 10001, color=(1,1,1,1), thickness=1)
-                    self.trash_image.blit(x1, y1)
+                    rectangle_vulg(x1 - 2 + self.cx, y1 - 2 + self.cy,
 
+                              x2 + 2 + self.cx, y2 + 2 + self.cy,
+
+                              color=(1, 0.5, 0, 1), thickness=2)
+                    # витавляємо малюнок корзини
+                    line(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
+                    self.trash_image.blit(self.selDel['x1'] + self.cx,
+                                          self.selDel['y1'] + self.cy)
 
     def on_show(self):
         # print("wwwwwwwwwwwww")
