@@ -4,9 +4,9 @@ from datetime import datetime
 from math import sqrt
 
 # import pyautogui
-from tkinter import colorchooser
+# from tkinter import colorchooser
 
-import numpy as np
+# import numpy as np
 import pyglet
 from PIL import Image
 from pyglet.gl import *
@@ -129,6 +129,7 @@ class MyWindow(pyglet.window.Window):
         glClearColor(233 / 255, 251 / 255, 202 / 255, 1.0)
         self.figures = []
         self.isGrid = True
+        self.isMove = False
         self.isExit = False
         self.colorPanelVisible = False
         self.widthPanelVisible = False
@@ -372,12 +373,23 @@ class MyWindow(pyglet.window.Window):
                     if btn['x1'] < x < btn['x2'] and btn['y1'] < y < btn['y2']:
                         self.penColor = btn['color']
                         self.colorPanelVisible = False
+                        # Змінюємо колір вибраної фігури якщо така є
+                        if self.selFig != {}:
+                            for fig in self.figures:
+                                if fig['id'] == self.selFig['fig']:
+                                    fig['color'] = self.penColor
+
                         break
             if self.widthPanelVisible:
                 for btn in self.widthPanelButtons:
                     if btn['x1'] < x < btn['x2'] and btn['y1'] < y < btn['y2']:
                         self.penWidth = btn['width']
                         self.widthPanelVisible = False
+                        # Змінюємо товщину ліній вибраної фігури якщо така є
+                        if self.selFig != {}:
+                            for fig in self.figures:
+                                if fig['id'] == self.selFig['fig']:
+                                    fig['thickness'] = self.penWidth
                         break
 
             for btn in self.buttons:
@@ -398,7 +410,7 @@ class MyWindow(pyglet.window.Window):
 
             if self.f:
                 if self.tool == 8:
-                    print("Увімкнення виділення")
+                    self.selFig = {}
                     # [{'name': 'polyline', 'p': [{'x': 429, 'y': 444}, {'x': 437, 'y': 448}, {'x': 438, 'y': 449}, {'x': 444, 'y': 449}, {'x': 449, 'y': 450}, {'x': 454, 'y': 450}, {'x': 462, 'y': 451}, {'x': 486, 'y': 451}, {'x': 498, 'y': 450}, {'x': 506, 'y': 446}, {'x': 512, 'y': 440}, {'x': 517, 'y': 432}, {'x': 519, 'y': 420}, {'x': 526, 'y': 401}, {'x': 527, 'y': 395}, {'x': 529, 'y': 391}, {'x': 530, 'y': 386}, {'x': 532, 'y': 382}, {'x': 534, 'y': 377}, {'x': 538, 'y': 372}, {'x': 546, 'y': 359}, {'x': 552, 'y': 352}, {'x': 560, 'y': 343}, {'x': 567, 'y': 338}, {'x': 573, 'y': 336}, {'x': 579, 'y': 332}, {'x': 580, 'y': 332}, {'x': 588, 'y': 332}, {'x': 588, 'y': 332}, {'x': 593, 'y': 331}], 'color': (1, 0, 0, 1), 'thickness': 4, 'fordel': False}]
                     for fig in reversed(self.figures):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
@@ -472,7 +484,8 @@ class MyWindow(pyglet.window.Window):
                     for fig in self.figures:
                         if fig['id'] == self.selFig['fig']:
                             x1, y1, x2, y2 = border_polyline(fig['p'])
-                            if x1<x<x2 and y1<y<y2:
+                            if (x1<x<x2 and y1<y<y2) or self.isMove:
+                                self.isMove = True
                                 for p in fig['p']:
                                     p['x'] += dx
                                     p['y'] += dy
@@ -518,6 +531,7 @@ class MyWindow(pyglet.window.Window):
 
         # print(self.figures)
         window.clear()
+        self.isMove = True
 
     def on_draw(self):
         # draw figures in visible part of window
@@ -687,6 +701,7 @@ class MyWindow(pyglet.window.Window):
 
 if __name__ == "__main__":
     window = MyWindow(1200, 600, caption="WhiteBoard", resizable=True)
+    window.set_location(100, 35)
     # window.maximize()
     window.clear()
 
