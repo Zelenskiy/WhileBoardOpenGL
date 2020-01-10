@@ -152,7 +152,7 @@ class MyWindow(pyglet.window.Window):
             {'id': 102, 'x': 250, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 1,
              'sel': False},
         ]
-
+        self.trash_image = pyglet.resource.image('img/close.png')
         self.colorPanelButtons = [
             {'id': 1, 'x1': 215, 'y1': 10 + 35, 'x2': 25 + 247, 'y2': 10 + 70, 'color': (1, 0, 0, 1)},
             {'id': 2, 'x1': 215, 'y1': 10 + 70, 'x2': 25 + 247, 'y2': 10 + 105, 'color': (1, 1, 0, 1)},
@@ -605,6 +605,10 @@ class MyWindow(pyglet.window.Window):
                 if fig['id'] == self.selFig['fig']:
                     x1, y1, x2, y2 = border_polyline(fig['p'])
                     rectangle(x1-2 + self.cx, y1-2 + self.cy, x2+2 + self.cx, y2+2 + self.cy, color=(1, 0.5, 0, 1), thickness=2)
+                    # витавляємо малюнок корзини
+                    rectangle(10000, 10000, 10001, 10001, color=(1,1,1,1), thickness=1)
+                    self.trash_image.blit(x1, y1)
+
 
     def on_show(self):
         # print("wwwwwwwwwwwww")
