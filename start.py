@@ -19,6 +19,16 @@ if platform == "win32" or platform == "cygwin":
 elif platform == "linux":
     pass
 
+def close_cross(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
+    line(x0+2, y0+2, x-2, y-2, color, thickness)
+    line(x0+2, y-2, x-2, y0+2, color, thickness)
+
+def resize_arr(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
+    line(x0, y0, x, y, color, thickness)
+    line(x0, y0, x0, y0-10, color, thickness)
+    line(x0, y0, x0+10, y0, color, thickness)
+    line(x-10, y, x, y, color, thickness)
+    line(x, y+10, x, y, color, thickness)
 
 def line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glColor4f(*color)
@@ -29,24 +39,44 @@ def line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glEnd()
 
 
-def rectangle_vulg(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
+# def rectangle_vulg(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
+#     # x0,y0 = x0-10,y0-10
+#     glColor4f(*color)
+#     glLineWidth(thickness)
+#     glBegin(GL_LINES)
+#     glVertex2f(x0, y0)
+#     glVertex2f(x, y0)
+#     glEnd()
+#     glBegin(GL_LINES)
+#     glVertex2f(x, y0)
+#     glVertex2f(x, y)
+#     glEnd()
+#     glBegin(GL_LINES)
+#     glVertex2f(x, y)
+#     glVertex2f(x0, y)
+#     glEnd()
+#     glBegin(GL_LINES)
+#     glVertex2f(x0, y)
+#     glVertex2f(x0, y0)
+#     glEnd()
+def ramka_top(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glColor4f(*color)
     glLineWidth(thickness)
     glBegin(GL_LINES)
-    glVertex2f(x0, y0)
-    glVertex2f(x, y0)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex2f(x, y0)
-    glVertex2f(x, y)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex2f(x, y)
+    glVertex2f(x0, y-10)
     glVertex2f(x0, y)
     glEnd()
     glBegin(GL_LINES)
     glVertex2f(x0, y)
-    glVertex2f(x0, y0)
+    glVertex2f(x0+10, y)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex2f(x-10, y)
+    glVertex2f(x, y)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex2f(x, y)
+    glVertex2f(x, y-10)
     glEnd()
 
 def rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=(1, 0, 0, 1), thickness=1):
@@ -157,6 +187,7 @@ class MyWindow(pyglet.window.Window):
         self.isGrid = True
         self.isMove = False
         self.isExit = False
+        self.isFill = False
         self.colorPanelVisible = False
         self.widthPanelVisible = False
 
@@ -177,8 +208,11 @@ class MyWindow(pyglet.window.Window):
              'sel': False},
             {'id': 102, 'x': 250, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 1,
              'sel': False},
+            {'id': 103, 'x': 285, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/ClearFill.png'), 'tool': 1,
+             'sel': False},
         ]
-        self.trash_image = pyglet.resource.image('img/close.png')
+        # self.trash_image = pyglet.resource.image('img/close.png')
+        # self.resize_image = pyglet.resource.image('img/resize_m.png')
         self.colorPanelButtons = [
             {'id': 1, 'x1': 215, 'y1': 10 + 35, 'x2': 25 + 247, 'y2': 10 + 70, 'color': (1, 0, 0, 1)},
             {'id': 2, 'x1': 215, 'y1': 10 + 70, 'x2': 25 + 247, 'y2': 10 + 105, 'color': (1, 1, 0, 1)},
@@ -214,6 +248,7 @@ class MyWindow(pyglet.window.Window):
         self.images = {}
         self.selFig = {}
         self.selDel = {}
+        self.selRes = {}
         self.id = 0
 
     def resize_image(self, input_image_path,
@@ -424,6 +459,9 @@ class MyWindow(pyglet.window.Window):
                 if (btn['x'] < x < btn['x'] + 32) and (btn['y'] < y < btn['y'] + 32):
                     btn['sel'] = True
                     if btn['id'] == 4:  # Fill figure
+                        if self.tool == btn['tool']:
+                            self.isFill = not self.isFill
+
                         self.tool = btn['tool']
                     elif btn['id'] == 101:  # Changr color pen
                         self.colorPanelVisible = not self.colorPanelVisible
@@ -444,6 +482,7 @@ class MyWindow(pyglet.window.Window):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
                         if (x > x1) and (x < x2) and (y > y1) and (y < y2):
                             self.selDel = {'x1': x1, 'y1': y1, 'x2': x1 + 20, 'y2': y1 + 20}
+                            self.selRes = {'x1': x2 - 18, 'y1': y1+2, 'x2': x2-2, 'y2': y1 + 20}
                             # canvas.config(cursor="fleur")
                             xx1 = self.selDel['x1']
                             yy1 = self.selDel['y1']
@@ -476,7 +515,11 @@ class MyWindow(pyglet.window.Window):
                     self.x0, self.y0 = x - self.cx, y - self.cy
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
-                elif self.tool == 3 or self.tool == 4:
+                elif self.tool == 3:    #line
+                    self.x0, self.y0 = x - self.cx, y - self.cy
+                    self.poly.clear()
+                    self.poly.append({'x': self.x0, 'y': self.y0})
+                elif self.tool == 4:    #rectangle
                     self.x0, self.y0 = x - self.cx, y - self.cy
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
@@ -518,11 +561,18 @@ class MyWindow(pyglet.window.Window):
                 line(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                      thickness=self.penWidth)
             elif self.tool == 4:
-                rectangle(self.x0 + self.cx, self.y0 + self.cy,
-                          self.x0 + self.cx, y,
-                          x, y,
-                          x, self.y0 + self.cy,
-                          color=self.penColor, thickness=self.penWidth)
+                if self.isFill:
+                    fill_4poly(self.x0 + self.cx, self.y0 + self.cy,
+                              self.x0 + self.cx, y,
+                              x, y,
+                              x, self.y0 + self.cy,
+                              color=self.penColor)
+                else:
+                    rectangle(self.x0 + self.cx, self.y0 + self.cy,
+                              self.x0 + self.cx, y,
+                              x, y,
+                              x, self.y0 + self.cy,
+                              color=self.penColor, thickness=self.penWidth)
                 # rectangle(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, thickness=self.penWidth)
             elif self.tool == 8:
                 if self.selFig != {}:
@@ -538,6 +588,10 @@ class MyWindow(pyglet.window.Window):
                                 self.selDel['y1'] += dy
                                 self.selDel['x2'] += dx
                                 self.selDel['y2'] += dy
+                                self.selRes['x1'] += dx
+                                self.selRes['y1'] += dy
+                                self.selRes['x2'] += dx
+                                self.selRes['y2'] += dy
                                 break
 
     def on_mouse_release(self, x, y, button, modifiers):
@@ -578,7 +632,10 @@ class MyWindow(pyglet.window.Window):
                 # self.poly.append({'x': x - self.cx, 'y': y0 - self.cy})
                 self.id += 1
                 k['id'] = self.id
-                k['name'] = 'rectangle'
+                if self.isFill:
+                    k['name'] = 'rectangle_fill'
+                else:
+                    k['name'] = 'rectangle'
                 k['p'] = self.poly.copy()
                 k['color'] = self.penColor
                 k['thickness'] = self.penWidth
@@ -665,6 +722,13 @@ class MyWindow(pyglet.window.Window):
             btn['image'].blit(btn['x'], btn['y'])
             if btn['sel']:
                 line(btn['x'] + 2, btn['y'] - 2, btn['x'] + 28, btn['y'] - 2, color=self.gridColor, thickness=2)
+            if btn['id'] == 4:
+                if self.isFill:
+
+                    fill_4poly(btn['x']+2, btn['y']+2,
+                               btn['x']+2, btn['y']+28,
+                               btn['x']+28, btn['y']+28,
+                               btn['x']+28, btn['y']+2, self.penColor)
         # # Це щоб не було засвітки на кнопках
         # rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
         if self.colorPanelVisible:
@@ -676,15 +740,25 @@ class MyWindow(pyglet.window.Window):
             for fig in self.figures:
                 if fig['id'] == self.selFig['fig']:
                     x1, y1, x2, y2 = border_polyline(fig['p'])
-                    rectangle_vulg(x1 - 2 + self.cx, y1 - 2 + self.cy,
+                    ramka_top(x1 - 2 + self.cx, y1 - 2 + self.cy,
 
                               x2 + 2 + self.cx, y2 + 2 + self.cy,
 
                               color=(1, 0.5, 0, 1), thickness=2)
                     # витавляємо малюнок корзини
                     line(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
-                    self.trash_image.blit(self.selDel['x1'] + self.cx,
-                                          self.selDel['y1'] + self.cy)
+                    # self.trash_image.blit(self.selDel['x1'] + self.cx,
+                    #                       self.selDel['y1'] + self.cy)
+                    # self.resize_image.blit(self.selRes['x1'] + self.cx,
+                    #                        self.selRes['y1'] + self.cy)
+                    close_cross (self.selDel['x1'] + self.cx, self.selDel['y1'] + self.cy,
+                                 self.selDel['x2'] + self.cx, self.selDel['y2'] + self.cy,
+                                 color=(1, 0.5, 0, 1), thickness=2
+                                 )
+
+                    resize_arr(self.selRes['x1'] + self.cx, self.selRes['y2'] + self.cx,
+                               self.selRes['x2'] + self.cx, self.selRes['y1'] + self.cx,
+                               color=(1, 0.5, 0, 1), thickness=2)
 
     def on_show(self):
         # print("wwwwwwwwwwwww")
