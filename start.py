@@ -12,7 +12,7 @@ import pyglet
 from PIL import Image
 from pyglet.gl import *
 from pyglet.model.codecs.gltf import Buffer
-from pyglet.window import mouse
+from pyglet.window import mouse, ImageMouseCursor
 
 from sys import platform
 
@@ -255,7 +255,7 @@ class MyWindow(pyglet.window.Window):
         self.gridColor = (208 / 255, 208 / 255, 208 / 255, 0.1)
         glClearColor(233 / 255, 251 / 255, 202 / 255, 1.0)
         self.figures = []
-        self.isGrid = True
+        self.isGrid = False
         self.isMove = False
         self.isResize = False
         self.isExit = False
@@ -342,54 +342,54 @@ class MyWindow(pyglet.window.Window):
         resized_image.show()
         resized_image.save(output_image_path)
 
-    def insert_image_from_file(self):
-        # For linux
-        # TODO no odgrg with cyrylic symbols
-        s = ""
-        if platform == "win32" or platform == "cygwin":
-            pass
-        elif platform == "linux":
-            try:
-                output = subprocess.check_output('zenity --file-selection --multiple --filename tmp',
-                                                 shell=True)
-                for o in output:
-                    s += chr(o)
-            except:
-                pass
-
-            if s != "":
-                s = s.strip()
-                names = s.split('|')
-            else:
-                names = []
-            w = window.width
-            h = window.height
-            i = 0
-            for name in names:
-                k = {}
-
-                width = 600
-                height = 9 * width // 16
-                k['name'] = 'image'
-                k['p'] = []
-                k['p'].append({'x': w - width - self.cx - i, 'y': h - height - self.cy - i})
-                k['p'].append({'x': width - i, 'y': height - i})  # TODO поправити висоту малюнка
-                i += 25
-                # image = pyglet.image.load(name.strip())
-                nnam = name.strip()
-                nnam_ = datetime.strftime(datetime.now(), "_%Y_%m_%d_%H_%M_%S") + '.png'
-
-                self.resize_image(nnam, 'tmp/' + nnam_, (width, height))
-
-                image = pyglet.image.load('tmp/' + nnam_)
-
-                self.images['tmp/' + nnam_] = image
-
-                k['image'] = 'tmp/' + nnam_
-                k['thickness'] = self.penWidth
-                k['fordel'] = False
-                self.figures.append(k)
-                # line(10000,10000,10001,10001,color=(1,1,1,1))
+    # def insert_image_from_file(self):
+    #     # For linux
+    #     # TODO no odgrg with cyrylic symbols
+    #     s = ""
+    #     if platform == "win32" or platform == "cygwin":
+    #         pass
+    #     elif platform == "linux":
+    #         try:
+    #             output = subprocess.check_output('zenity --file-selection --multiple --filename tmp',
+    #                                              shell=True)
+    #             for o in output:
+    #                 s += chr(o)
+    #         except:
+    #             pass
+    #
+    #         if s != "":
+    #             s = s.strip()
+    #             names = s.split('|')
+    #         else:
+    #             names = []
+    #         w = window.width
+    #         h = window.height
+    #         i = 0
+    #         for name in names:
+    #             k = {}
+    #
+    #             width = 600
+    #             height = 9 * width // 16
+    #             k['name'] = 'image'
+    #             k['p'] = []
+    #             k['p'].append({'x': w - width - self.cx - i, 'y': h - height - self.cy - i})
+    #             k['p'].append({'x': width - i, 'y': height - i})  # TODO поправити висоту малюнка
+    #             i += 25
+    #             # image = pyglet.image.load(name.strip())
+    #             nnam = name.strip()
+    #             nnam_ = datetime.strftime(datetime.now(), "_%Y_%m_%d_%H_%M_%S") + '.png'
+    #
+    #             self.resize_image(nnam, 'tmp/' + nnam_, (width, height))
+    #
+    #             image = pyglet.image.load('tmp/' + nnam_)
+    #
+    #             self.images['tmp/' + nnam_] = image
+    #
+    #             k['image'] = 'tmp/' + nnam_
+    #             k['thickness'] = self.penWidth
+    #             k['fordel'] = False
+    #             self.figures.append(k)
+    #             # line(10000,10000,10001,10001,color=(1,1,1,1))
 
     def set_color(self):
         # For linux
@@ -427,6 +427,30 @@ class MyWindow(pyglet.window.Window):
             except:
                 pass
 
+    def insert_image(self):
+        window.set_visible(False)
+        nnam = datetime.strftime(datetime.now(), "_%Y_%m_%d_%H_%M_%S") + '.png'
+
+        im = ImageGrab.grab()
+        im.save('tmp/'+nnam)
+        k = {}
+        w = window.width
+        h = window.height
+        width = 600
+        height = 9 * width // 16
+        k['name'] = 'image'
+        k['p'] = []
+        k['p'].append({'x': w - width - self.cx, 'y': h - height - self.cy})
+        k['p'].append({'x': width, 'y': height})  # TODO поправити висоту малюнка
+        nnam_ = nnam + ".resize.png"
+        self.resize_image('tmp/' + nnam, 'tmp/' + nnam_, (width, height))
+        image = pyglet.image.load('tmp/' + nnam_)
+        self.images['tmp/' + nnam_] = image
+        k['image'] = 'tmp/' + nnam_
+        k['thickness'] = self.penWidth
+        k['fordel'] = False
+        self.figures.append(k)
+        window.set_visible(True)
 
 
     def on_key_press(self, symbol, modifiers):
@@ -474,13 +498,11 @@ class MyWindow(pyglet.window.Window):
             window.set_fullscreen(self.fullscr)
             window.clear()
         elif symbol == 115:  # set S
-            s=""
-            width, height = 122, 221
-            im = ImageGrab.grab()
+            if platform == "win32" or platform == "cygwin":
+                self.insert_image()
+            elif platform == "linux":
+                self.btnScrInsertInCanvasClick()
 
-
-            # save image file
-            im.save('screenshot.png')
 
         elif symbol == 112:  # set pen
             self.tool = 1
@@ -907,7 +929,8 @@ class MyWindow(pyglet.window.Window):
         #     window.maximize()
 
     def btnScrInsertInCanvasClick(self):
-        window.minimize()
+
+        window.set_visible(False)
         # Тут треба паузу зротити
         self.scS = True
         if self.scS:
@@ -919,9 +942,9 @@ class MyWindow(pyglet.window.Window):
 
             self.scS = False
             # print("All")
-            window.maximize()
 
-        pass
+
+        window.set_visible(True)
         # print('btnClick')
         # floatWindow.wm_attributes("-alpha", "0.0")
         # width = 600
