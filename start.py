@@ -2,6 +2,7 @@ import os
 import subprocess
 from datetime import datetime
 from math import *
+import pyscreenshot as ImageGrab
 
 # import pyautogui
 # from tkinter import colorchooser
@@ -10,6 +11,7 @@ from math import *
 import pyglet
 from PIL import Image
 from pyglet.gl import *
+from pyglet.model.codecs.gltf import Buffer
 from pyglet.window import mouse
 
 from sys import platform
@@ -18,6 +20,7 @@ if platform == "win32" or platform == "cygwin":
     pass
 elif platform == "linux":
     pass
+
 
 
 def close_cross(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
@@ -96,6 +99,36 @@ def draw_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
     glColor4f(*color)
     circle.draw(GL_LINE_LOOP)
 
+def draw_regular_polygon(x0, y0, r, numPoints=3, angleStart=90, color=(0, 0, 0, 1), thickness=1):
+
+    verts = []
+    for i in range(numPoints):
+        angle = radians(float(i) / numPoints * 360.0+angleStart)
+        x = r * cos(angle) + x0
+        y = r * sin(angle) + y0
+        verts += [x, y]
+    glLineWidth(thickness)
+    circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
+    glColor4f(*color)
+    circle.draw(GL_LINE_LOOP)
+
+def draw_fill_regular_polygon(x0, y0, r, numPoints=3, angleStart=90, color=(0, 0, 0, 1), thickness=1):
+
+    verts = []
+    xstart,ystart = x0,y0
+    for i in range(numPoints):
+        angle = radians(float(i) / numPoints * 360.0+angleStart)
+        x = r * cos(angle) + x0
+        y = r * sin(angle) + y0
+        verts += [x, y]
+        fill_3poly(x0, y0, x, y, xstart,ystart, color)
+        xstart, ystart = x,y
+    fill_3poly(x0, y0, x, y, verts[0], verts[1], color)
+    glLineWidth(thickness)
+    circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
+    glColor4f(*color)
+    circle.draw(GL_LINE_LOOP)
+
 
 def draw_fill_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
     numPoints = r * 10
@@ -143,6 +176,11 @@ def fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, color):
     r, g, b, a = color
     pyglet.graphics.draw(4, pyglet.gl.GL_QUADS, ('v2f', [x1, y1, x2, y2, x3, y3, x4, y4]),
                          ('c3f', [r, g, b, r, g, b, r, g, b, r, g, b]))
+
+def fill_3poly(x1, y1, x2, y2, x3, y3, color=(0, 0, 0, 1)):
+    r, g, b, a = color
+    pyglet.graphics.draw(3, pyglet.gl.GL_TRIANGLES, ('v2f', [x1, y1, x2, y2, x3, y3]),
+                         ('c3f', [r, g, b, r, g, b, r, g, b]))
 
 
 class Quad:
@@ -389,6 +427,8 @@ class MyWindow(pyglet.window.Window):
             except:
                 pass
 
+
+
     def on_key_press(self, symbol, modifiers):
         if symbol == 65307:  # ESC
             # TODO поміняти потім
@@ -434,7 +474,14 @@ class MyWindow(pyglet.window.Window):
             window.set_fullscreen(self.fullscr)
             window.clear()
         elif symbol == 115:  # set S
-            self.btnScrInsertInCanvasClick()
+            s=""
+            width, height = 122, 221
+            im = ImageGrab.grab()
+
+
+            # save image file
+            im.save('screenshot.png')
+
         elif symbol == 112:  # set pen
             self.tool = 1
         elif symbol == 101:  # set erazer
@@ -618,8 +665,6 @@ class MyWindow(pyglet.window.Window):
                         if fig['id'] == self.selFig['fig']:
                             x1, y1, x2, y2 = border_polyline(fig['p'])
                             if (x1 < x < x2 and y1 < y < y2) or self.isMove and not self.isResize:
-
-                                print("Тягаємо")
                                 self.isMove = True
                                 for p in fig['p']:
                                     p['x'] += dx
@@ -638,14 +683,13 @@ class MyWindow(pyglet.window.Window):
                             if (xr1 - 10 < x < xr2 + 10 and yr1 - 10 < y < yr2 + 10) or self.isResize:
                                 self.isMove = False
                                 self.isResize = True
-                                print("Змінюємо розмір")
                                 #Координати верхньої лівої точки x1, y2
                                 for p in fig['p']:
                                     kx = (p['x']-x1)/(x-x1)
                                     ky = (p['y']-y2)/(y-y2)
                                     p['x'] += kx*dx
                                     p['y'] += ky*dy
-
+                                # xd1, yd1, xd2, yd2 = border_polyline(fig['p'])
                                 # self.selDel['x1'] += dx
                                 # self.selDel['y1'] += dy
                                 # self.selDel['x2'] += dx
@@ -824,6 +868,8 @@ class MyWindow(pyglet.window.Window):
 
         color = (1, 0, 0, 1)
         # draw_fill_circle(500, 500, 10, color, 3)
+        # draw_fill_regular_polygon(300, 300, 100, numPoints=8, color=color, thickness=3)
+        # fill_3poly(200, 200, 100, 100, 100, 300)
 
     def on_show(self):
         # print("wwwwwwwwwwwww")
