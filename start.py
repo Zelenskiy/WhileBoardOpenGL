@@ -328,6 +328,7 @@ class MyWindow(pyglet.window.Window):
         self.selDel = {}
         self.selRes = {}
         self.id = 0
+        self.page = 1
 
     def resize_image(self, input_image_path,
                      output_image_path,
@@ -432,6 +433,7 @@ class MyWindow(pyglet.window.Window):
             window.close()
             # self.on_close()
         elif symbol == 65360:  # Home
+            self.page = 1
             self.cx, self.cy = 0, 0
         elif symbol == 65535:  # Delete
             if self.selFig != {}:
@@ -551,10 +553,14 @@ class MyWindow(pyglet.window.Window):
                         self.widthPanelVisible = not self.widthPanelVisible
                     elif btn['id'] == 105:  #
                         print(105)
-                        self.cx += 100000
+                        self.page += 1
+                        self.cx = self.page * 100000 - 100000
                     elif btn['id'] == 104:  #
                         print(104)
-                        self.cx -= 100000
+                        self.page -= 1
+                        if self.page < 1:
+                            self.page = 1
+                        self.cx = self.page * 100000 - 100000
                     else:
                         if btn['tool'] != 0:
                             self.tool = btn['tool']
@@ -886,8 +892,17 @@ class MyWindow(pyglet.window.Window):
                     resize_arr(self.selRes['x1'] + 0, self.selRes['y2'] + 0,
                                self.selRes['x2'] + 0, self.selRes['y1'] + 0,
                                color=self.ramkaColor, thickness=self.ramkaThickness)
+        print("sssssssssssssssssssssssssss")
+        labelPage = pyglet.text.Label(str(self.page),
+                                  font_name='Arial',
+                                  font_size=24,
+                                  # x=400, y=200,
+                                  x=window.width - 62, y=26,
+                                  anchor_x='center', anchor_y='center')
+        labelPage.set_style("color", (3, 105, 25, 255))
+        labelPage.draw()
 
-        color = (1, 0, 0, 1)
+        # color = (1, 0, 0, 1)
         # draw_fill_circle(500, 500, 10, color, 3)
         # draw_fill_regular_polygon(300, 300, 100, numPoints=8, color=color, thickness=3)
         # fill_3poly(200, 200, 100, 100, 100, 300)
