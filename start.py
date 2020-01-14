@@ -284,11 +284,11 @@ class MyWindow(pyglet.window.Window):
              'tool': 0, 'sel': False, 'align':'left'},
             {'id': 104, 'x': 75, 'y': 5, 'text': '<', 'image': pyglet.resource.image('img/left.png'), 'tool': 0,
              'sel': False, 'align': 'right'},
-            {'id': 104, 'x': 5, 'y': 5, 'text': '>', 'image': pyglet.resource.image('img/right.png'), 'tool': 0,
+            {'id': 105, 'x': 5, 'y': 5, 'text': '>', 'image': pyglet.resource.image('img/right.png'), 'tool': 0,
              'sel': False, 'align': 'right'},
         ]
-        # self.trash_image = pyglet.resource.image('img/close.png')
-        # self.resize_image = pyglet.resource.image('img/resize_m.png')
+
+
         self.colorPanelButtons = [
             {'id': 1, 'x1': 215, 'y1': 10 + 35, 'x2': 25 + 247, 'y2': 10 + 70, 'color': (1, 0, 0, 1)},
             {'id': 2, 'x1': 215, 'y1': 10 + 70, 'x2': 25 + 247, 'y2': 10 + 105, 'color': (1, 1, 0, 1)},
@@ -470,7 +470,8 @@ class MyWindow(pyglet.window.Window):
             if platform == "win32" or platform == "cygwin":
                 self.insert_screenshot()
             elif platform == "linux":
-                self.btnScrInsertInCanvasClick()
+                # self.btnScrInsertInCanvasClick()
+                self.insert_screenshot()
 
 
         elif symbol == 112:  # set pen
@@ -528,10 +529,15 @@ class MyWindow(pyglet.window.Window):
                                 if fig['id'] == self.selFig['fig']:
                                     fig['thickness'] = self.penWidth
                         break
-
+            w = window.width
+            h = window.height
             for btn in self.buttons:
                 btn['sel'] = False
-                if (btn['x'] < x < btn['x'] + 32) and (btn['y'] < y < btn['y'] + 32):
+                if btn['align'] == 'right':
+                    xx, yy = window.width - btn['x'] - 35, btn['y']
+                else:
+                    xx, yy = btn['x'], btn['y']
+                if (xx < x < xx + 32) and (yy < y < yy + 32):
                     btn['sel'] = True
                     if btn['id'] == 4:  # Fill figure
                         if self.tool == btn['tool']:
@@ -543,6 +549,12 @@ class MyWindow(pyglet.window.Window):
                     elif btn['id'] == 102:  # Changr width pen
                         # self.set_width(self.penWidth)
                         self.widthPanelVisible = not self.widthPanelVisible
+                    elif btn['id'] == 105:  #
+                        print(105)
+                        self.cx += 100000
+                    elif btn['id'] == 104:  #
+                        print(104)
+                        self.cx -= 100000
                     else:
                         if btn['tool'] != 0:
                             self.tool = btn['tool']
@@ -556,10 +568,14 @@ class MyWindow(pyglet.window.Window):
                     # [{'name': 'polyline', 'p': [{'x': 429, 'y': 444}, {'x': 437, 'y': 448}, {'x': 438, 'y': 449}, {'x': 444, 'y': 449}, {'x': 449, 'y': 450}, {'x': 454, 'y': 450}, {'x': 462, 'y': 451}, {'x': 486, 'y': 451}, {'x': 498, 'y': 450}, {'x': 506, 'y': 446}, {'x': 512, 'y': 440}, {'x': 517, 'y': 432}, {'x': 519, 'y': 420}, {'x': 526, 'y': 401}, {'x': 527, 'y': 395}, {'x': 529, 'y': 391}, {'x': 530, 'y': 386}, {'x': 532, 'y': 382}, {'x': 534, 'y': 377}, {'x': 538, 'y': 372}, {'x': 546, 'y': 359}, {'x': 552, 'y': 352}, {'x': 560, 'y': 343}, {'x': 567, 'y': 338}, {'x': 573, 'y': 336}, {'x': 579, 'y': 332}, {'x': 580, 'y': 332}, {'x': 588, 'y': 332}, {'x': 588, 'y': 332}, {'x': 593, 'y': 331}], 'color': (1, 0, 0, 1), 'thickness': 4, 'fordel': False}]
                     for fig in reversed(self.figures):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
+                        x1, y1, x2, y2 = x1 + self.cx, y1 + self.cy, x2 + self.cx, y2 + self.cy
+                        # x -=self.cx; y -=self.cy
                         if ((x > x1) and (x < x2) and (y > y1) and (y < y2)) or (
                                 x2 - 18 + 20 < x < x2 - 2 + 20 and y1 + 2 - 20 < y < y1 + 20 - 20):
-                            self.selDel = {'x1': x1, 'y1': y1, 'x2': x1 + 20, 'y2': y1 + 20}
-                            self.selRes = {'x1': x2 - 18 + 20, 'y1': y1 + 2 - 20, 'x2': x2 - 2 + 20, 'y2': y1 + 20 - 20}
+                            self.selDel = {'x1': x1,            'y1': y1,
+                                           'x2': x1 + 20,       'y2': y1 + 20}
+                            self.selRes = {'x1': x2 - 18 + 20,  'y1': y1 + 2 - 20,
+                                           'x2': x2 - 2 + 20,   'y2': y1 + 20 - 20}
                             # canvas.config(cursor="fleur")
                             xx1 = self.selDel['x1']
                             yy1 = self.selDel['y1']
@@ -648,6 +664,7 @@ class MyWindow(pyglet.window.Window):
                     for fig in self.figures:
                         if fig['id'] == self.selFig['fig']:
                             x1, y1, x2, y2 = border_polyline(fig['p'])
+                            x1, y1, x2, y2 = x1 + self.cx, y1 + self.cy, x2 + self.cx, y2 + self.cy
                             if (x1 < x < x2 and y1 < y < y2) or self.isMove and not self.isResize:
                                 self.isMove = True
                                 for p in fig['p']:
@@ -664,6 +681,7 @@ class MyWindow(pyglet.window.Window):
                                 break
                             xr1, yr1, xr2, yr2 = self.selRes['x1'], self.selRes['y1'], self.selRes['x2'], \
                                                  self.selRes['y2']
+                            # xr1, yr1, xr2, yr2 = xr1 + self.cx, yr1 + self.cy, xr2 + self.cx, yr2 + self.cy
                             if (xr1 - 10 < x < xr2 + 10 and yr1 - 10 < y < yr2 + 10) or self.isResize:
                                 self.isMove = False
                                 self.isResize = True
@@ -673,11 +691,10 @@ class MyWindow(pyglet.window.Window):
                                     ky = (p['y'] - y2) / (y - y2)
                                     p['x'] += kx * dx
                                     p['y'] += ky * dy
-                                # xd1, yd1, xd2, yd2 = border_polyline(fig['p'])
-                                # self.selDel['x1'] += dx
-                                # self.selDel['y1'] += dy
-                                # self.selDel['x2'] += dx
-                                # self.selDel['y2'] += dy
+                                self.selDel['x1'] += 0
+                                self.selDel['y1'] += dy
+                                self.selDel['x2'] += 0
+                                self.selDel['y2'] += dy
 
                                 self.selRes['x1'] += dx
                                 self.selRes['y1'] += dy
@@ -810,7 +827,7 @@ class MyWindow(pyglet.window.Window):
                     y = f['p'][1]['y']
                     image = self.images[f['image']]
                     # Це щоб не було засвітки
-                    draw_line(-10000, -10000, -10001, -10001, color=(1, 1, 1, 1), thickness=1)
+                    draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
                     image.blit(x0 + self.cx, y0 + self.cy)
 
                     # image.blit(x + self.cx, y + self.cy )
@@ -823,7 +840,7 @@ class MyWindow(pyglet.window.Window):
                 draw_line(x, 0, x, 4000, color=self.gridColor, thickness=1)
 
         # Це щоб не було засвітки на кнопках
-        draw_line(-10000, -10000, -10001, -10001, color=(1, 1, 1, 1), thickness=1)
+        draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
         # Draw buttons
         for btn in self.buttons:
             if btn['align'] == 'right':
@@ -832,7 +849,7 @@ class MyWindow(pyglet.window.Window):
                 x, y = btn['x'], btn['y']
             btn['image'].blit(x, y)
             if btn['sel']:
-                draw_line(x + 2, y - 2, x + 28, y - 2, color=self.gridColor, thickness=2)
+                draw_line(x + 2, y - 2, x + 28, y - 2, color=self.fonColor, thickness=2)
             if btn['id'] == 4:
                 if self.isFill:
                     fill_4poly(x + 2, y + 2,
@@ -856,18 +873,18 @@ class MyWindow(pyglet.window.Window):
 
                                    color=self.ramkaColor, thickness=self.ramkaThickness)
                     # витавляємо малюнок корзини
-                    draw_line(-10000, -10000, -10001, -10001, color=(1, 1, 1, 1), thickness=1)
+                    draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
                     # self.trash_image.blit(self.selDel['x1'] + self.cx,
                     #                       self.selDel['y1'] + self.cy)
                     # self.resize_image.blit(self.selRes['x1'] + self.cx,
                     #                        self.selRes['y1'] + self.cy)
-                    close_cross(self.selDel['x1'] + self.cx, self.selDel['y1'] + self.cy,
-                                self.selDel['x2'] + self.cx, self.selDel['y2'] + self.cy,
+                    close_cross(self.selDel['x1'] + 0, self.selDel['y1'] + 0,
+                                self.selDel['x2'] + 0, self.selDel['y2'] + 0,
                                 color=self.ramkaColor, thickness=self.ramkaThickness
                                 )
 
-                    resize_arr(self.selRes['x1'] + self.cx, self.selRes['y2'] + self.cx,
-                               self.selRes['x2'] + self.cx, self.selRes['y1'] + self.cx,
+                    resize_arr(self.selRes['x1'] + 0, self.selRes['y2'] + 0,
+                               self.selRes['x2'] + 0, self.selRes['y1'] + 0,
                                color=self.ramkaColor, thickness=self.ramkaThickness)
 
         color = (1, 0, 0, 1)
@@ -889,9 +906,9 @@ class MyWindow(pyglet.window.Window):
         window.clear()
 
     def on_close(self):
-        label = pyglet.text.Label('Вийти?',
-                                  font_name='Times New Roman',
-                                  font_size=36,
+        label = pyglet.text.Label('x',
+                                  font_name='Arial',
+                                  font_size=96,
                                   x=window.width // 2, y=window.height // 2,
                                   anchor_x='center', anchor_y='center')
         label.set_style("color", (255, 0, 0, 255))
