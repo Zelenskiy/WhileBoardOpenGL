@@ -255,7 +255,7 @@ class MyWindow(pyglet.window.Window):
         self.gridColor = (208 / 255, 208 / 255, 208 / 255, 0.1)
         glClearColor(233 / 255, 251 / 255, 202 / 255, 1.0)
         self.figures = []
-        self.isGrid = False
+        self.isGrid = True
         self.isMove = False
         self.isResize = False
         self.isExit = False
@@ -673,6 +673,7 @@ class MyWindow(pyglet.window.Window):
                             x1, y1, x2, y2 = x1 + self.cx, y1 + self.cy, x2 + self.cx, y2 + self.cy
                             if (x1 < x < x2 and y1 < y < y2) or self.isMove and not self.isResize:
                                 self.isMove = True
+                                self.isResize = False
                                 for p in fig['p']:
                                     p['x'] += dx
                                     p['y'] += dy
@@ -687,7 +688,8 @@ class MyWindow(pyglet.window.Window):
                                 break
                             xr1, yr1, xr2, yr2 = self.selRes['x1'], self.selRes['y1'], self.selRes['x2'], \
                                                  self.selRes['y2']
-                            # xr1, yr1, xr2, yr2 = xr1 + self.cx, yr1 + self.cy, xr2 + self.cx, yr2 + self.cy
+
+                            # xr1, yr1, xr2, yr2 = xr1 - self.cx, yr1 - self.cy, xr2 - self.cx, yr2 - self.cy
                             if (xr1 - 10 < x < xr2 + 10 and yr1 - 10 < y < yr2 + 10) or self.isResize:
                                 self.isMove = False
                                 self.isResize = True
@@ -702,10 +704,15 @@ class MyWindow(pyglet.window.Window):
                                 self.selDel['x2'] += 0
                                 self.selDel['y2'] += dy
 
-                                self.selRes['x1'] += dx
-                                self.selRes['y1'] += dy
-                                self.selRes['x2'] += dx
-                                self.selRes['y2'] += dy
+
+                                self.selRes['x1'] = x2
+                                self.selRes['y1'] = y1 - 20
+                                self.selRes['x2'] = x2+20
+                                self.selRes['y2'] = y1
+                                # self.selRes['x1'] += dx
+                                # self.selRes['y1'] += dy
+                                # self.selRes['x2'] += dx
+                                # self.selRes['y2'] += dy
 
     def on_mouse_release(self, x, y, button, modifiers):
 
@@ -739,7 +746,7 @@ class MyWindow(pyglet.window.Window):
                 x0, y0 = self.x0, self.y0
                 self.poly.append({'x': x - self.cx, 'y': y0})
                 self.poly.append({'x': x - self.cx, 'y': y - self.cy})
-                self.poly.append({'x': x0 - self.cx, 'y': y - self.cy})
+                self.poly.append({'x': x0, 'y': y - self.cy})
                 # self.poly.append({'x': x0 - self.cx, 'y': y - self.cy})
                 # self.poly.append({'x': x - self.cx, 'y': y - self.cy})
                 # self.poly.append({'x': x - self.cx, 'y': y0 - self.cy})
@@ -796,11 +803,11 @@ class MyWindow(pyglet.window.Window):
                                   thickness=f['thickness'])
                         x0, y0 = x, y
                 elif f['name'] == 'line':
-                    x0 = f['p'][0]['x']
-                    y0 = f['p'][0]['y']
-                    x_ = f['p'][1]['x']
-                    y_ = f['p'][1]['y']
-                    draw_line(x0 + self.cx, y0 + self.cy, x_ + self.cx, y_ + self.cy, color=f['color'],
+                    x0 = f['p'][0]['x'] + self.cx
+                    y0 = f['p'][0]['y'] + self.cy
+                    x_ = f['p'][1]['x'] + self.cx
+                    y_ = f['p'][1]['y'] + self.cy
+                    draw_line(x0, y0, x_, y_, color=f['color'],
                               thickness=f['thickness'])
                 elif f['name'] == 'rectangle_fill':
                     x1 = f['p'][0]['x'] + self.cx
@@ -892,7 +899,7 @@ class MyWindow(pyglet.window.Window):
                     resize_arr(self.selRes['x1'] + 0, self.selRes['y2'] + 0,
                                self.selRes['x2'] + 0, self.selRes['y1'] + 0,
                                color=self.ramkaColor, thickness=self.ramkaThickness)
-        print("sssssssssssssssssssssssssss")
+
         labelPage = pyglet.text.Label(str(self.page),
                                   font_name='Arial',
                                   font_size=24,
