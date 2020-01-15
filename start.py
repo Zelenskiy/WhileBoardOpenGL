@@ -806,6 +806,13 @@ class MyWindow(pyglet.window.Window):
         # draw figures in visible part of window
         w = window.width
         h = window.height
+        # Draw grid
+        if self.isGrid:
+            for y in range(0, 4000, self.step):
+                draw_line(0, y, 4000, y, color=self.gridColor, thickness=1)
+            for x in range(0, 4000, self.step):
+                draw_line(x, 0, x, 4000, color=self.gridColor, thickness=1)
+
         count = 0
         for f in self.figures:
             x_min, y_min, x_max, y_max = border_polyline(f['p'])
@@ -854,12 +861,6 @@ class MyWindow(pyglet.window.Window):
 
                     # image.blit(x + self.cx, y + self.cy )
 
-        # Draw grid
-        if self.isGrid:
-            for y in range(0, 4000, self.step):
-                draw_line(0, y, 4000, y, color=self.gridColor, thickness=1)
-            for x in range(0, 4000, self.step):
-                draw_line(x, 0, x, 4000, color=self.gridColor, thickness=1)
 
         # Це щоб не було засвітки на кнопках
         draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
