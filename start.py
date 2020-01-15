@@ -657,9 +657,7 @@ class MyWindow(pyglet.window.Window):
                           x - self.errSize // 2, y - self.errSize // 2, color=(1, 1, 0, 1), thickness=self.errSize)
                 for f in self.figures:
                     x_min, y_min, x_max, y_max = border_polyline(f['p'])
-                    x_min, y_min = self.canvas_to_screen(x_min, y_min)
-                    x_max, y_max = self.canvas_to_screen(x_max, y_max)
-                    if dist((x_max + x_min) // 2, (y_max + y_min) // 2, x,y, self.errSize):
+                    if dist((x_max + x_min) // 2, (y_max + y_min) // 2, self.canvas_to_screen(x,y), self.errSize):
                         # print('del')
                         f['fordel'] = True
                         break
