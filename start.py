@@ -16,11 +16,14 @@ from pyglet.window import mouse, ImageMouseCursor
 
 from sys import platform
 
+
+
 if platform == "win32" or platform == "cygwin":
     pass
 elif platform == "linux":
     pass
 
+winPanel = None
 
 def close_cross(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     draw_line(x0 + 4, y0 + 4, x - 4, y - 4, color, thickness)
@@ -233,6 +236,26 @@ def border_polyline(points):
 #         print("aaaaaaaaa")
 #
 
+class DlgWindow(pyglet.window.Window):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_location(50,100)
+
+
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        window.insert_screenshot()
+        winPanel.close()
+
+
+    def on_close(self):
+        window.set_visible(True)
+
+
+
+def show_screenshot_panel():
+    global winPanel
+    winPanel = DlgWindow(50, 70, style='borderless')
 
 class MyWindow(pyglet.window.Window):
 
@@ -346,10 +369,22 @@ class MyWindow(pyglet.window.Window):
         # resized_image.show()
         resized_image.save(output_image_path)
 
-    def resize_image2(self, input_image_path, output_image_path, size):
-        original_image = Image.open(input_image_path)
-        resized_image = original_image.resize(size)
-        resized_image.save(output_image_path)
+    def set_width(self, w):
+        if platform == "win32" or platform == "cygwin":
+            pass
+        elif platform == "linux":
+            try:
+                output = subprocess.check_output(
+                    'zenity --scale --title="Товщина лінії" --text="Виберіть товщину лінії"  --min-value=4 --max-value=40 --value=' + str(
+                        w) + ' --step=1',
+                    shell=True)
+                s = ""
+                for o in output:
+                    s += chr(o)
+                s = s[0:-1]
+                self.penWidth = int(s)
+            except:
+                pass
 
     def set_color(self):
         # For linux
@@ -370,22 +405,10 @@ class MyWindow(pyglet.window.Window):
             except:
                 pass
 
-    def set_width(self, w):
-        if platform == "win32" or platform == "cygwin":
-            pass
-        elif platform == "linux":
-            try:
-                output = subprocess.check_output(
-                    'zenity --scale --title="Товщина лінії" --text="Виберіть товщину лінії"  --min-value=4 --max-value=40 --value=' + str(
-                        w) + ' --step=1',
-                    shell=True)
-                s = ""
-                for o in output:
-                    s += chr(o)
-                s = s[0:-1]
-                self.penWidth = int(s)
-            except:
-                pass
+    def resize_image2(self, input_image_path, output_image_path, size):
+        original_image = Image.open(input_image_path)
+        resized_image = original_image.resize(size)
+        resized_image.save(output_image_path)
 
     def screen_to_canvas(self, x, y):
         x -= self.cx
@@ -441,6 +464,8 @@ class MyWindow(pyglet.window.Window):
         if symbol == 65307:  # ESC
             # TODO поміняти потім
             window.close()
+            if winPanel != None:
+                winPanel.close()
             # self.on_close()
         elif symbol == 65360:  # Home
             self.page = 1
@@ -513,6 +538,8 @@ class MyWindow(pyglet.window.Window):
         if self.isExit:
             if window.width // 2 - 200 < x < window.width // 2 + 200 and window.height // 2 - 100 < y < window.height // 2 + 100:
                 window.close()
+                if winPanel != None:
+                    winPanel.close()
             else:
                 self.isExit = False
 
@@ -556,17 +583,23 @@ class MyWindow(pyglet.window.Window):
                             self.isFill = not self.isFill
 
                         self.tool = btn['tool']
+                    elif btn['id'] == 26:  # Changr color pen
+                        # hide main window
+                        window.set_visible(False)
+                        # show panel window
+                        show_screenshot_panel()
+
                     elif btn['id'] == 101:  # Changr color pen
                         self.colorPanelVisible = not self.colorPanelVisible
                     elif btn['id'] == 102:  # Changr width pen
                         # self.set_width(self.penWidth)
                         self.widthPanelVisible = not self.widthPanelVisible
                     elif btn['id'] == 105:  #
-                        print(105)
+                        window.clear()
                         self.page += 1
                         self.cx = self.page * 100000 - 100000
                     elif btn['id'] == 104:  #
-                        print(104)
+                        window.clear()
                         self.page -= 1
                         if self.page < 1:
                             self.page = 1
@@ -913,7 +946,7 @@ class MyWindow(pyglet.window.Window):
                                   font_name='Arial',
                                   font_size=24,
                                   # x=400, y=200,
-                                  x=window.width - 62, y=26,
+                                  x=window.width - 60, y=22,
                                   anchor_x='center', anchor_y='center')
         labelPage.set_style("color", (3, 105, 25, 255))
         labelPage.draw()
@@ -927,13 +960,14 @@ class MyWindow(pyglet.window.Window):
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         # print("scrool ", scroll_y)
+        window.clear()
         self.cy -= scroll_y * 10
         # rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
-        window.clear()
+        # window.clear()
 
     def on_close(self):
         label = pyglet.text.Label('x',
-                                  font_name='Arial',
+                                  font_name='Wingdings',
                                   font_size=96,
                                   x=window.width // 2, y=window.height // 2,
                                   anchor_x='center', anchor_y='center')
