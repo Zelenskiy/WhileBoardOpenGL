@@ -983,8 +983,7 @@ class MyWindow(pyglet.window.Window):
         # print("scrool ", scroll_y)
         window.clear()
         self.cy -= scroll_y * 10
-        # rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
-        # window.clear()
+
 
     def on_close(self):
         self.label = pyglet.text.Label('x',
