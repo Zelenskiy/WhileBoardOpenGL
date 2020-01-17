@@ -4,6 +4,8 @@ from datetime import datetime
 from math import *
 import pyscreenshot as ImageGrab
 
+import wx
+
 # import pyautogui
 # from tkinter import colorchooser
 
@@ -15,6 +17,8 @@ from pyglet.model.codecs.gltf import Buffer
 from pyglet.window import mouse, ImageMouseCursor
 
 from sys import platform
+
+from dialogWindow import *
 
 
 
@@ -236,26 +240,40 @@ def border_polyline(points):
 #         print("aaaaaaaaa")
 #
 
-class DlgWindow(pyglet.window.Window):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.set_location(50,100)
+# class DlgWindow(pyglet.window.Window):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.set_location(50,100)
+#
+#
+#
+#     def on_mouse_press(self, x, y, button, modifiers):
+#         window.insert_screenshot()
+#         winPanel.close()
+#
+#
+#     def on_close(self):
+#         window.set_visible(True)
 
-
-
-    def on_mouse_press(self, x, y, button, modifiers):
-        window.insert_screenshot()
-        winPanel.close()
-
-
-    def on_close(self):
-        window.set_visible(True)
 
 
 
 def show_screenshot_panel():
-    global winPanel
-    winPanel = DlgWindow(50, 70, style='borderless')
+
+
+    result = dialog.ShowModal()  # показываем модальный диалог
+    if result == wx.ID_OK:
+        print("OK")
+        window.set_visible(True)
+        window.insert_screenshot()
+        # dialog.Destroy()
+
+    else:
+        print("Cancel")
+        window.set_visible(True)
+
+
+
 
 class MyWindow(pyglet.window.Window):
 
@@ -285,6 +303,7 @@ class MyWindow(pyglet.window.Window):
         self.isFill = False
         self.colorPanelVisible = False
         self.widthPanelVisible = False
+        self.label = None
 
         self.buttons = [
             {'id': 8, 'x': 5, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
@@ -540,6 +559,7 @@ class MyWindow(pyglet.window.Window):
                 window.close()
                 if winPanel != None:
                     winPanel.close()
+                dialog.Destroy()
             else:
                 self.isExit = False
 
@@ -583,7 +603,7 @@ class MyWindow(pyglet.window.Window):
                             self.isFill = not self.isFill
 
                         self.tool = btn['tool']
-                    elif btn['id'] == 26:  # Changr color pen
+                    elif btn['id'] == 26:  # Діалогове вікно
                         # hide main window
                         window.set_visible(False)
                         # show panel window
@@ -889,7 +909,7 @@ class MyWindow(pyglet.window.Window):
                     y = f['p'][1]['y']
                     image = self.images[f['image']]
                     # Це щоб не було засвітки
-                    draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+                    draw_line(-10000, -10000, -10001, -10001, (1,1,1,1), thickness=1)
                     image.blit(x0 + self.cx, y0 + self.cy)
 
                     # image.blit(x + self.cx, y + self.cy )
@@ -950,6 +970,8 @@ class MyWindow(pyglet.window.Window):
                                   anchor_x='center', anchor_y='center')
         labelPage.set_style("color", (3, 105, 25, 255))
         labelPage.draw()
+        if self.isExit:
+            self.label.draw()
 
 
     def on_show(self):
@@ -966,14 +988,14 @@ class MyWindow(pyglet.window.Window):
         # window.clear()
 
     def on_close(self):
-        label = pyglet.text.Label('x',
+        self.label = pyglet.text.Label('x',
                                   font_name='Wingdings',
                                   font_size=96,
                                   x=window.width // 2, y=window.height // 2,
                                   anchor_x='center', anchor_y='center')
-        label.set_style("color", (255, 0, 0, 255))
+        self.label.set_style("color", (255, 0, 0, 255))
         self.isExit = True
-        label.draw()
+        self.label.draw()
 
     def on_hide(self):
         pass
@@ -1049,9 +1071,16 @@ class MyWindow(pyglet.window.Window):
 if __name__ == "__main__":
     window = MyWindow(1200, 600, caption="WhiteBoard", resizable=True)
     window.set_location(100, 35)
+    appDialog = wx.App()
+    dialog = SubclassDialog()
+    dialog.SetTransparent(128)
+
     # window.maximize()
     window.clear()
 
     window.on_draw()
-    # color_dialog.on_draw()
+
+
+    # app.MainLoop()
+
     pyglet.app.run()
