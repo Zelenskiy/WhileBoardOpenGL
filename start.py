@@ -4,6 +4,8 @@ from datetime import datetime
 from math import *
 import pyscreenshot as ImageGrab
 
+import wx
+
 # import pyautogui
 # from tkinter import colorchooser
 
@@ -16,11 +18,16 @@ from pyglet.window import mouse, ImageMouseCursor
 
 from sys import platform
 
+from dialogWindow import *
+
+
+
 if platform == "win32" or platform == "cygwin":
     pass
 elif platform == "linux":
     pass
 
+winPanel = None
 
 def close_cross(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     draw_line(x0 + 4, y0 + 4, x - 4, y - 4, color, thickness)
@@ -233,6 +240,40 @@ def border_polyline(points):
 #         print("aaaaaaaaa")
 #
 
+# class DlgWindow(pyglet.window.Window):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.set_location(50,100)
+#
+#
+#
+#     def on_mouse_press(self, x, y, button, modifiers):
+#         window.insert_screenshot()
+#         winPanel.close()
+#
+#
+#     def on_close(self):
+#         window.set_visible(True)
+
+
+
+
+def show_screenshot_panel():
+
+
+    result = dialog.ShowModal()  # показываем модальный диалог
+    if result == wx.ID_OK:
+        print("OK")
+        window.set_visible(True)
+        window.insert_screenshot()
+        # dialog.Destroy()
+
+    else:
+        print("Cancel")
+        window.set_visible(True)
+
+
+
 
 class MyWindow(pyglet.window.Window):
 
@@ -262,6 +303,7 @@ class MyWindow(pyglet.window.Window):
         self.isFill = False
         self.colorPanelVisible = False
         self.widthPanelVisible = False
+        self.label = None
 
         self.buttons = [
             {'id': 8, 'x': 5, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
@@ -346,10 +388,22 @@ class MyWindow(pyglet.window.Window):
         # resized_image.show()
         resized_image.save(output_image_path)
 
-    def resize_image2(self, input_image_path, output_image_path, size):
-        original_image = Image.open(input_image_path)
-        resized_image = original_image.resize(size)
-        resized_image.save(output_image_path)
+    def set_width(self, w):
+        if platform == "win32" or platform == "cygwin":
+            pass
+        elif platform == "linux":
+            try:
+                output = subprocess.check_output(
+                    'zenity --scale --title="Товщина лінії" --text="Виберіть товщину лінії"  --min-value=4 --max-value=40 --value=' + str(
+                        w) + ' --step=1',
+                    shell=True)
+                s = ""
+                for o in output:
+                    s += chr(o)
+                s = s[0:-1]
+                self.penWidth = int(s)
+            except:
+                pass
 
     def set_color(self):
         # For linux
@@ -370,22 +424,10 @@ class MyWindow(pyglet.window.Window):
             except:
                 pass
 
-    def set_width(self, w):
-        if platform == "win32" or platform == "cygwin":
-            pass
-        elif platform == "linux":
-            try:
-                output = subprocess.check_output(
-                    'zenity --scale --title="Товщина лінії" --text="Виберіть товщину лінії"  --min-value=4 --max-value=40 --value=' + str(
-                        w) + ' --step=1',
-                    shell=True)
-                s = ""
-                for o in output:
-                    s += chr(o)
-                s = s[0:-1]
-                self.penWidth = int(s)
-            except:
-                pass
+    def resize_image2(self, input_image_path, output_image_path, size):
+        original_image = Image.open(input_image_path)
+        resized_image = original_image.resize(size)
+        resized_image.save(output_image_path)
 
     def screen_to_canvas(self, x, y):
         x -= self.cx
@@ -441,6 +483,8 @@ class MyWindow(pyglet.window.Window):
         if symbol == 65307:  # ESC
             # TODO поміняти потім
             window.close()
+            if winPanel != None:
+                winPanel.close()
             # self.on_close()
         elif symbol == 65360:  # Home
             self.page = 1
@@ -513,6 +557,9 @@ class MyWindow(pyglet.window.Window):
         if self.isExit:
             if window.width // 2 - 200 < x < window.width // 2 + 200 and window.height // 2 - 100 < y < window.height // 2 + 100:
                 window.close()
+                if winPanel != None:
+                    winPanel.close()
+                dialog.Destroy()
             else:
                 self.isExit = False
 
@@ -556,17 +603,23 @@ class MyWindow(pyglet.window.Window):
                             self.isFill = not self.isFill
 
                         self.tool = btn['tool']
+                    elif btn['id'] == 26:  # Діалогове вікно
+                        # hide main window
+                        window.set_visible(False)
+                        # show panel window
+                        show_screenshot_panel()
+
                     elif btn['id'] == 101:  # Changr color pen
                         self.colorPanelVisible = not self.colorPanelVisible
                     elif btn['id'] == 102:  # Changr width pen
                         # self.set_width(self.penWidth)
                         self.widthPanelVisible = not self.widthPanelVisible
                     elif btn['id'] == 105:  #
-                        print(105)
+                        window.clear()
                         self.page += 1
                         self.cx = self.page * 100000 - 100000
                     elif btn['id'] == 104:  #
-                        print(104)
+                        window.clear()
                         self.page -= 1
                         if self.page < 1:
                             self.page = 1
@@ -657,7 +710,9 @@ class MyWindow(pyglet.window.Window):
                           x - self.errSize // 2, y - self.errSize // 2, color=(1, 1, 0, 1), thickness=self.errSize)
                 for f in self.figures:
                     x_min, y_min, x_max, y_max = border_polyline(f['p'])
-                    if dist((x_max + x_min) // 2, (y_max + y_min) // 2, self.canvas_to_screen(x,y), self.errSize):
+                    x_min, y_min = self.canvas_to_screen(x_min, y_min)
+                    x_max, y_max = self.canvas_to_screen(x_max, y_max)
+                    if dist((x_max + x_min) // 2, (y_max + y_min) // 2, x,y, self.errSize):
                         # print('del')
                         f['fordel'] = True
                         break
@@ -804,6 +859,13 @@ class MyWindow(pyglet.window.Window):
         # draw figures in visible part of window
         w = window.width
         h = window.height
+        # Draw grid
+        if self.isGrid:
+            for y in range(0, 4000, self.step):
+                draw_line(0, y, 4000, y, color=self.gridColor, thickness=1)
+            for x in range(0, 4000, self.step):
+                draw_line(x, 0, x, 4000, color=self.gridColor, thickness=1)
+
         count = 0
         for f in self.figures:
             x_min, y_min, x_max, y_max = border_polyline(f['p'])
@@ -847,17 +909,11 @@ class MyWindow(pyglet.window.Window):
                     y = f['p'][1]['y']
                     image = self.images[f['image']]
                     # Це щоб не було засвітки
-                    draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+                    draw_line(-10000, -10000, -10001, -10001, (1,1,1,1), thickness=1)
                     image.blit(x0 + self.cx, y0 + self.cy)
 
                     # image.blit(x + self.cx, y + self.cy )
 
-        # Draw grid
-        if self.isGrid:
-            for y in range(0, 4000, self.step):
-                draw_line(0, y, 4000, y, color=self.gridColor, thickness=1)
-            for x in range(0, 4000, self.step):
-                draw_line(x, 0, x, 4000, color=self.gridColor, thickness=1)
 
         # Це щоб не було засвітки на кнопках
         draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
@@ -910,33 +966,35 @@ class MyWindow(pyglet.window.Window):
                                   font_name='Arial',
                                   font_size=24,
                                   # x=400, y=200,
-                                  x=window.width - 62, y=26,
+                                  x=window.width - 60, y=22,
                                   anchor_x='center', anchor_y='center')
         labelPage.set_style("color", (3, 105, 25, 255))
         labelPage.draw()
+        if self.isExit:
+            self.label.draw()
 
 
     def on_show(self):
         # print("wwwwwwwwwwwww")
         pass
 
-    # No order
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         # print("scrool ", scroll_y)
+        window.clear()
         self.cy -= scroll_y * 10
         # rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
-        window.clear()
+        # window.clear()
 
     def on_close(self):
-        label = pyglet.text.Label('x',
-                                  font_name='Arial',
+        self.label = pyglet.text.Label('x',
+                                  font_name='Wingdings',
                                   font_size=96,
                                   x=window.width // 2, y=window.height // 2,
                                   anchor_x='center', anchor_y='center')
-        label.set_style("color", (255, 0, 0, 255))
+        self.label.set_style("color", (255, 0, 0, 255))
         self.isExit = True
-        label.draw()
+        self.label.draw()
 
     def on_hide(self):
         pass
@@ -1012,9 +1070,14 @@ class MyWindow(pyglet.window.Window):
 if __name__ == "__main__":
     window = MyWindow(1200, 600, caption="WhiteBoard", resizable=True)
     window.set_location(100, 35)
-    # window.maximize()
+    appDialog = wx.App()
+    dialog = SubclassDialog()
+    dialog.SetTransparent(64)
+
+
     window.clear()
 
     window.on_draw()
-    # color_dialog.on_draw()
+
+
     pyglet.app.run()

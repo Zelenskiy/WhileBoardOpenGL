@@ -15,6 +15,13 @@ pip install python-zenity
 https://pypi.org/project/python-zenity/
 
 
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python get-pip.py
+pip install wxPython
+
+
+
+
 
             proc = subprocess.Popen("zenity --question --text='Quit now?'", shell=True)
             proc.communicate()
