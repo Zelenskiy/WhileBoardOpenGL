@@ -743,7 +743,7 @@ class MyWindow(pyglet.window.Window):
                             x1, y1, x2, y2 = border_polyline(fig['p'])
                             x1, y1 = self.canvas_to_screen(x1,y1)
                             x2, y2 = self.canvas_to_screen(x2,y2)
-                            if (x1 < x < x2 and y1 < y < y2) or self.isMove and not self.isResize:
+                            if ((x1 < x < x2 and y1 < y < y2) or self.isMove) and not self.isResize:
                                 self.isMove = True
                                 self.isResize = False
                                 for p in fig['p']:
@@ -839,17 +839,19 @@ class MyWindow(pyglet.window.Window):
                     for f in self.figures:
                         if f['name'] == 'image':
                             if self.selFig['fig'] == f['id']:
-                                x0 = f['p'][0]['x']
-                                y0 = f['p'][0]['y']
-                                width = int(f['p'][1]['x'] - x0)
-                                height = int(f['p'][1]['y'] - y0)
-                                ori_image_name = f['image'][:-11]
-                                f['p'][1]['x'] = f['p'][0]['x'] + width
-                                f['p'][1]['y'] = f['p'][0]['y'] + height
-                                f['fordel'] = True
-                                self.update_fig()
-                                self.insert_image_from_file(ori_image_name, x0,y0,width,height)
-                                break
+                                if self.selFig['fig'] !=[]:
+                                    # x1,y1,x2,y2 = border_polyline(self.selFig['fig'])
+                                    x0 = f['p'][0]['x']
+                                    y0 = f['p'][0]['y']
+                                    width = int(f['p'][1]['x'] - x0)
+                                    height = int(f['p'][1]['y'] - y0)
+                                    ori_image_name = f['image'][:-11]
+                                    f['p'][1]['x'] = f['p'][0]['x'] + width
+                                    f['p'][1]['y'] = f['p'][0]['y'] + height
+                                    f['fordel'] = True
+                                    self.update_fig()
+                                    self.insert_image_from_file(ori_image_name, x0,y0,width,height)
+                                    break
 
         window.clear()
         self.isMove = False
@@ -1069,6 +1071,7 @@ class MyWindow(pyglet.window.Window):
 if __name__ == "__main__":
     window = MyWindow(1200, 600, caption="WhiteBoard", resizable=True)
     window.set_location(100, 35)
+    # window.maximize()
     appDialog = wx.App()
     dialog = SubclassDialog()
     dialog.SetTransparent(64)
