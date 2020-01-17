@@ -978,7 +978,6 @@ class MyWindow(pyglet.window.Window):
         # print("wwwwwwwwwwwww")
         pass
 
-    # No order
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         # print("scrool ", scroll_y)
@@ -1073,14 +1072,12 @@ if __name__ == "__main__":
     window.set_location(100, 35)
     appDialog = wx.App()
     dialog = SubclassDialog()
-    dialog.SetTransparent(128)
+    dialog.SetTransparent(64)
 
-    # window.maximize()
+
     window.clear()
 
     window.on_draw()
 
-
-    # app.MainLoop()
 
     pyglet.app.run()
