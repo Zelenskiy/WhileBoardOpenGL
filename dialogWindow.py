@@ -1,5 +1,6 @@
 import wx
 
+
 class SubclassDialog(wx.Dialog):
     def __init__(self):              #инициируем диалог
         wx.Dialog.__init__(self, None, -1, 'Dialog Subclass',size=(120, 150),
