@@ -1,14 +1,11 @@
 import math
 
-
 # import pyautogui
 # from tkinter import colorchooser
 
 # import numpy as np
 import pyglet
 from pyglet.gl import *
-
-
 
 
 def close_cross(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
@@ -25,82 +22,159 @@ def resize_arr(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
 
 
 """
-def drawVuLine(canvas:TCanvas; x1,y1,x2,y2: integer);
-var x, dx, dy, xend, ypxl1,xpxl1,xpxl2,ypxl2 :integer;
-    gradient, yend, xgap,intery: real;
-    steep: boolean;
-
+function HightBright(ColorPen:TColor; ColorFon:TColor; c:real):TColor;
+var r, g, b: Byte;
+    rf, gf, bf: Byte;
+    rt, gt, bt:real;
 begin
+    ColorToRgb(ColorPen, r, g, b);
+    ColorToRgb(ColorFon, rf, gf, bf);
+    if r<rf  then rt := 1-c else rt := c;
+    if g<gf  then gt := 1-c else gt := c;
+    if b<bf  then bt := 1-c else bt := c;
+    r := round(abs(rf-r) * (rt) + min(r,rf));
+    g := round(abs(gf-g) * (gt) + min(g,gf));
+    b := round(abs(bf-b) * (bt) + min(b,bf));
+    HightBright := RGB(r,g,b);
+end;
 
-    dx := x2 - x1  ;
-    dy := y2 - y1  ;
-    if dx=0 then dx:=1;
-    gradient := dy / dx;
-    steep := abs(dy) > abs(dx);
-
-    if steep then begin
-      swap_ (x1, y1);
-      swap_ (x2, y2);
-      //swap_ (dx, dy);
-    end;
-
-    if x2 < x1 then begin
-      swap_ (x1, x2);
-      swap_ (y1, y2);
-    end;
-    dx := x2 - x1  ;
-    dy := y2 - y1  ;
-    if dx=0 then dx:=1;
-    gradient := dy / dx;
-
-    // handle first endpoint
-    xend := round(x1);
-    yend := y1 + gradient * (xend - x1);
-    xgap := rfpart(x1 + 0.5);
-    xpxl1 := xend;  // this will be used in the main loop
-    ypxl1 := ipart(yend);
-
-    if (steep) then begin //устанавливаем 2 пикселя с разной прозрачностью
-        plot(canvas,ypxl1, xpxl1, rfpart(yend) * xgap);
-        plot(canvas,ypxl1 + 1, xpxl1, fpart(yend) * xgap);
-    end  else begin
-        plot(canvas, xpxl1, ypxl1, rfpart(yend) * xgap);
-        plot(canvas, xpxl1, ypxl1 + 1, fpart(yend) * xgap);
-    end;
-    //сохраняем для основного цикла
-    intery := yend + gradient;
-
-    // обработка конца отрезка(аналогично началу)
-    xend := round(x2);
-    yend := y2 + gradient * (xend - x2);
-    xgap := fpart(x2 + 0.5);
-
-    xpxl2 := xend;
-    ypxl2 := ipart(yend);
-
-    if (steep) then begin
-        plot(canvas, ypxl2, xpxl2, rfpart(yend) * xgap);
-        plot(canvas, ypxl2 + 1, xpxl2, fpart(yend) * xgap);
-    end else begin
-        plot(canvas, xpxl2, ypxl2, rfpart(yend) * xgap);
-        plot(canvas, xpxl2, ypxl2 + 1, fpart(yend) * xgap);
-    end;
-
-    // основной цикл
-    for x := xpxl1 + 1 to xpxl2 - 1 do begin
-        if (steep) then begin //устанавливаем 2 пикселя с разной прозрачностью в зависимости от удаленности от отрезка
-            plot(canvas, ipart(intery), x, rfpart(intery));
-            plot(canvas, ipart(intery) + 1, x, fpart(intery));
-        end else begin
-            plot(canvas, x, ipart(intery), rfpart(intery));
-            plot(canvas, x, ipart(intery) + 1, fpart(intery));
-        end;
-
-        intery := intery + gradient;
-    end;
-
-end;               
+procedure plot(canvas:TCanvas; x, y: integer; c:real);
+var penColor, fonColor:TColor;
+begin
+     penColor := canvas.Pen.Color;
+     fonColor := Form1.fonColor;
+     //Якшо під низом не колір пензля, то замінюємо його на новий
+     if Canvas.Pixels[x,y] <> pen_C then
+        Canvas.Pixels[x,y] := HightBright(pen_C, fon_C, c);
+end;
+  
 """
+
+
+def hight_bright(color, fon_color, c):
+    r, g, b, a = color
+    rf, gf, bf, a = fon_color
+    if r < rf:
+        rt = 1 - c
+    else:
+        rt = c
+    if g < gf:
+        gt = 1 - c
+    else:
+        gt = c
+    if b < bf:
+        bt = 1 - c
+    else:
+        bt = c
+    # r = round(abs(rf - r) * (rt) + min(r, rf))
+    # g = round(abs(gf - g) * (gt) + min(g, gf))
+    # b = round(abs(bf - b) * (bt) + min(b, bf))
+    r, g, b = (r + rf) / 2, (g + gf) / 2, (b + bf) / 2
+    return (r, g, b)
+
+
+def plot(x, y, c, color, fon_color):
+    c = hight_bright(color, fon_color, c)
+    r, g, b = c
+    glColor3f(r, g, b)
+    glBegin(GL_POINTS)
+    glVertex2i(x, y)
+    glEnd()
+    glFlush()
+
+
+def ipart(x):
+    return math.floor(x);
+
+
+def round_(x):
+    return ipart(x + 0.5)
+
+
+def fpart(x):
+    return x - math.floor(x)
+
+
+def rfpart(x):
+    return 1.0 - fpart(x)
+
+
+
+
+
+def draw_vu_line( x0,  y0, x1,  y1, color,thickness=1):
+    r,g,b,a = color
+    pyglet.gl.glColor4f(r, g, b, a)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glEnable(GL_BLEND)
+    glEnable(GL_LINE_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE)
+    glLineWidth(thickness)
+    pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
+                         ('v2i', (x0, y0, x1, y1)))
+
+# def draw_vu_line(x1, y1, x2, y2, color, fon_color):
+#     dx = x2 - x1
+#     dy = y2 - y1
+#     if dx == 0: dx = 1
+#     gradient = dy / dx
+#     steep = abs(dy) > abs(dx)
+#
+#     if steep:
+#         x1, y1 = y1, x1
+#         x2, y2 = y2, x2
+#
+#     if x2 < x1:
+#         x1, x2 = x2, x1
+#         y1, y2 = y2, y1
+#
+#     dx = x2 - x1
+#     dy = y2 - y1
+#     if dx == 0: dx = 1
+#     gradient = dy / dx
+#
+#     # handle first endpoint
+#     xend = round(x1)
+#     yend = y1 + gradient * (xend - x1)
+#     xgap = rfpart(x1 + 0.5)
+#     xpxl1 = xend  # this will be used in the main loop
+#     ypxl1 = ipart(yend)
+#
+#     if (steep):  # устанавливаем 2 пикселя с разной прозрачностью
+#         plot(ypxl1, xpxl1, rfpart(yend) * xgap, color, fon_color)
+#         plot(ypxl1 + 1, xpxl1, fpart(yend) * xgap, color, fon_color)
+#     else:
+#         plot(xpxl1, ypxl1, rfpart(yend) * xgap, color, fon_color)
+#         plot(xpxl1, ypxl1 + 1, fpart(yend) * xgap, color, fon_color)
+#
+#     # сохраняем для основного цикла
+#     intery = yend + gradient
+#
+#     # обработка конца отрезка(аналогично началу)
+#     xend = round(x2)
+#     yend = y2 + gradient * (xend - x2)
+#     xgap = fpart(x2 + 0.5)
+#
+#     xpxl2 = xend;
+#     ypxl2 = ipart(yend);
+#
+#     if (steep):
+#         plot(ypxl2, xpxl2, rfpart(yend) * xgap, color, fon_color)
+#         plot(ypxl2 + 1, xpxl2, fpart(yend) * xgap, color, fon_color)
+#     else:
+#         plot(xpxl2, ypxl2, rfpart(yend) * xgap, color, fon_color)
+#         plot(xpxl2, ypxl2 + 1, fpart(yend) * xgap, color, fon_color)
+#
+#     # основной цикл
+#     for x in range(xpxl1 + 1, xpxl2):
+#         if (steep):  # устанавливаем 2 пикселя с разной прозрачностью в зависимости от удаленности от отрезка
+#             plot(ipart(intery), x, rfpart(intery), color, fon_color)
+#             plot(ipart(intery) + 1, x, fpart(intery), color, fon_color)
+#         else:
+#             plot(x, ipart(intery), rfpart(intery), color, fon_color)
+#             plot(x, ipart(intery) + 1, fpart(intery), color, fon_color)
+#
+#         intery = intery + gradient
 
 
 def draw_arrow_head(X, Y, Angle, LW, arrow, color, fon_color, thickness):
@@ -116,9 +190,36 @@ def draw_arrow_head(X, Y, Angle, LW, arrow, color, fon_color, thickness):
     x2, y2 = X + int(LineLen * LW * math.cos(A1)), Y - int(LineLen * LW * math.sin(A1))
     x3, y3 = X + int(CentLen * LW * math.cos(Angle)), Y - int(CentLen * LW * math.sin(Angle))
     x4, y4 = X + int(LineLen * LW * math.cos(A2)), Y - int(LineLen * LW * math.sin(A2))
-    draw_fill_circle(x1, y1, int(thickness*1.2), fon_color)
+    draw_fill_circle(x1, y1, int(thickness * 1.2), fon_color)
     fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, color)
 
+def draw_Line(x1, y1, x2, y2, color, fon_color, thickness=1):
+    pen_W = thickness
+    pen_C = color
+    fon_C = fon_color
+    r = pen_W // 2
+    dx = abs(x1 - x2)
+    dy = abs(y1 - y2);
+    len = math.sqrt(dx ** 2 + dy ** 2)
+    if len == 0: len = 1
+    sin_a = dx / len
+    cos_a = dy / len
+    rc = r * cos_a
+    if (y1 - y2) * (x1 - x2) < 0:
+        rs = r * sin_a
+    else:
+        rs = - r * sin_a
+    x11 = round(x1 - rc)
+    x12 = round(x1 + rc)
+    y11 = round(y1 - rs)
+    y12 = round(y1 + rs)
+    x21 = round(x2 - rc)
+    x22 = round(x2 + rc)
+    y21 = round(y2 - rs)
+    y22 = round(y2 + rs)
+    draw_vu_line(x11, y11, x21, y21, color, fon_color)
+    draw_vu_line(x12, y12, x22, y22, color, fon_color)
+    # draw_line(x1, y1, x2, y2, color, thickness)
 
 def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glColor4f(*color)
@@ -131,12 +232,13 @@ def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
 
 def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thickness=4, arrow=0, dash=(1, 0)):
     # print ("thickness - ", thickness)
-    glColor4f(*color)
-    glLineWidth(thickness)
-    glBegin(GL_LINES)
-    glVertex2f(x0, y0)
-    glVertex2f(x, y)
-    glEnd()
+    # glColor4f(*color)
+    # glLineWidth(thickness)
+    # glBegin(GL_LINES)
+    # glVertex2f(x0, y0)
+    # glVertex2f(x, y)
+    # glEnd()
+    draw_vu_line(x0, y0, x, y, color,  thickness=thickness)
     # Рисуємо стрілки
     LW = 1
     if arrow == 3:
@@ -331,7 +433,6 @@ def border_polyline(points):
 
     return x_min, y_min, x_max, y_max
 
-
 # class MyFloatWindow(pyglet.window.Window):
 #
 #     def __init__(self, *args, **kwargs):
@@ -355,4 +456,3 @@ def border_polyline(points):
 #
 #     def on_close(self):
 #         window.set_visible(True)
-

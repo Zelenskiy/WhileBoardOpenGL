@@ -553,7 +553,8 @@ class MyWindow(pyglet.window.Window):
                     y_ = p['y']
                     xx0, yy0 = self.canvas_to_screen(x0, y0)
                     xx_, yy_ = self.canvas_to_screen(x_, y_)
-                    draw_line(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth)
+                    # draw_line(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth)
+                    draw_vu_line(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth)
                     x0, y0 = x_, y_
                 self.x0, self.y0 = self.screen_to_canvas(x, y)
             elif self.tool == 2:
@@ -719,15 +720,9 @@ class MyWindow(pyglet.window.Window):
 
     def on_draw(self):
         # draw figures in visible part of window
+
         w = window.width
         h = window.height
-        # Draw grid
-        if self.isGrid:
-            for y in range(0, 4000, self.step):
-                draw_line(0, y, 4000, y, color=self.gridColor, thickness=1)
-            for x in range(0, 4000, self.step):
-                draw_line(x, 0, x, 4000, color=self.gridColor, thickness=1)
-
         count = 0
         for f in self.figures:
             x_min, y_min, x_max, y_max = border_polyline(f['p'])
@@ -746,7 +741,7 @@ class MyWindow(pyglet.window.Window):
                         xx, yy = self.canvas_to_screen(x, y)
                         draw_fill_circle(xx0, yy0, int(f['thickness'] * 0.4), color=f['color'])
                         draw_fill_circle(xx, yy, int(f['thickness'] * 0.4), color=f['color'])
-                        draw_line(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'])
+                        draw_vu_line(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'])
                         x0, y0 = x, y
                 elif f['name'] == 'line':
                     x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
@@ -777,6 +772,13 @@ class MyWindow(pyglet.window.Window):
                     image.blit(x0 + self.cx, y0 + self.cy)
 
                     # image.blit(x + self.cx, y + self.cy )
+
+        # Draw grid
+        if self.isGrid:
+            for y in range(0, 4000, self.step):
+                draw_line(0, y, 4000, y, color=self.gridColor, thickness=1)
+            for x in range(0, 4000, self.step):
+                draw_line(x, 0, x, 4000, color=self.gridColor, thickness=1)
 
         # Це щоб не було засвітки на кнопках
         draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
@@ -840,6 +842,9 @@ class MyWindow(pyglet.window.Window):
         labelPage.draw()
         if self.isExit:
             self.label.draw()
+        # draw_vu_line(100, 100, 1050, 50, self.penColor, self.fonColor, thickness=self.penWidth)
+        # draw_vu_line(100, 100, 1050, 50, self.penColor, self.fonColor, thickness=self.penWidth)
+        # draw_vu_line(10, 600, 750, 50, self.penColor, self.fonColor, thickness=self.penWidth)
         # draw_line_mod(200, 200, 500, 500, color=self.penColor, fon_color=self.fonColor, thickness=self.penWidth,
         #               arrow=1, dash=(1, 0))
 
