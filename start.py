@@ -1,12 +1,7 @@
-import math
-import os
-import subprocess
-from datetime import datetime
-from math import *
+
 from graph_ogl import *
 import pyscreenshot as ImageGrab
 
-import wx
 import pickle
 
 # import pyautogui
@@ -16,7 +11,7 @@ import pickle
 import pyglet
 from PIL import Image
 from pyglet.gl import *
-from pyglet.model.codecs.gltf import Buffer
+
 from pyglet.window import mouse, ImageMouseCursor
 
 from sys import platform
@@ -31,7 +26,23 @@ elif platform == "linux":
 winPanel = None
 
 
+
+
+
+
 class MyWindow(pyglet.window.Window):
+
+    def show_screenshot_panel(self):
+        result = dialog.ShowModal()  # показываем модальный диалог
+        if result == wx.ID_OK:
+            print("OK")
+            window.set_visible(True)
+            window.insert_screenshot()
+            # dialog.Destroy()
+
+        else:
+            print("Cancel")
+            window.set_visible(True)
 
     def draw_color_panel(self):
         for btn in self.colorPanelButtons:
@@ -442,7 +453,7 @@ class MyWindow(pyglet.window.Window):
                         # hide main window
                         window.set_visible(False)
                         # show panel window
-                        show_screenshot_panel()
+                        self.show_screenshot_panel()
 
                     elif btn['id'] == 101:  # Changr color pen
                         self.colorPanelVisible = not self.colorPanelVisible

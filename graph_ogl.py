@@ -1,25 +1,12 @@
 import math
-import os
-import subprocess
-from datetime import datetime
 
-
-import pyscreenshot as ImageGrab
-
-import wx
-import pickle
 
 # import pyautogui
 # from tkinter import colorchooser
 
 # import numpy as np
 import pyglet
-from PIL import Image
 from pyglet.gl import *
-from pyglet.model.codecs.gltf import Buffer
-from pyglet.window import mouse, ImageMouseCursor
-
-from sys import platform
 
 
 
@@ -237,9 +224,9 @@ def draw_fill_regular_polygon(x0, y0, r, numPoints=3, angleStart=90, color=(0, 0
     verts = []
     xstart, ystart = x0, y0
     for i in range(numPoints):
-        angle = radians(float(i) / numPoints * 360.0 + angleStart)
-        x = r * cos(angle) + x0
-        y = r * sin(angle) + y0
+        angle = math.radians(float(i) / numPoints * 360.0 + angleStart)
+        x = r * math.cos(angle) + x0
+        y = r * math.sin(angle) + y0
         verts += [x, y]
         fill_3poly(x0, y0, x, y, xstart, ystart, color)
         xstart, ystart = x, y
@@ -316,7 +303,7 @@ class Quad:
 
 
 def dist(x0, y0, x, y, r):
-    d = sqrt((x - x0) ** 2 + (y - y0) ** 2)
+    d = math.sqrt((x - x0) ** 2 + (y - y0) ** 2)
     return d < r
 
 
@@ -368,17 +355,4 @@ def border_polyline(points):
 #
 #     def on_close(self):
 #         window.set_visible(True)
-
-
-def show_screenshot_panel():
-    result = dialog.ShowModal()  # показываем модальный диалог
-    if result == wx.ID_OK:
-        print("OK")
-        window.set_visible(True)
-        window.insert_screenshot()
-        # dialog.Destroy()
-
-    else:
-        print("Cancel")
-        window.set_visible(True)
 
