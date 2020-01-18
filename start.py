@@ -363,9 +363,9 @@ class MyWindow(pyglet.window.Window):
              'tool': 4, 'sel': False, 'align':'left'},
             {'id': 26, 'x': 180, 'y': 5, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
              'sel': False, 'align':'left'},
-            {'id': 101, 'x': 215, 'y': 5, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 1,
+            {'id': 101, 'x': 215, 'y': 5, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 0,
              'sel': False, 'align':'left'},
-            {'id': 102, 'x': 250, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 1,
+            {'id': 102, 'x': 250, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 0,
              'sel': False, 'align':'left'},
             {'id': 103, 'x': 285, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/add.png'),
              'tool': 0, 'sel': False, 'align':'left'},
@@ -385,13 +385,15 @@ class MyWindow(pyglet.window.Window):
             {'id': 6, 'x1': 215, 'y1': 10 + 210, 'x2': 25 + 247, 'y2': 10 + 245, 'color': (0, 0, 0, 1)},
         ]
         self.widthPanelButtons = [
-            {'id': 1, 'x1': 250, 'y1': 10 + 35, 'x2': 50 + 282, 'y2': 10 + 70, 'width': 2},
-            {'id': 2, 'x1': 250, 'y1': 10 + 70, 'x2': 50 + 282, 'y2': 10 + 105, 'width': 3},
-            {'id': 3, 'x1': 250, 'y1': 10 + 105, 'x2': 50 + 282, 'y2': 10 + 140, 'width': 5},
-            {'id': 4, 'x1': 250, 'y1': 10 + 140, 'x2': 50 + 282, 'y2': 10 + 175, 'width': 7},
-            {'id': 5, 'x1': 250, 'y1': 10 + 175, 'x2': 50 + 282, 'y2': 10 + 210, 'width': 10},
-            {'id': 6, 'x1': 250, 'y1': 10 + 210, 'x2': 50 + 282, 'y2': 10 + 245, 'width': 16},
-            {'id': 7, 'x1': 250, 'y1': 10 + 245, 'x2': 50 + 282, 'y2': 10 + 280, 'width': 22},
+            {'id': 1, 'x1': 250, 'y1': 10 + 35, 'x2': 50 + 282, 'y2': 10 + 70, 'width': 3},
+            {'id': 2, 'x1': 250, 'y1': 10 + 70, 'x2': 50 + 282, 'y2': 10 + 105, 'width': 5},
+            {'id': 3, 'x1': 250, 'y1': 10 + 105, 'x2': 50 + 282, 'y2': 10 + 140, 'width': 9},
+            {'id': 4, 'x1': 250, 'y1': 10 + 140, 'x2': 50 + 282, 'y2': 10 + 175, 'width': 13},
+            {'id': 5, 'x1': 250, 'y1': 10 + 175, 'x2': 50 + 282, 'y2': 10 + 210, 'width': 17},
+            {'id': 6, 'x1': 250, 'y1': 10 + 210, 'x2': 50 + 282, 'y2': 10 + 245, 'width': 23},
+            {'id': 7, 'x1': 250, 'y1': 10 + 245, 'x2': 50 + 282, 'y2': 10 + 280, 'width': 29},
+            {'id': 8, 'x1': 250, 'y1': 10 + 280, 'x2': 50 + 282, 'y2': 10 + 315, 'width': 37},
+            # {'id': 9, 'x1': 250, 'y1': 10 + 315, 'x2': 50 + 282, 'y2': 10 + 350, 'width': 45},
             # {'id': 5, 'x1': 250, 'y1': 10 + 175, 'x2': 282, 'y2': 10 + 210, 'width': 32},
 
         ]
@@ -946,6 +948,8 @@ class MyWindow(pyglet.window.Window):
                         # line(x0 , y0 , x , y , color=f['color'], thickness=f['thickness'])
                         xx0,yy0 = self.canvas_to_screen(x0,y0)
                         xx,yy = self.canvas_to_screen(x,y)
+                        draw_fill_circle(xx0, yy0, int(f['thickness']/2.5), color = f['color'])
+                        draw_fill_circle(xx, yy, int(f['thickness']/2.5), color = f['color'])
                         draw_line(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'])
                         x0, y0 = x, y
                 elif f['name'] == 'line':
@@ -996,6 +1000,9 @@ class MyWindow(pyglet.window.Window):
                                x + 2, y + 28,
                                x + 28, y + 28,
                                x + 28, y + 2, self.penColor)
+            if self.tool == btn['tool']:
+                draw_fill_circle(x + 5, y + 34, 3, color=self.penColor)
+                draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
         # # Це щоб не було засвітки на кнопках
         # rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
         if self.colorPanelVisible:
