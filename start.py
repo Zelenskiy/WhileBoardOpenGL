@@ -1,3 +1,6 @@
+import datetime
+import os
+import subprocess
 
 from graph_ogl import *
 import pyscreenshot as ImageGrab
@@ -217,22 +220,22 @@ class MyWindow(pyglet.window.Window):
         # resized_image.show()
         resized_image.save(output_image_path)
 
-    def set_width(self, w):
-        if platform == "win32" or platform == "cygwin":
-            pass
-        elif platform == "linux":
-            try:
-                output = subprocess.check_output(
-                    'zenity --scale --title="Товщина лінії" --text="Виберіть товщину лінії"  --min-value=4 --max-value=40 --value=' + str(
-                        w) + ' --step=1',
-                    shell=True)
-                s = ""
-                for o in output:
-                    s += chr(o)
-                s = s[0:-1]
-                self.penWidth = int(s)
-            except:
-                pass
+    # def set_width(self, w):
+    #     if platform == "win32" or platform == "cygwin":
+    #         pass
+    #     elif platform == "linux":
+    #         try:
+    #             output = subprocess.check_output(
+    #                 'zenity --scale --title="Товщина лінії" --text="Виберіть товщину лінії"  --min-value=4 --max-value=40 --value=' + str(
+    #                     w) + ' --step=1',
+    #                 shell=True)
+    #             s = ""
+    #             for o in output:
+    #                 s += chr(o)
+    #             s = s[0:-1]
+    #             self.penWidth = int(s)
+    #         except:
+    #             pass
 
     def set_color(self):
         # For linux
@@ -871,49 +874,49 @@ class MyWindow(pyglet.window.Window):
         #     print("All")
         #     window.maximize()
 
-    def btnScrInsertInCanvasClick(self):
-
-        window.set_visible(False)
-        # Тут треба паузу зротити
-        self.scS = True
-        if self.scS:
-            name = 'tmp/' + datetime.strftime(datetime.now(), "%Y_%m_%d_%H_%M_%S") + '.png'
-            # os.system('gnome-screenshot -d 2 -f ' + name)
-            # output = subprocess.check_output('/usr/bin/gnome-screenshot -d 2 -f ' + name, shell=True)
-            myCmd = './scrsht.sh ' + name
-            os.system(myCmd)
-
-            self.scS = False
-            # print("All")
-
-        window.set_visible(True)
-        # print('btnClick')
-        # floatWindow.wm_attributes("-alpha", "0.0")
-        # width = 600
-        # self.window_width = root.winfo_width()
-        # self.window_height = root.winfo_height()
-        # x0 = -self.xc + self.window_width - width - 40
-        # y0 = -self.yc + 20
-
-        #
-        # k = self.screen_width / (self.screen_height + 75)
-        # height = int(width / k)
-        # image = image.resize((width, height), Image.ANTIALIAS)
-        # root.wm_state('normal')
-        # self.images.append(ImageTk.PhotoImage(image))
-        # k = []
-        # c = {}
-        # c['name'] = name
-        # c['x'] = x0
-        # c['y'] = y0
-        # c['width'] = width
-        # c['height'] = height
-        # k.append(canvas.create_image(x0, y0, image=self.images[-1], state=NORMAL, anchor=NW))
-        # k.append("image")
-        # k.append(c)
-        # self.figures.append(k)
-        #
-        # floatWindow.destroy()
+    # def btnScrInsertInCanvasClick(self):
+    #
+    #     window.set_visible(False)
+    #     # Тут треба паузу зротити
+    #     self.scS = True
+    #     if self.scS:
+    #         name = 'tmp/' + datetime.strftime(datetime.now(), "%Y_%m_%d_%H_%M_%S") + '.png'
+    #         # os.system('gnome-screenshot -d 2 -f ' + name)
+    #         # output = subprocess.check_output('/usr/bin/gnome-screenshot -d 2 -f ' + name, shell=True)
+    #         myCmd = './scrsht.sh ' + name
+    #         os.system(myCmd)
+    #
+    #         self.scS = False
+    #         # print("All")
+    #
+    #     window.set_visible(True)
+    #     # print('btnClick')
+    #     # floatWindow.wm_attributes("-alpha", "0.0")
+    #     # width = 600
+    #     # self.window_width = root.winfo_width()
+    #     # self.window_height = root.winfo_height()
+    #     # x0 = -self.xc + self.window_width - width - 40
+    #     # y0 = -self.yc + 20
+    #
+    #     #
+    #     # k = self.screen_width / (self.screen_height + 75)
+    #     # height = int(width / k)
+    #     # image = image.resize((width, height), Image.ANTIALIAS)
+    #     # root.wm_state('normal')
+    #     # self.images.append(ImageTk.PhotoImage(image))
+    #     # k = []
+    #     # c = {}
+    #     # c['name'] = name
+    #     # c['x'] = x0
+    #     # c['y'] = y0
+    #     # c['width'] = width
+    #     # c['height'] = height
+    #     # k.append(canvas.create_image(x0, y0, image=self.images[-1], state=NORMAL, anchor=NW))
+    #     # k.append("image")
+    #     # k.append(c)
+    #     # self.figures.append(k)
+    #     #
+    #     # floatWindow.destroy()
 
     # def btnScrClick(self):
     #     print('btnScrClick')
