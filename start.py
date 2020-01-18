@@ -5,6 +5,7 @@ from math import *
 import pyscreenshot as ImageGrab
 
 import wx
+import pickle
 
 # import pyautogui
 # from tkinter import colorchooser
@@ -28,6 +29,11 @@ elif platform == "linux":
     pass
 
 winPanel = None
+
+
+
+
+
 
 def close_cross(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     draw_line(x0 + 4, y0 + 4, x - 4, y - 4, color, thickness)
@@ -288,6 +294,45 @@ class MyWindow(pyglet.window.Window):
             draw_fill_rectangle(btn['x1'], btn['y1'], btn['x2'], btn['y2'], self.fonColor)
             draw_fill_rectangle(btn['x1'], y - btn['width'] // 2, btn['x2'], y + btn['width'] // 2, self.penColor)
 
+    def save(self):
+        data = {}
+        data['figures'] = self.figures
+        data['penColor'] = self.penColor
+        data['penWidth'] = self.penWidth
+        data['fonColor'] = self.fonColor
+        data['cx'] = self.cx
+        data['cy'] = self.cy
+        data['id'] = self.id
+        data['isGrid'] = self.isGrid
+
+        with open("test.wb", "wb") as fp:
+            pickle.dump(data, fp)
+
+    def load(self):
+
+        self.figures = []
+        self.images = {}
+
+
+
+        with open("test.wb", "rb") as fp:  # Unpickling
+            data = pickle.load(fp)
+        self.figures = data['figures']
+        self.penColor = data['penColor']
+
+        self.penWidth = data['penWidth']
+        self.fonColor = data['fonColor']
+        self.id = data['id']
+        self.cx = data['cx']
+        self.cy = data['cy']
+        self.isGrid = data['isGrid']
+        # Загрузка images
+        for fig in self.figures:
+            if fig['name'] == 'image':
+                nnam_ = fig['image']
+                image = pyglet.image.load(nnam_)
+                self.images[nnam_] = image
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # E9FBCA    233/255,251/255,202/255
@@ -489,6 +534,13 @@ class MyWindow(pyglet.window.Window):
         elif symbol == 65360:  # Home
             self.page = 1
             self.cx, self.cy = 0, 0
+        elif symbol == 100:  # D    Save whiteboard
+            print("save")
+            self.save()
+        elif symbol == 117:  # U    Open whiteboard
+            print("load")
+            self.load()
+            window.clear()
         elif symbol == 65535:  # Delete
             if self.selFig != {}:
                 for fig in self.figures:
@@ -781,10 +833,20 @@ class MyWindow(pyglet.window.Window):
                                 self.selRes['y1'] = y1 - 20
                                 self.selRes['x2'] = x2+20
                                 self.selRes['y2'] = y1
+                                if fig['name'] == 'image':
+                                    #[{'id': 1, 'name': 'image', 'p': [{'x': 417, 'y': 224}, {'x': 1017, 'y': 561}], 'image': 'tmp/_2020_01_17_21_30_24.png.resize.png', 'thickness': 4, 'fordel': False}]
+                                    size = (int(x2-x1),int(y2-y1))
+                                    print (size)
+                                    self.images[fig['image']] = self.images[fig['image']].resize(size)
+                                    # resized_image = self.original_image.resize(size)
+
+
+
                                 break
 
 
     def on_mouse_release(self, x, y, button, modifiers):
+        # print (self.figures)
 
         if self.f:
             # window.clear()
