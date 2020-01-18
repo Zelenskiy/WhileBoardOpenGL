@@ -98,11 +98,15 @@ def fpart(x):
 def rfpart(x):
     return 1.0 - fpart(x)
 
+def draw_line_1( x0,  y0, x1,  y1, color,thickness=1, smooth=False):
+    if smooth:
+        draw_vu_line(x0, y0, x1, y1, color, thickness)
+    else:
+        draw_line(x0, y0, x1, y1, color, thickness)
 
 
 
-
-def draw_vu_line( x0,  y0, x1,  y1, color,thickness=1):
+def draw_vu_line(x0, y0, x1, y1, color, thickness=1):
     r,g,b,a = color
     pyglet.gl.glColor4f(r, g, b, a)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -111,7 +115,8 @@ def draw_vu_line( x0,  y0, x1,  y1, color,thickness=1):
     glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE)
     glLineWidth(thickness)
     pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
-                         ('v2i', (x0, y0, x1, y1)))
+                         ('v2i', (int(x0), int(y0), int(x1), int(y1))))
+
 
 # def draw_vu_line(x1, y1, x2, y2, color, fon_color):
 #     dx = x2 - x1
@@ -193,33 +198,33 @@ def draw_arrow_head(X, Y, Angle, LW, arrow, color, fon_color, thickness):
     draw_fill_circle(x1, y1, int(thickness * 1.2), fon_color)
     fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, color)
 
-def draw_Line(x1, y1, x2, y2, color, fon_color, thickness=1):
-    pen_W = thickness
-    pen_C = color
-    fon_C = fon_color
-    r = pen_W // 2
-    dx = abs(x1 - x2)
-    dy = abs(y1 - y2);
-    len = math.sqrt(dx ** 2 + dy ** 2)
-    if len == 0: len = 1
-    sin_a = dx / len
-    cos_a = dy / len
-    rc = r * cos_a
-    if (y1 - y2) * (x1 - x2) < 0:
-        rs = r * sin_a
-    else:
-        rs = - r * sin_a
-    x11 = round(x1 - rc)
-    x12 = round(x1 + rc)
-    y11 = round(y1 - rs)
-    y12 = round(y1 + rs)
-    x21 = round(x2 - rc)
-    x22 = round(x2 + rc)
-    y21 = round(y2 - rs)
-    y22 = round(y2 + rs)
-    draw_vu_line(x11, y11, x21, y21, color, fon_color)
-    draw_vu_line(x12, y12, x22, y22, color, fon_color)
-    # draw_line(x1, y1, x2, y2, color, thickness)
+# def draw_Line(x1, y1, x2, y2, color, fon_color, thickness=1):
+#     pen_W = thickness
+#     pen_C = color
+#     fon_C = fon_color
+#     r = pen_W // 2
+#     dx = abs(x1 - x2)
+#     dy = abs(y1 - y2);
+#     len = math.sqrt(dx ** 2 + dy ** 2)
+#     if len == 0: len = 1
+#     sin_a = dx / len
+#     cos_a = dy / len
+#     rc = r * cos_a
+#     if (y1 - y2) * (x1 - x2) < 0:
+#         rs = r * sin_a
+#     else:
+#         rs = - r * sin_a
+#     x11 = round(x1 - rc)
+#     x12 = round(x1 + rc)
+#     y11 = round(y1 - rs)
+#     y12 = round(y1 + rs)
+#     x21 = round(x2 - rc)
+#     x22 = round(x2 + rc)
+#     y21 = round(y2 - rs)
+#     y22 = round(y2 + rs)
+#     draw_vu_line(x11, y11, x21, y21, color, fon_color)
+#     draw_vu_line(x12, y12, x22, y22, color, fon_color)
+#     # draw_line(x1, y1, x2, y2, color, thickness)
 
 def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glColor4f(*color)
@@ -238,7 +243,7 @@ def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thic
     # glVertex2f(x0, y0)
     # glVertex2f(x, y)
     # glEnd()
-    draw_vu_line(x0, y0, x, y, color,  thickness=thickness)
+    draw_line_1(x0, y0, x, y, color, thickness=thickness)
     # Рисуємо стрілки
     LW = 1
     if arrow == 3:

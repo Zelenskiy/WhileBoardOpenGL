@@ -22,6 +22,7 @@ from sys import platform
 
 from dialogWindow import *
 
+
 if platform == "win32" or platform == "cygwin":
     pass
 elif platform == "linux":
@@ -109,7 +110,7 @@ class MyWindow(pyglet.window.Window):
         # E9FBCA    233/255,251/255,202/255
         self.set_minimum_size(400, 30)
         self.fonColor = (233 / 255, 251 / 255, 202 / 255, 1.0)
-        self.gridColor = (208 / 255, 208 / 255, 208 / 255, 0.1)
+        self.gridColor = (208 / 255, 208 / 255, 208 / 255, 0.5)
         glClearColor(233 / 255, 251 / 255, 202 / 255, 1.0)
         self.figures = []
         self.isGrid = True
@@ -117,6 +118,7 @@ class MyWindow(pyglet.window.Window):
         self.isResize = False
         self.isExit = False
         self.isFill = False
+        self.isSmooth = True
         self.isBtnClick = False
         self.colorPanelVisible = False
         self.widthPanelVisible = False
@@ -554,7 +556,7 @@ class MyWindow(pyglet.window.Window):
                     xx0, yy0 = self.canvas_to_screen(x0, y0)
                     xx_, yy_ = self.canvas_to_screen(x_, y_)
                     # draw_line(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth)
-                    draw_vu_line(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth)
+                    draw_line_1(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth,smooth=self.isSmooth)
                     x0, y0 = x_, y_
                 self.x0, self.y0 = self.screen_to_canvas(x, y)
             elif self.tool == 2:
@@ -637,7 +639,7 @@ class MyWindow(pyglet.window.Window):
                                 if fig['name'] == 'image':
                                     # [{'id': 1, 'name': 'image', 'p': [{'x': 417, 'y': 224}, {'x': 1017, 'y': 561}], 'image': 'tmp/_2020_01_17_21_30_24.png.resize.png', 'thickness': 4, 'fordel': False}]
                                     size = (int(x2 - x1), int(y2 - y1))
-                                    print(size)
+                                    # print(size)
                                     self.images[fig['image']] = self.images[fig['image']].resize(size)
                                     # resized_image = self.original_image.resize(size)
 
@@ -723,6 +725,12 @@ class MyWindow(pyglet.window.Window):
 
         w = window.width
         h = window.height
+        # Draw grid
+        if self.isGrid:
+            for y in range(0, h, self.step):
+                draw_line_1(0, y, w, y, color=self.gridColor, thickness=1,smooth=self.isSmooth)
+            for x in range(0, w, self.step):
+                draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1,smooth=self.isSmooth)
         count = 0
         for f in self.figures:
             x_min, y_min, x_max, y_max = border_polyline(f['p'])
@@ -741,7 +749,7 @@ class MyWindow(pyglet.window.Window):
                         xx, yy = self.canvas_to_screen(x, y)
                         draw_fill_circle(xx0, yy0, int(f['thickness'] * 0.4), color=f['color'])
                         draw_fill_circle(xx, yy, int(f['thickness'] * 0.4), color=f['color'])
-                        draw_vu_line(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'])
+                        draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'],smooth=self.isSmooth)
                         x0, y0 = x, y
                 elif f['name'] == 'line':
                     x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
@@ -773,12 +781,7 @@ class MyWindow(pyglet.window.Window):
 
                     # image.blit(x + self.cx, y + self.cy )
 
-        # Draw grid
-        if self.isGrid:
-            for y in range(0, 4000, self.step):
-                draw_line(0, y, 4000, y, color=self.gridColor, thickness=1)
-            for x in range(0, 4000, self.step):
-                draw_line(x, 0, x, 4000, color=self.gridColor, thickness=1)
+
 
         # Це щоб не було засвітки на кнопках
         draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
@@ -842,6 +845,7 @@ class MyWindow(pyglet.window.Window):
         labelPage.draw()
         if self.isExit:
             self.label.draw()
+        # draw_line(100, 100, 1050, 50, self.penColor, thickness=self.penWidth)
         # draw_vu_line(100, 100, 1050, 50, self.penColor, self.fonColor, thickness=self.penWidth)
         # draw_vu_line(100, 100, 1050, 50, self.penColor, self.fonColor, thickness=self.penWidth)
         # draw_vu_line(10, 600, 750, 50, self.penColor, self.fonColor, thickness=self.penWidth)
@@ -939,9 +943,10 @@ class MyWindow(pyglet.window.Window):
 
 
 if __name__ == "__main__":
-    window = MyWindow(1200, 600, caption="WhiteBoard", resizable=True)
-    window.set_location(100, 35)
-    # window.maximize()
+
+    window = MyWindow(1366, 768, caption="WhiteBoard", resizable=True)
+    window.set_location(0, 0)
+    window.maximize()
     appDialog = wx.App()
     dialog = SubclassDialog()
     dialog.SetTransparent(64)
