@@ -25,7 +25,7 @@ def resize_arr(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
 
 
 """
-procedure drawVuLine(canvas:TCanvas; x1,y1,x2,y2: integer);
+def drawVuLine(canvas:TCanvas; x1,y1,x2,y2: integer);
 var x, dx, dy, xend, ypxl1,xpxl1,xpxl2,ypxl2 :integer;
     gradient, yend, xgap,intery: real;
     steep: boolean;
