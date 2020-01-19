@@ -182,7 +182,7 @@ def draw_vu_line(x0, y0, x1, y1, color, thickness=1):
 #         intery = intery + gradient
 
 
-def draw_arrow_head(X, Y, Angle,  color, thickness):
+def draw_arrow_head(X, Y, Angle, color, thickness):
     Beta = 0.322
     print("Angle ", Angle)
     LineLen = 4.74 * thickness
@@ -193,9 +193,9 @@ def draw_arrow_head(X, Y, Angle,  color, thickness):
     A1 = Angle - Beta
     A2 = Angle + Beta
     x1, y1 = X, Y
-    x2, y2 = X + int(LineLen  * math.cos(A1)), Y - int(LineLen *  math.sin(A1))
-    x3, y3 = X + int(CentLen  * math.cos(Angle)), Y - int(CentLen *  math.sin(Angle))
-    x4, y4 = X + int(LineLen  * math.cos(A2)), Y - int(LineLen *  math.sin(A2))
+    x2, y2 = X + int(LineLen * math.cos(A1)), Y - int(LineLen * math.sin(A1))
+    x3, y3 = X + int(CentLen * math.cos(Angle)), Y - int(CentLen * math.sin(Angle))
+    x4, y4 = X + int(LineLen * math.cos(A2)), Y - int(LineLen * math.sin(A2))
     # draw_fill_circle(x1, y1, int(thickness * 1.2), fon_color)
 
     # x0_ = math.cos(Angle) * LineLen
@@ -241,13 +241,14 @@ def draw_arrow_head(X, Y, Angle,  color, thickness):
 #     draw_vu_line(x12, y12, x22, y22, color, fon_color)
 #     # draw_line(x1, y1, x2, y2, color, thickness)
 
-def longer_for_polyline(xx0, yy0, xx, yy, thickness):
-    LineLen = -0.2 * thickness
+def longer_for_polyline(xx0, yy0, xx, yy, thickness, k):
+    LineLen = -k * thickness
     l = dist_(xx0, yy0, xx, yy)
     angle = math.atan2(yy0 - yy, xx - xx0)
     x_, y_ = xx0 + (l - LineLen) * math.cos(angle), yy0 - (l - LineLen) * math.sin(angle)
     x0_, y0_ = xx - (l - LineLen) * math.cos(angle), yy + (l - LineLen) * math.sin(angle)
     return x0_, y0_, x_, y_
+
 
 def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glColor4f(*color)
@@ -257,10 +258,13 @@ def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glVertex2f(x, y)
     glEnd()
 
-def dist_(x0, y0, x, y):
-    return math.sqrt((x0-x)**2+(y0-y)**2)
 
-def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thickness=4, smooth=False , arrow=0, dash=(1, 0)):
+def dist_(x0, y0, x, y):
+    return math.sqrt((x0 - x) ** 2 + (y0 - y) ** 2)
+
+
+def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thickness=4, smooth=False, arrow=0,
+                  dash=(1, 0)):
     # print ("thickness - ", thickness)
     # glColor4f(*color)
     # glLineWidth(thickness)
@@ -276,8 +280,8 @@ def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thic
     l = dist_(x0, y0, x, y)
     angle = math.atan2(y0 - y, x - x0)
     angle2 = math.atan2(y - y0, x0 - x)
-    x_, y_ = x0 + (l - LineLen)*math.cos(angle), y0 - (l - LineLen)*math.sin(angle)
-    x0_, y0_ = x - (l - LineLen)*math.cos(angle), y + (l - LineLen)*math.sin(angle)
+    x_, y_ = x0 + (l - LineLen) * math.cos(angle), y0 - (l - LineLen) * math.sin(angle)
+    x0_, y0_ = x - (l - LineLen) * math.cos(angle), y + (l - LineLen) * math.sin(angle)
     # x_, y_ = x,y
     if arrow == 3:
         draw_line_1(x0, y0, x_, y_, color, thickness=thickness)
@@ -393,7 +397,40 @@ def draw_fill_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
     circle.draw(GL_LINE_LOOP)
 
 
+# def draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=(1, 0, 0, 1), thickness=1):
+#     glColor4f(*color)
+#     glLineWidth(thickness)
+#     glBegin(GL_LINES)
+#     glVertex2f(x1, y1)
+#     glVertex2f(x2, y2)
+#     glEnd()
+#     glBegin(GL_LINES)
+#     glVertex2f(x2, y2)
+#     glVertex2f(x3, y3)
+#     glEnd()
+#     glBegin(GL_LINES)
+#     glVertex2f(x3, y3)
+#     glVertex2f(x4, y4)
+#     glEnd()
+#     glBegin(GL_LINES)
+#     glVertex2f(x4, y4)
+#     glVertex2f(x1, y1)
+#     glEnd()
 def draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=(1, 0, 0, 1), thickness=1):
+
+    # k = 0
+    # for i in range(k):
+    #     x1, x2, x3, x4 = x2, x3, x4, x1
+    #     y1, y2, y3, y4 = y2, y3, y4, y1
+    # x1 += thickness // 2
+    # x2 -= thickness // 2
+    # x3 -= thickness // 2
+    # x4 += thickness // 2
+    # y1 -= thickness // 2
+    # y2 -= thickness // 2
+    # y3 += thickness // 2
+    # y4 += thickness // 2
+
     glColor4f(*color)
     glLineWidth(thickness)
     glBegin(GL_LINES)

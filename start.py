@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 from datetime import datetime
@@ -22,7 +21,6 @@ from sys import platform
 
 from dialogWindow import *
 
-
 if platform == "win32" or platform == "cygwin":
     pass
 elif platform == "linux":
@@ -44,10 +42,7 @@ def show_screenshot_panel():
         window.set_visible(True)
 
 
-
 class MyWindow(pyglet.window.Window):
-
-
 
     def draw_color_panel(self):
         for btn in self.colorPanelButtons:
@@ -558,8 +553,8 @@ class MyWindow(pyglet.window.Window):
                     # draw_fill_circle(xx0, yy0, int(self.penWidth * 0.4), self.penColor)
                     # draw_fill_circle(xx, yy, int(self.penWidth * 0.4), self.penColor)
                     # draw_line(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth)
-                    xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, self.penWidth)
-                    draw_line_1(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth,smooth=self.isSmooth)
+                    xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, self.penWidth, 0.2)
+                    draw_line_1(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth, smooth=self.isSmooth)
                     x0, y0 = x_, y_
                 self.x0, self.y0 = self.screen_to_canvas(x, y)
             elif self.tool == 2:
@@ -588,12 +583,18 @@ class MyWindow(pyglet.window.Window):
                                x, self.y0 + self.cy,  # TODO
                                color=self.penColor)
                 else:
-                    draw_rectangle(self.x0 + self.cx, self.y0 + self.cy,
-                                   self.x0 + self.cx, y,
-                                   x, y,
-                                   x, self.y0 + self.cy,
-                                   color=self.penColor, thickness=self.penWidth)
-                # rectangle(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, thickness=self.penWidth)
+                    # draw_rectangle(self.x0 + self.cx, self.y0 + self.cy,
+                    #                self.x0 + self.cx, y,
+                    #                x, y,
+                    #                x, self.y0 + self.cy,
+                    #                color=self.penColor, thickness=self.penWidth)
+                    x1, y1 = self.canvas_to_screen(self.x0, self.y0)
+                    x2, y2 = self.canvas_to_screen(self.x0, y - self.cy)
+                    x3, y3 = self.canvas_to_screen(x - self.cx, y - self.cy)
+                    x4, y4 = self.canvas_to_screen(x - self.cx, self.y0)
+                    draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=self.penColor, thickness=self.penWidth)
+
+
             elif self.tool == 8:
                 if self.selFig != {}:
                     for fig in self.figures:
@@ -731,9 +732,9 @@ class MyWindow(pyglet.window.Window):
         # Draw grid
         if self.isGrid:
             for y in range(0, h, self.step):
-                draw_line_1(0, y, w, y, color=self.gridColor, thickness=1,smooth=self.isSmooth)
+                draw_line_1(0, y, w, y, color=self.gridColor, thickness=1, smooth=self.isSmooth)
             for x in range(0, w, self.step):
-                draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1,smooth=self.isSmooth)
+                draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1, smooth=self.isSmooth)
         count = 0
         for f in self.figures:
             x_min, y_min, x_max, y_max = border_polyline(f['p'])
@@ -750,8 +751,8 @@ class MyWindow(pyglet.window.Window):
                         # line(x0 , y0 , x , y , color=f['color'], thickness=f['thickness'])
                         xx0, yy0 = self.canvas_to_screen(x0, y0)
                         xx, yy = self.canvas_to_screen(x, y)
-                        xx0, yy0, xx, yy = longer_for_polyline(xx0, yy0, xx, yy, f['thickness'])
-                        draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'],smooth=self.isSmooth)
+                        xx0, yy0, xx, yy = longer_for_polyline(xx0, yy0, xx, yy, f['thickness'], 0.2)
+                        draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'], smooth=self.isSmooth)
                         x0, y0 = x, y
                 elif f['name'] == 'line':
                     x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
@@ -769,8 +770,7 @@ class MyWindow(pyglet.window.Window):
                     x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
                     x3, y3 = self.canvas_to_screen(f['p'][2]['x'], f['p'][2]['y'])
                     x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
-                    draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'],
-                                   thickness=f['thickness'])
+                    draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'])
                 elif f['name'] == 'image':
                     x0 = f['p'][0]['x']
                     y0 = f['p'][0]['y']
@@ -782,8 +782,6 @@ class MyWindow(pyglet.window.Window):
                     image.blit(x0 + self.cx, y0 + self.cy)
 
                     # image.blit(x + self.cx, y + self.cy )
-
-
 
         # Це щоб не було засвітки на кнопках
         draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
@@ -854,8 +852,6 @@ class MyWindow(pyglet.window.Window):
         # draw_line_mod(200, 200, 500, 500, color=self.penColor, fon_color=self.fonColor, thickness=self.penWidth,
         #               arrow=1, dash=(1, 0))
 
-
-
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         # print("scrool ", scroll_y)
         window.clear()
@@ -870,7 +866,6 @@ class MyWindow(pyglet.window.Window):
         self.label.set_style("color", (255, 0, 0, 255))
         self.isExit = True
         self.label.draw()
-
 
     # def btnScrInsertInCanvasClick(self):
     #
@@ -931,7 +926,6 @@ class MyWindow(pyglet.window.Window):
 
 
 if __name__ == "__main__":
-
     window = MyWindow(1364, 726, caption="WhiteBoard", resizable=True)
     window.set_location(2, 2)
     # window.maximize()
