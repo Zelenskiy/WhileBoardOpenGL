@@ -98,16 +98,16 @@ def fpart(x):
 def rfpart(x):
     return 1.0 - fpart(x)
 
-def draw_line_1( x0,  y0, x1,  y1, color,thickness=1, smooth=False):
+
+def draw_line_1(x0, y0, x1, y1, color, thickness=1, smooth=False, dash=(1, 0)):
     if smooth:
         draw_vu_line(x0, y0, x1, y1, color, thickness)
     else:
         draw_line(x0, y0, x1, y1, color, thickness)
 
 
-
 def draw_vu_line(x0, y0, x1, y1, color, thickness=1):
-    r,g,b,a = color
+    r, g, b, a = color
     pyglet.gl.glColor4f(r, g, b, a)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_BLEND)
@@ -182,8 +182,9 @@ def draw_vu_line(x0, y0, x1, y1, color, thickness=1):
 #         intery = intery + gradient
 
 
-def draw_arrow_head(X, Y, Angle, LW, arrow, color, fon_color, thickness):
+def draw_arrow_head(X, Y, Angle,  color, thickness):
     Beta = 0.322
+    print("Angle ", Angle)
     LineLen = 4.74 * thickness
     CentLen = 3
     Angle = math.pi + Angle
@@ -192,11 +193,25 @@ def draw_arrow_head(X, Y, Angle, LW, arrow, color, fon_color, thickness):
     A1 = Angle - Beta
     A2 = Angle + Beta
     x1, y1 = X, Y
-    x2, y2 = X + int(LineLen * LW * math.cos(A1)), Y - int(LineLen * LW * math.sin(A1))
-    x3, y3 = X + int(CentLen * LW * math.cos(Angle)), Y - int(CentLen * LW * math.sin(Angle))
-    x4, y4 = X + int(LineLen * LW * math.cos(A2)), Y - int(LineLen * LW * math.sin(A2))
-    draw_fill_circle(x1, y1, int(thickness * 1.2), fon_color)
+    x2, y2 = X + int(LineLen  * math.cos(A1)), Y - int(LineLen *  math.sin(A1))
+    x3, y3 = X + int(CentLen  * math.cos(Angle)), Y - int(CentLen *  math.sin(Angle))
+    x4, y4 = X + int(LineLen  * math.cos(A2)), Y - int(LineLen *  math.sin(A2))
+    # draw_fill_circle(x1, y1, int(thickness * 1.2), fon_color)
+
+    # x0_ = math.cos(Angle) * LineLen
+    # y0_ = math.sin(Angle) * LineLen
+    # x1_ = x0_ + thickness / 2 * math.cos(Angle)
+    # y1_ = y0_ + thickness / 2 * math.sin(Angle)
+    # x2_ = x0_ - thickness / 2 * math.cos(Angle)
+    # y2_ = y0_ - thickness / 2 * math.sin(Angle)
+    # x3_ = x0_ - thickness / 2 * math.cos(Angle)
+    # y3_ = y0_ - thickness / 2 * math.sin(Angle)
+    # x4_ = x0_ + thickness / 2 * math.cos(Angle)
+    # y4_ = y0_ + thickness / 2 * math.sin(Angle)
+    # fill_4poly(x1_, y1_, x2_, y2_, x3_, y3_, x4_, y4_, (1, 1, 1, 1))
+
     fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, color)
+
 
 # def draw_Line(x1, y1, x2, y2, color, fon_color, thickness=1):
 #     pen_W = thickness
@@ -226,6 +241,14 @@ def draw_arrow_head(X, Y, Angle, LW, arrow, color, fon_color, thickness):
 #     draw_vu_line(x12, y12, x22, y22, color, fon_color)
 #     # draw_line(x1, y1, x2, y2, color, thickness)
 
+def longer_for_polyline(xx0, yy0, xx, yy, thickness):
+    LineLen = -0.2 * thickness
+    l = dist_(xx0, yy0, xx, yy)
+    angle = math.atan2(yy0 - yy, xx - xx0)
+    x_, y_ = xx0 + (l - LineLen) * math.cos(angle), yy0 - (l - LineLen) * math.sin(angle)
+    x0_, y0_ = xx - (l - LineLen) * math.cos(angle), yy + (l - LineLen) * math.sin(angle)
+    return x0_, y0_, x_, y_
+
 def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glColor4f(*color)
     glLineWidth(thickness)
@@ -234,8 +257,10 @@ def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glVertex2f(x, y)
     glEnd()
 
+def dist_(x0, y0, x, y):
+    return math.sqrt((x0-x)**2+(y0-y)**2)
 
-def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thickness=4, arrow=0, dash=(1, 0)):
+def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thickness=4, smooth=False , arrow=0, dash=(1, 0)):
     # print ("thickness - ", thickness)
     # glColor4f(*color)
     # glLineWidth(thickness)
@@ -243,20 +268,29 @@ def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thic
     # glVertex2f(x0, y0)
     # glVertex2f(x, y)
     # glEnd()
-    draw_line_1(x0, y0, x, y, color, thickness=thickness)
+
     # Рисуємо стрілки
     LW = 1
+
+    LineLen = 4.74 * thickness
+    l = dist_(x0, y0, x, y)
+    angle = math.atan2(y0 - y, x - x0)
+    angle2 = math.atan2(y - y0, x0 - x)
+    x_, y_ = x0 + (l - LineLen)*math.cos(angle), y0 - (l - LineLen)*math.sin(angle)
+    x0_, y0_ = x - (l - LineLen)*math.cos(angle), y + (l - LineLen)*math.sin(angle)
+    # x_, y_ = x,y
     if arrow == 3:
-        angle = math.atan2(y0 - y, x - x0)
-        draw_arrow_head(x, y, angle, LW, arrow, color, fon_color, thickness)
+        draw_line_1(x0, y0, x_, y_, color, thickness=thickness)
+        draw_arrow_head(x, y, angle, color, thickness)
     elif arrow == 2:
-        angle = math.atan2(y - y0, x0 - x)
-        draw_arrow_head(x0, y0, angle, LW, arrow, color, fon_color, thickness)
+        draw_line_1(x0_, y0_, x, y, color, thickness=thickness)
+        draw_arrow_head(x0, y0, angle2, color, thickness)
     elif arrow == 1:
-        angle = math.atan2(y0 - y, x - x0)
-        draw_arrow_head(x, y, angle, LW, arrow, color, fon_color, thickness)
-        angle = math.atan2(y - y0, x0 - x)
-        draw_arrow_head(x0, y0, angle, LW, arrow, color, fon_color, thickness)
+        draw_line_1(x0_, y0_, x_, y_, color, thickness=thickness)
+        draw_arrow_head(x, y, angle, color, thickness)
+        draw_arrow_head(x0, y0, angle2, color, thickness)
+    else:
+        draw_line_1(x0, y0, x, y, color, thickness=thickness)
 
 
 # def rectangle_vulg(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):

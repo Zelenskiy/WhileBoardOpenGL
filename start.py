@@ -555,7 +555,10 @@ class MyWindow(pyglet.window.Window):
                     y_ = p['y']
                     xx0, yy0 = self.canvas_to_screen(x0, y0)
                     xx_, yy_ = self.canvas_to_screen(x_, y_)
+                    # draw_fill_circle(xx0, yy0, int(self.penWidth * 0.4), self.penColor)
+                    # draw_fill_circle(xx, yy, int(self.penWidth * 0.4), self.penColor)
                     # draw_line(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth)
+                    xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, self.penWidth)
                     draw_line_1(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth,smooth=self.isSmooth)
                     x0, y0 = x_, y_
                 self.x0, self.y0 = self.screen_to_canvas(x, y)
@@ -747,8 +750,7 @@ class MyWindow(pyglet.window.Window):
                         # line(x0 , y0 , x , y , color=f['color'], thickness=f['thickness'])
                         xx0, yy0 = self.canvas_to_screen(x0, y0)
                         xx, yy = self.canvas_to_screen(x, y)
-                        draw_fill_circle(xx0, yy0, int(f['thickness'] * 0.4), color=f['color'])
-                        draw_fill_circle(xx, yy, int(f['thickness'] * 0.4), color=f['color'])
+                        xx0, yy0, xx, yy = longer_for_polyline(xx0, yy0, xx, yy, f['thickness'])
                         draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'],smooth=self.isSmooth)
                         x0, y0 = x, y
                 elif f['name'] == 'line':
@@ -852,9 +854,7 @@ class MyWindow(pyglet.window.Window):
         # draw_line_mod(200, 200, 500, 500, color=self.penColor, fon_color=self.fonColor, thickness=self.penWidth,
         #               arrow=1, dash=(1, 0))
 
-    def on_show(self):
-        # print("wwwwwwwwwwwww")
-        pass
+
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         # print("scrool ", scroll_y)
@@ -871,18 +871,6 @@ class MyWindow(pyglet.window.Window):
         self.isExit = True
         self.label.draw()
 
-    def on_hide(self):
-        pass
-        # if self.scS:
-        #     name = 'tmp/' + datetime.strftime(datetime.now(), "%Y_%m_%d_%H_%M_%S") + '.png'
-        #     # os.system('gnome-screenshot -d 2 -f ' + name)
-        #     # output = subprocess.check_output('/usr/bin/gnome-screenshot -d 2 -f ' + name, shell=True)
-        #     myCmd = './scrsht.sh '+ name
-        #     os.system(myCmd)
-        #
-        #     self.scS = False
-        #     print("All")
-        #     window.maximize()
 
     # def btnScrInsertInCanvasClick(self):
     #
@@ -944,9 +932,9 @@ class MyWindow(pyglet.window.Window):
 
 if __name__ == "__main__":
 
-    window = MyWindow(1366, 768, caption="WhiteBoard", resizable=True)
-    window.set_location(0, 0)
-    window.maximize()
+    window = MyWindow(1364, 726, caption="WhiteBoard", resizable=True)
+    window.set_location(2, 2)
+    # window.maximize()
     appDialog = wx.App()
     dialog = SubclassDialog()
     dialog.SetTransparent(64)
