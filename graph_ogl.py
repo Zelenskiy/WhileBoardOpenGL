@@ -338,6 +338,37 @@ def draw_ramka_top(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glEnd()
 
 
+
+def draw_ellipse(x1, y1, x2, y2, numPoints=1000, color=(0, 0, 0, 1), thickness=1):
+    x0, y0 = (x1+x2)/2, (y1+y2)/2
+    rx, ry = abs(x1-x2)/2, abs(y1-y2)/2
+    verts = []
+    for i in range(numPoints):
+        angle = math.radians(float(i) / numPoints * 360.0)
+        x = rx * math.cos(angle) + x0
+        y = ry * math.sin(angle) + y0
+        verts += [x, y]
+    glLineWidth(thickness)
+    circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
+    glColor4f(*color)
+    circle.draw(GL_LINE_LOOP)
+
+def draw_fill_ellipse(x1, y1, x2, y2, numPoints=1000, color=(0, 0, 0, 1), thickness=1):
+    x0, y0 = (x1 + x2) / 2, (y1 + y2) / 2
+    rx, ry = abs(x1 - x2) / 2, abs(y1 - y2) / 2
+    verts = []
+    numPoints = int(numPoints)
+    for i in range(numPoints):
+        angle = math.radians(float(i) / numPoints * 360.0)
+        x = rx * math.cos(angle) + x0
+        y = ry * math.sin(angle) + y0
+        verts += [x, y]
+        draw_line(x0, y0, x, y, color=color, thickness=1)
+    glLineWidth(thickness)
+    circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
+    glColor4f(*color)
+    circle.draw(GL_LINE_LOOP)
+
 def draw_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
     numPoints = 200
     verts = []

@@ -29,20 +29,22 @@ elif platform == "linux":
 winPanel = None
 
 
-def show_screenshot_panel():
-    result = dialog.ShowModal()  # показываем модальный диалог
-    if result == wx.ID_OK:
-        print("OK")
-        # window.set_visible(True)
-        window.insert_screenshot()
-        # dialog.Destroy()
 
-    else:
-        print("Cancel")
-        window.set_visible(True)
 
 
 class MyWindow(pyglet.window.Window):
+
+    def show_screenshot_panel(self):
+        result = self.dialog.ShowModal()  # показываем модальный диалог
+        if result == wx.ID_OK:
+            print("OK")
+            # window.set_visible(True)
+            window.insert_screenshot()
+            # dialog.Destroy()
+
+        else:
+            print("Cancel")
+            window.set_visible(True)
 
     def draw_color_panel(self):
         for btn in self.colorPanelButtons:
@@ -110,7 +112,7 @@ class MyWindow(pyglet.window.Window):
         self.isSmooth = False
         self.penWidth = 7
         self.errSize = 20
-        self.fullscr = True
+        self.fullscr = False
         self.penColor = (0, 0, 1, 1)
         self.ramkaColor = (1, 0.5, 0, 1)
         self.ramkaThickness = 2
@@ -133,33 +135,70 @@ class MyWindow(pyglet.window.Window):
         self.colorPanelVisible = False
         self.widthPanelVisible = False
         self.label = None
+        # self.buttons = [
+        #     {'id': 8, 'x': 5, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
+        #      'sel': False, 'align': 'left'},
+        #     {'id': 1, 'x': 40, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1,
+        #      'sel': True, 'align': 'left'},
+        #     {'id': 2, 'x': 75, 'y': 5, 'text': 'Erazer', 'image': pyglet.resource.image('img/err.png'), 'tool': 2,
+        #      'sel': False, 'align': 'left'},
+        #     {'id': 3, 'x': 110, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/line.png'), 'tool': 3,
+        #      'sel': False, 'align': 'left'},
+        #     {'id': 4, 'x': 145, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/_ClearFill.png'),
+        #      'tool': 4, 'sel': False, 'align': 'left'},
+        #     {'id': 26, 'x': 180, 'y': 5, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
+        #      'sel': False, 'align': 'left'},
+        #     {'id': 101, 'x': 215, 'y': 5, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 0,
+        #      'sel': False, 'align': 'left'},
+        #     {'id': 102, 'x': 250, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 0,
+        #      'sel': False, 'align': 'left'},
+        #     {'id': 103, 'x': 285, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/add.png'),
+        #      'tool': 0, 'sel': False, 'align': 'left'},
+        #     {'id': 104, 'x': 75, 'y': 5, 'text': '<', 'image': pyglet.resource.image('img/left.png'), 'tool': 0,
+        #      'sel': False, 'align': 'right'},
+        #     {'id': 105, 'x': 5, 'y': 5, 'text': '>', 'image': pyglet.resource.image('img/right.png'), 'tool': 0,
+        #      'sel': False, 'align': 'right'},
+        #     {'id': 106, 'x': 320, 'y': 5, 'text': 'arrow', 'image': pyglet.resource.image('img/arr.png'), 'tool': 0,
+        #      'sel': False, 'align': 'left'},
+        #
+        # ]
         self.buttons = [
-            {'id': 8, 'x': 5, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
+            {'id': 8,  'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
              'sel': False, 'align': 'left'},
-            {'id': 1, 'x': 40, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1,
+            {'id': 1,  'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1,
              'sel': True, 'align': 'left'},
-            {'id': 2, 'x': 75, 'y': 5, 'text': 'Erazer', 'image': pyglet.resource.image('img/err.png'), 'tool': 2,
+            {'id': 2,  'text': 'Erazer', 'image': pyglet.resource.image('img/err.png'), 'tool': 2,
              'sel': False, 'align': 'left'},
-            {'id': 3, 'x': 110, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/line.png'), 'tool': 3,
+            {'id': 3,  'text': 'line', 'image': pyglet.resource.image('img/line.png'), 'tool': 3,
              'sel': False, 'align': 'left'},
-            {'id': 4, 'x': 145, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/_ClearFill.png'),
+            {'id': 4,  'text': 'rectangle', 'image': pyglet.resource.image('img/_ClearFill.png'),
              'tool': 4, 'sel': False, 'align': 'left'},
-            {'id': 26, 'x': 180, 'y': 5, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
+            {'id': 5,  'text': 'ellipse', 'image': pyglet.resource.image('img/ellFill.png'),
+             'tool': 5, 'sel': False, 'align': 'left'},
+            {'id': 26,  'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
              'sel': False, 'align': 'left'},
-            {'id': 101, 'x': 215, 'y': 5, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 0,
+            {'id': 101,  'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 0,
              'sel': False, 'align': 'left'},
-            {'id': 102, 'x': 250, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 0,
+            {'id': 102,  'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 0,
              'sel': False, 'align': 'left'},
-            {'id': 103, 'x': 285, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/add.png'),
+            {'id': 103,  'text': 'width', 'image': pyglet.resource.image('img/add.png'),
              'tool': 0, 'sel': False, 'align': 'left'},
+            {'id': 106, 'text': 'arrow', 'image': pyglet.resource.image('img/arr.png'), 'tool': 0,
+             'sel': False, 'align': 'left'},
             {'id': 104, 'x': 75, 'y': 5, 'text': '<', 'image': pyglet.resource.image('img/left.png'), 'tool': 0,
              'sel': False, 'align': 'right'},
             {'id': 105, 'x': 5, 'y': 5, 'text': '>', 'image': pyglet.resource.image('img/right.png'), 'tool': 0,
              'sel': False, 'align': 'right'},
-            {'id': 106, 'x': 320, 'y': 5, 'text': 'arrow', 'image': pyglet.resource.image('img/arr.png'), 'tool': 0,
-             'sel': False, 'align': 'left'},
 
         ]
+        x = 5
+        for b in self.buttons:
+            if b['align'] == 'left':
+                b['x'] = x
+                b['y'] = 5
+                x += 35
+
+
         self.colorPanelButtons = [
             {'id': 1, 'x1': 215, 'y1': 10 + 35, 'x2': 25 + 247, 'y2': 10 + 70, 'color': (1, 0, 0, 1)},
             {'id': 2, 'x1': 215, 'y1': 10 + 70, 'x2': 25 + 247, 'y2': 10 + 105, 'color': (1, 1, 0, 1)},
@@ -213,6 +252,11 @@ class MyWindow(pyglet.window.Window):
         self.selRes = {}
         self.id = 0
         self.page = 1
+
+        self.appDialog = wx.App()
+        self.dialog = SubclassDialog()
+        self.dialog.SetTransparent(64)
+
 
     def resize_image(self, input_image_path,
                      output_image_path,
@@ -406,9 +450,9 @@ class MyWindow(pyglet.window.Window):
         if self.isExit:
             if window.width // 2 - 200 < x < window.width // 2 + 200 and window.height // 2 - 100 < y < window.height // 2 + 100:
                 window.close()
-                if winPanel != None:
-                    winPanel.close()
-                dialog.Destroy()
+                # if winPanel != None:
+                #     winPanel.close()
+                # dialog.Destroy()
             else:
                 self.isExit = False
 
@@ -454,30 +498,27 @@ class MyWindow(pyglet.window.Window):
                     xx, yy = btn['x'], btn['y']
                 if (xx < x < xx + 32) and (yy < y < yy + 32):
                     btn['sel'] = True
-                    if btn['id'] == 4:  # Fill figure
+                    if btn['id'] == 4 or btn['id'] == 5:  # Fill figure
                         if self.tool == btn['tool']:
                             self.isFill = not self.isFill
-
                         self.tool = btn['tool']
                     elif btn['id'] == 26:  # Діалогове вікно
                         # hide main window
                         window.set_visible(False)
                         # show panel window
-                        show_screenshot_panel()
+                        self.show_screenshot_panel()
 
                     elif btn['id'] == 101:  # Changr color pen
                         self.colorPanelVisible = not self.colorPanelVisible
                     elif btn['id'] == 102:  # Changr width pen
-                        # self.set_width(self.penWidth)
                         self.widthPanelVisible = not self.widthPanelVisible
                     elif btn['id'] == 106:  # Chang arrow
-                        # self.set_width(self.penWidth)
                         self.arrowPanelVisible = not self.arrowPanelVisible
-                    elif btn['id'] == 105:  #
+                    elif btn['id'] == 105:  # Сторінка вправо
                         window.clear()
                         self.page += 1
                         self.cx = self.page * 100000 - 100000
-                    elif btn['id'] == 104:  #
+                    elif btn['id'] == 104:  # Сторінка вліво
                         window.clear()
                         self.page -= 1
                         if self.page < 1:
@@ -544,6 +585,8 @@ class MyWindow(pyglet.window.Window):
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
+                elif self.tool == 5:  # ellipse
+                    self.x0, self.y0 = self.screen_to_canvas(x, y)
 
                 elif self.tool == 26:  # scheenshot mode
                     pass
@@ -551,6 +594,7 @@ class MyWindow(pyglet.window.Window):
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         if self.drawRight: window.clear()
+
         if self.f:
             if self.tool == 1:
                 xx, yy = self.screen_to_canvas(x, y)
@@ -587,6 +631,13 @@ class MyWindow(pyglet.window.Window):
                               thickness=self.penWidth, arrow=self.arr)
                 # draw_line(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                 #           thickness=self.penWidth)
+            elif self.tool == 5: #ellipse
+                if self.isFill:
+                    # draw_fill_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, thickness=self.penWidth)
+                    draw_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, thickness=self.penWidth)
+                else:
+                    draw_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, thickness=self.penWidth)
+
             elif self.tool == 4:
                 window.clear()
                 if self.isFill:
@@ -595,6 +646,7 @@ class MyWindow(pyglet.window.Window):
                                x, y,
                                x, self.y0 + self.cy,  # TODO
                                color=self.penColor)
+
                 else:
                     # draw_rectangle(self.x0 + self.cx, self.y0 + self.cy,
                     #                self.x0 + self.cx, y,
@@ -713,6 +765,26 @@ class MyWindow(pyglet.window.Window):
                 k['thickness'] = self.penWidth
                 k['fordel'] = False
                 self.figures.append(k)
+            elif self.tool == 5:
+                k = {}
+                self.poly = []
+
+                x0, y0 = self.x0, self.y0
+                xx, yy = self.screen_to_canvas(x, y)
+                self.poly.append({'x':x0, 'y':y0})
+                self.poly.append({'x':xx, 'y':yy})
+                self.id += 1
+                k['id'] = self.id
+                if self.isFill:
+                    k['name'] = 'ellipse_fill'
+                else:
+                    k['name'] = 'ellipse'
+                k['p'] = self.poly.copy()
+                k['color'] = self.penColor
+                k['thickness'] = self.penWidth
+                k['arrow'] = self.arr
+                k['fordel'] = False
+                self.figures.append(k)
             elif self.tool == 8:
                 if self.isResize:
                     # Зміна розміру малюнка
@@ -740,6 +812,7 @@ class MyWindow(pyglet.window.Window):
     def on_draw(self):
         # draw figures in visible part of window
         if self.drawRight:
+        # if True:
 
             w = window.width
             h = window.height
@@ -773,6 +846,15 @@ class MyWindow(pyglet.window.Window):
                         x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
                         draw_line_mod(x0, y0, x_, y_, color=f['color'], fon_color=self.fonColor,
                                       thickness=f['thickness'], arrow=f['arrow'])
+                    elif f['name'] == 'ellipse':
+                        x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
+                        x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
+                        draw_ellipse(x0, y0, x_, y_, color=f['color'], thickness=f['thickness'])
+                    elif f['name'] == 'ellipse_fill':
+                        x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
+                        x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
+                        num = max(abs(x0-x_), abs(y0-y_)) * 4
+                        draw_fill_ellipse(x0, y0, x_, y_, numPoints=num, color=f['color'], thickness=f['thickness'])
                     elif f['name'] == 'rectangle_fill':
                         x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
                         x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
@@ -814,6 +896,10 @@ class MyWindow(pyglet.window.Window):
                                    x + 2, y + 28,
                                    x + 28, y + 28,
                                    x + 28, y + 2, self.penColor)
+                if btn['id'] == 5:
+                    if self.isFill:
+                        draw_fill_ellipse(x + 2, y + 2, x + 28, y + 28, numPoints=100 ,color=self.penColor)
+                        draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
                 if self.tool == btn['tool']:
                     draw_fill_circle(x + 5, y + 34, 3, color=self.penColor)
                     draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
@@ -859,15 +945,10 @@ class MyWindow(pyglet.window.Window):
             labelPage.draw()
             if self.isExit:
                 self.label.draw()
-            # draw_line(100, 100, 1050, 50, self.penColor, thickness=self.penWidth)
-            # draw_vu_line(100, 100, 1050, 50, self.penColor, self.fonColor, thickness=self.penWidth)
-            # draw_vu_line(100, 100, 1050, 50, self.penColor, self.fonColor, thickness=self.penWidth)
-            # draw_vu_line(10, 600, 750, 50, self.penColor, self.fonColor, thickness=self.penWidth)
-            # draw_line_mod(200, 200, 500, 500, color=self.penColor, fon_color=self.fonColor, thickness=self.penWidth,
-            #               arrow=1, dash=(1, 0))
+
+        # draw_fill_ellipse(40, 400, 800, 50,  color=(0, 0, 0, 1), thickness=10)
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
-        # print("scrool ", scroll_y)
         window.clear()
         self.cy -= scroll_y * 10
 
@@ -881,71 +962,16 @@ class MyWindow(pyglet.window.Window):
         self.isExit = True
         self.label.draw()
 
-    # def btnScrInsertInCanvasClick(self):
-    #
-    #     window.set_visible(False)
-    #     # Тут треба паузу зротити
-    #     self.scS = True
-    #     if self.scS:
-    #         name = 'tmp/' + datetime.strftime(datetime.now(), "%Y_%m_%d_%H_%M_%S") + '.png'
-    #         # os.system('gnome-screenshot -d 2 -f ' + name)
-    #         # output = subprocess.check_output('/usr/bin/gnome-screenshot -d 2 -f ' + name, shell=True)
-    #         myCmd = './scrsht.sh ' + name
-    #         os.system(myCmd)
-    #
-    #         self.scS = False
-    #         # print("All")
-    #
-    #     window.set_visible(True)
-    #     # print('btnClick')
-    #     # floatWindow.wm_attributes("-alpha", "0.0")
-    #     # width = 600
-    #     # self.window_width = root.winfo_width()
-    #     # self.window_height = root.winfo_height()
-    #     # x0 = -self.xc + self.window_width - width - 40
-    #     # y0 = -self.yc + 20
-    #
-    #     #
-    #     # k = self.screen_width / (self.screen_height + 75)
-    #     # height = int(width / k)
-    #     # image = image.resize((width, height), Image.ANTIALIAS)
-    #     # root.wm_state('normal')
-    #     # self.images.append(ImageTk.PhotoImage(image))
-    #     # k = []
-    #     # c = {}
-    #     # c['name'] = name
-    #     # c['x'] = x0
-    #     # c['y'] = y0
-    #     # c['width'] = width
-    #     # c['height'] = height
-    #     # k.append(canvas.create_image(x0, y0, image=self.images[-1], state=NORMAL, anchor=NW))
-    #     # k.append("image")
-    #     # k.append(c)
-    #     # self.figures.append(k)
-    #     #
-    #     # floatWindow.destroy()
-
-    # def btnScrClick(self):
-    #     print('btnScrClick')
-    #     floatWindow = MyFloatWindow(40, 35, caption="", resizable=False, style=pyglet.window.Window.WINDOW_STYLE_BORDERLESS)
-    #     floatWindow.set_location(20, 20)
-    #     glClearColor(1.0, 1.0, 1.0, 0.5)
-    #     floatWindow.clear()
-
-    #     floatWindow.overrideredirect(1)
-    #     floatWindow.wm_attributes("-topmost", True)
-    #     floatWindow.wm_attributes("-alpha", "0.5")
-    #     btnScrInsertInCanvas.pack(fill=BOTH, expand=True)
-    #     self.btnPenClick()
 
 
 if __name__ == "__main__":
     window = MyWindow(1364, 726, caption="WhiteBoard", resizable=True)
     window.set_location(2, 2)
     # window.maximize()
-    appDialog = wx.App()
-    dialog = SubclassDialog()
-    dialog.SetTransparent(64)
+    # appDialog = wx.App()
+    # dialog = SubclassDialog()
+    # dialog.SetTransparent(64)
+
 
     window.clear()
 
