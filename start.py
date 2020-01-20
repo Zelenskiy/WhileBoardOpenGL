@@ -37,7 +37,9 @@ class MainFrame(wx.Frame):
 
         self.panel = MainPanel(self)
         self.Fit()
-        self.Centre()
+        # self.Centre()
+        self.SetSize(60,30)
+        self.SetPosition((10,40))
         self.Show()
 
 class MainPanel(wx.Panel):
@@ -69,16 +71,16 @@ class MyWindow(pyglet.window.Window):
 
     def show_screenshot_panel(self):
         window.set_visible(False)
-        # result = self.dialog.ShowModal()  # показываем модальный диалог
-        # if result == wx.ID_OK:
-        #     print("OK")
-        #     # window.set_visible(True)
-        #     window.insert_screenshot()
-        #     # dialog.Destroy()
-        #
-        # else:
-        #     print("Cancel")
-        #     window.set_visible(True)
+        result = self.dialog.ShowModal()  # показываем модальный диалог
+        if result == wx.ID_OK:
+            print("OK")
+            # window.set_visible(True)
+            window.insert_screenshot()
+            # dialog.Destroy()
+        
+        else:
+            print("Cancel")
+            window.set_visible(True)
 
     def draw_color_panel(self):
         for btn in self.colorPanelButtons:
@@ -169,33 +171,6 @@ class MyWindow(pyglet.window.Window):
         self.colorPanelVisible = False
         self.widthPanelVisible = False
         self.label = None
-        # self.buttons = [
-        #     {'id': 8, 'x': 5, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
-        #      'sel': False, 'align': 'left'},
-        #     {'id': 1, 'x': 40, 'y': 5, 'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1,
-        #      'sel': True, 'align': 'left'},
-        #     {'id': 2, 'x': 75, 'y': 5, 'text': 'Erazer', 'image': pyglet.resource.image('img/err.png'), 'tool': 2,
-        #      'sel': False, 'align': 'left'},
-        #     {'id': 3, 'x': 110, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/line.png'), 'tool': 3,
-        #      'sel': False, 'align': 'left'},
-        #     {'id': 4, 'x': 145, 'y': 5, 'text': 'line', 'image': pyglet.resource.image('img/_ClearFill.png'),
-        #      'tool': 4, 'sel': False, 'align': 'left'},
-        #     {'id': 26, 'x': 180, 'y': 5, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
-        #      'sel': False, 'align': 'left'},
-        #     {'id': 101, 'x': 215, 'y': 5, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 0,
-        #      'sel': False, 'align': 'left'},
-        #     {'id': 102, 'x': 250, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 0,
-        #      'sel': False, 'align': 'left'},
-        #     {'id': 103, 'x': 285, 'y': 5, 'text': 'width', 'image': pyglet.resource.image('img/add.png'),
-        #      'tool': 0, 'sel': False, 'align': 'left'},
-        #     {'id': 104, 'x': 75, 'y': 5, 'text': '<', 'image': pyglet.resource.image('img/left.png'), 'tool': 0,
-        #      'sel': False, 'align': 'right'},
-        #     {'id': 105, 'x': 5, 'y': 5, 'text': '>', 'image': pyglet.resource.image('img/right.png'), 'tool': 0,
-        #      'sel': False, 'align': 'right'},
-        #     {'id': 106, 'x': 320, 'y': 5, 'text': 'arrow', 'image': pyglet.resource.image('img/arr.png'), 'tool': 0,
-        #      'sel': False, 'align': 'left'},
-        #
-        # ]
         self.buttons = [
             {'id': 8,  'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
              'sel': False, 'align': 'left'},
@@ -300,7 +275,7 @@ class MyWindow(pyglet.window.Window):
         # btnOk.SetSize(self, size=(100, 32))
 
         frame = MainFrame()
-        self.alignToBottomRight(frame)
+        #self.alignToBottomRight(frame)
 
         frame.Show(True)
 
@@ -317,32 +292,11 @@ class MyWindow(pyglet.window.Window):
         original_image = Image.open(input_image_path)
         original_image.save(output_image_path + '.ori.png')
         width, height = original_image.size
-        # print('The original image size is {wide} wide x {height} '
-        #       'high'.format(wide=width, height=height))
-
         resized_image = original_image.resize(size)
         width, height = resized_image.size
-        # print('The resized image size is {wide} wide x {height} '
-        #       'high'.format(wide=width, height=height))
-        # resized_image.show()
         resized_image.save(output_image_path)
 
-    # def set_width(self, w):
-    #     if platform == "win32" or platform == "cygwin":
-    #         pass
-    #     elif platform == "linux":
-    #         try:
-    #             output = subprocess.check_output(
-    #                 'zenity --scale --title="Товщина лінії" --text="Виберіть товщину лінії"  --min-value=4 --max-value=40 --value=' + str(
-    #                     w) + ' --step=1',
-    #                 shell=True)
-    #             s = ""
-    #             for o in output:
-    #                 s += chr(o)
-    #             s = s[0:-1]
-    #             self.penWidth = int(s)
-    #         except:
-    #             pass
+
 
     def set_color(self):
         # For linux
