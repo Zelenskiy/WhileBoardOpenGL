@@ -46,7 +46,7 @@ class MainPanel(wx.Panel):
     def __init__(self, frame):
         wx.Panel.__init__(self, frame)
 
-        # Button
+        # Button 1
         button_sizer = self._button_sizer(frame)
 
         # Main sizer
