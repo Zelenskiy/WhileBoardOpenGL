@@ -19,7 +19,7 @@ from pyglet.window import mouse, ImageMouseCursor
 
 from sys import platform
 
-from dialogWindow import *
+# from dialogWindow import *
 
 if platform == "win32" or platform == "cygwin":
     pass
@@ -29,58 +29,59 @@ elif platform == "linux":
 winPanel = None
 
 
-class MainFrame(wx.Frame):
-    def __init__(self):
-        wx.Frame.__init__(self, None, -1,
-                          style=wx.STAY_ON_TOP|wx.TAB_TRAVERSAL|wx.FRAME_NO_TASKBAR)
-        self.SetTransparent(64)
-
-        self.panel = MainPanel(self)
-        self.Fit()
-        # self.Centre()
-        self.SetSize(60,30)
-        self.SetPosition((10,40))
-        self.Show()
-
-class MainPanel(wx.Panel):
-    def __init__(self, frame):
-        wx.Panel.__init__(self, frame)
-
-        # Button
-        button_sizer = self._button_sizer(frame)
-
-        # Main sizer
-        main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add((0, 0))
-        main_sizer.Add(button_sizer)
-        self.SetSizer(main_sizer)
-        self.Fit()
-
-    def _button_sizer(self, frame):
-        cmd_screenshot = wx.Button(self, label='+')
-        button_sizer = wx.BoxSizer(wx.VERTICAL)
-        button_sizer.Add(cmd_screenshot)
-        cmd_screenshot.Bind(wx.EVT_BUTTON, self.OnScrClick)
-        return button_sizer
-
-    def OnScrClick(self, event):
-        window.insert_screenshot()
+# class MainFrame(wx.Frame):
+#     def __init__(self):
+#         wx.Frame.__init__(self, None, -1,
+#                           style=wx.STAY_ON_TOP|wx.TAB_TRAVERSAL|wx.FRAME_NO_TASKBAR)
+#         self.SetTransparent(64)
+#
+#         self.panel = MainPanel(self)
+#         self.Fit()
+#         # self.Centre()
+#         self.SetSize(60,30)
+#         self.SetPosition((10,40))
+#         self.Show()
+#
+# class MainPanel(wx.Panel):
+#     def __init__(self, frame):
+#         wx.Panel.__init__(self, frame)
+#
+#         # Button
+#         button_sizer = self._button_sizer(frame)
+#
+#         # Main sizer
+#         main_sizer = wx.BoxSizer(wx.VERTICAL)
+#         main_sizer.Add((0, 0))
+#         main_sizer.Add(button_sizer)
+#         self.SetSizer(main_sizer)
+#         self.Fit()
+#
+#     def _button_sizer(self, frame):
+#         cmd_screenshot = wx.Button(self, label='+')
+#         button_sizer = wx.BoxSizer(wx.VERTICAL)
+#         button_sizer.Add(cmd_screenshot)
+#         cmd_screenshot.Bind(wx.EVT_BUTTON, self.OnScrClick)
+#         return button_sizer
+#
+#     def OnScrClick(self, event):
+#         window.insert_screenshot()
 
 
 class MyWindow(pyglet.window.Window):
+    pass
 
-    def show_screenshot_panel(self):
-        window.set_visible(False)
-        result = self.dialog.ShowModal()  # показываем модальный диалог
-        if result == wx.ID_OK:
-            print("OK")
-            # window.set_visible(True)
-            window.insert_screenshot()
-            # dialog.Destroy()
-        
-        else:
-            print("Cancel")
-            window.set_visible(True)
+    # def show_screenshot_panel(self):
+    #     window.set_visible(False)
+    #     result = self.dialog.ShowModal()  # показываем модальный диалог
+    #     if result == wx.ID_OK:
+    #         print("OK")
+    #         # window.set_visible(True)
+    #         window.insert_screenshot()
+    #         # dialog.Destroy()
+    #
+    #     else:
+    #         print("Cancel")
+    #         window.set_visible(True)
 
     def draw_color_panel(self):
         for btn in self.colorPanelButtons:
@@ -262,7 +263,7 @@ class MyWindow(pyglet.window.Window):
         self.id = 0
         self.page = 1
 
-        self.appDialog = wx.App()
+        # self.appDialog = wx.App()
         # self.dialog = SubclassDialog()
         # self.dialog.SetTransparent(64)
 
@@ -274,10 +275,13 @@ class MyWindow(pyglet.window.Window):
         # btnOk = wx.Button(self)
         # btnOk.SetSize(self, size=(100, 32))
 
-        frame = MainFrame()
+        # frame = MainFrame()
         #self.alignToBottomRight(frame)
 
-        frame.Show(True)
+        # frame.Show(True)
+
+
+
 
     def alignToBottomRight(self, win):
         dw, dh = wx.DisplaySize()
@@ -982,6 +986,8 @@ if __name__ == "__main__":
 
     window.clear()
 
+    frame = pyglet.window.Window(style='borderless')
+    # frame.on_draw()
     window.on_draw()
 
     pyglet.app.run()
