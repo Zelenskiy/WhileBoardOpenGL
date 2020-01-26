@@ -1129,12 +1129,8 @@ class MyWindow(pyglet.window.Window):
                         x2, y2 = self.canvas_to_screen(x2, y2)
                         draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
                                        color=self.ramkaColor, thickness=self.ramkaThickness)
-                        # витавляємо малюнок корзини
+
                         draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
-                        # self.trash_image.blit(self.selDel['x1'] + self.cx,
-                        #                       self.selDel['y1'] + self.cy)
-                        # self.resize_image.blit(self.selRes['x1'] + self.cx,
-                        #                        self.selRes['y1'] + self.cy)
                         close_cross(self.selDel['x1'] + 0, self.selDel['y1'] + 0,
                                     self.selDel['x2'] + 0, self.selDel['y2'] + 0,
                                     color=self.ramkaColor, thickness=self.ramkaThickness
@@ -1172,10 +1168,6 @@ class MyWindow(pyglet.window.Window):
 
     def closeApp(self):
         raise SystemExit
-        #frame.close()
-        #window.close()
-
-
 
     def wxStart(self):
         app = wx.App()
