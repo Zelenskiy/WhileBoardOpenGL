@@ -49,10 +49,11 @@ class MainFrame(wx.Frame):
 class MainPanel(wx.Panel):
 
     def __init__(self, frame):
-        wx.Panel.__init__(self, frame)
+        wx.Panel.__init__(self, frame, )
         self.x0 = 0
         self.y0 = 0
         self.isDown=False
+
 
         # Button 1
         button_sizer = self._button_sizer(frame)
@@ -508,14 +509,14 @@ class MyWindow(pyglet.window.Window):
         h = window.height
         height = 9 * width // 16
         x0, y0 = w - width - self.cx, h - height - self.cy
-        data = {}
-        data['image'] =  nnam
-        data['x0'], data['y0'], data['width'], data['height'] = x0, y0, width, height
-        file_name = "tmp/shedule.shf"
-        with open(file_name, "wb") as fp:
-            pickle.dump(data, fp)
-        # window.insert_image_from_file(nnam, x0, y0, width, height)
-        # time.sleep(3)
+        # data = {}
+        # data['image'] =  nnam
+        # data['x0'], data['y0'], data['width'], data['height'] = x0, y0, width, height
+        # file_name = "tmp/shedule.shf"
+        # with open(file_name, "wb") as fp:
+        #     pickle.dump(data, fp)
+        window.insert_image_from_file(nnam, x0, y0, width, height)
+
         window.set_visible(True)
         window.maximize()
 
@@ -997,20 +998,20 @@ class MyWindow(pyglet.window.Window):
     def on_draw(self):
         # Перевіряємо наявність зовнішніх даних та підвантажуємо їх за потребою
 
-        file_name = "tmp/shedule.shf"
-        if os.path.exists(file_name):
-            print("#read data")
-            #read data
-            with open(file_name, "rb") as fp:  # Unpickling
-                data = pickle.load(fp)
-            nnam = data['image']
-            x0, y0, width, height = data['x0'], data['y0'], data['width'], data['height']
-            print("Перед self.insert_image_from_file(")
-            self.insert_image_from_file( nnam, x0, y0, width, height)
-            print("Після self.insert_image_from_file(")
-            # remove file
-            print(" remove file")
-            os.remove(file_name)
+        # file_name = "tmp/shedule.shf"
+        # if os.path.exists(file_name):
+        #     print("#read data")
+        #     #read data
+        #     with open(file_name, "rb") as fp:  # Unpickling
+        #         data = pickle.load(fp)
+        #     nnam = data['image']
+        #     x0, y0, width, height = data['x0'], data['y0'], data['width'], data['height']
+        #     print("Перед self.insert_image_from_file(")
+        #     self.insert_image_from_file( nnam, x0, y0, width, height)
+        #     print("Після self.insert_image_from_file(")
+        #     # remove file
+        #     print(" remove file")
+        #     os.remove(file_name)
 
 
 
@@ -1175,6 +1176,7 @@ class MyWindow(pyglet.window.Window):
         frame = MainFrame()
         frame.SetWindowStyle(style=wx.STAY_ON_TOP)  # | wx.TAB_TRAVERSAL)
         frame.SetSize(size=(60, 280))
+        frame.SetPosition((1200, 600))
         frame.Show()
         y = threading.Thread(target=app.MainLoop)
         y.setDaemon(True)
