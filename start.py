@@ -126,21 +126,21 @@ class MainPanel(wx.Panel):
         return button_sizer
 
     def btnDownPen(self, event):
-        print("Down ", event)
+        #print("Down ", event)
         self.isDown = True
         self.x0 = event.x
         self.y0 = event.y
         window.tool = 1
 
     def pnlDown(self, event):
-        print("Down ", event)
+        #print("Down ", event)
         self.isDown = True
         self.x0 = event.x
         self.y0 = event.y
 
 
     def btnDownEr(self, event):
-        print("Down ", event)
+        #print("Down ", event)
         self.isDown = True
         self.x0 = event.x
         self.y0 = event.y
@@ -156,7 +156,7 @@ class MainPanel(wx.Panel):
 
 
     def btnUp(self,event):
-        print("Up ",event)
+        #print("Up ",event)
 
         self.isDown = False
 
@@ -222,23 +222,23 @@ class MainPanel(wx.Panel):
 #     k['p'].append({'x': x0, 'y': y0})
 #     k['p'].append({'x': x0 + width, 'y': y0 + height})
 #     nnam_ = nnam + ".resize.png"
-#     print(1)
+#     #print(1)
 #
 #     resize_image2(nnam, nnam_, (width, height))
-#     print(2)
+#     #print(2)
 #
 #     image = pyglet.image.load(nnam_)
-#     print(3)
+#     #print(3)
 #
 #     window.images[nnam_] = image
-#     print(4)
+#     #print(4)
 #
 #     k['image'] = nnam_
 #     k['thickness'] = window.penWidth
 #     k['fordel'] = False
 #     window.figures.append(k)
-#     print(5)
-#     print("images ", window.images)
+#     #print(5)
+#     #print("images ", window.images)
 #
 
 class MyWindow(pyglet.window.Window):
@@ -247,14 +247,14 @@ class MyWindow(pyglet.window.Window):
     #     # self.set_visible(False)
     #     result = self.dialog.ShowModal()  # показываем модальный диалог
     #     if result == wx.ID_OK:
-    #         print("OK")
+    #         #print("OK")
     #         # self.set_visible(True)
     #         self.set_visible(False)
     #         self.insert_screenshot()
     #         # dialog.Destroy()
     #
     #     else:
-    #         print("Cancel")
+    #         #print("Cancel")
     #         self.set_visible(True)
 
     def draw_color_panel(self):
@@ -491,14 +491,14 @@ class MyWindow(pyglet.window.Window):
         resized_image.save(output_image_path)
 
     def resize_image2(self, input_image_path, output_image_path, size):
-        print("resize_image2 1")
+        #print("resize_image2 1")
         original_image = Image.open(input_image_path)
-        print("resize_image2 2 size=", size)
-        print("original_image=", original_image)
+        #print("resize_image2 2 size=", size)
+        #print("original_image=", original_image)
         resized_image = original_image.resize(size)
-        print("resize_image2 3")
+        #print("resize_image2 3")
         resized_image.save(output_image_path)
-        print("resize_image2 4")
+        #print("resize_image2 4")
 
     def insert_screenshot(self):
         window.set_visible(False)
@@ -521,28 +521,28 @@ class MyWindow(pyglet.window.Window):
         window.maximize()
 
     def insert_image_from_file(self, nnam, x0, y0, width, height):
-        print("insert_image_from_file 1 ")
+        #print("insert_image_from_file 1 ")
         k = {}
         window.id += 1
-        print(" id=", self.id)
+        #print(" id=", self.id)
         k['id'] = self.id
         k['name'] = 'image'
         k['p'] = []
         k['p'].append({'x': x0, 'y': y0})
         k['p'].append({'x': x0 + width, 'y': y0 + height})
         nnam_ = nnam + ".resize.png"
-        print("insert_image_from_file 2")
+        #print("insert_image_from_file 2")
         self.resize_image2(nnam, nnam_, (width, height))
-        print("insert_image_from_file 3")
+        #print("insert_image_from_file 3")
         image = pyglet.image.load(nnam_)
-        print("insert_image_from_file 4")
+        #print("insert_image_from_file 4")
         self.images[nnam_] = image
-        print("insert_image_from_file 5")
+        #print("insert_image_from_file 5")
         k['image'] = nnam_
         k['thickness'] = self.penWidth
         k['fordel'] = False
         self.figures.append(k)
-        print("insert_image_from_file 3")
+        #print("insert_image_from_file 3")
 
     def update_fig(self):
         new_list = []
@@ -560,10 +560,10 @@ class MyWindow(pyglet.window.Window):
             self.page = 1
             self.cx, self.cy = 0, 0
         elif symbol == 100:  # D    Save whiteboard
-            print("save")
+            #print("save")
             self.save()
         elif symbol == 117:  # U    Open whiteboard
-            print("load")
+            #print("load")
             self.load()
             self.clear()
         elif symbol == 65535:  # Delete
@@ -580,7 +580,8 @@ class MyWindow(pyglet.window.Window):
         elif symbol == 105:  # Insert image
             names = self.insert_screenshot().split('|')
             for n in names:
-                print(n)
+                pass
+                #print(n)
         elif symbol == 65451:  # Change thickness +
             self.penWidth += 2
         elif symbol == 65453:  # Change thickness
@@ -624,8 +625,9 @@ class MyWindow(pyglet.window.Window):
 
 
         else:
-            print('A key was pressed')
-            print(symbol)
+            pass
+            #print('A key was pressed')
+            #print(symbol)
         self.clear()
 
     def on_mouse_press(self, x, y, button, modifier):
@@ -674,7 +676,7 @@ class MyWindow(pyglet.window.Window):
                         self.f = False
                         self.arr = btn['id']
                         self.arrowPanelVisible = False
-                        # print(self.arr)
+                        # #print(self.arr)
             for btn in self.buttons:
                 btn['sel'] = False
                 if btn['align'] == 'right':
@@ -740,7 +742,7 @@ class MyWindow(pyglet.window.Window):
                             if self.selDel != {}:
                                 if (x > xx1) and (x < xx2) and (y > yy1) and (y < yy2):
                                     # Вилучаємо
-                                    print("Вилучаємо")
+                                    #print("Вилучаємо")
                                     fig['fordel'] = True
                                     self.update_fig()
                             self.selFig['fig'] = fig['id']
@@ -805,7 +807,7 @@ class MyWindow(pyglet.window.Window):
                     x_min, y_min = self.canvas_to_screen(x_min, y_min)
                     x_max, y_max = self.canvas_to_screen(x_max, y_max)
                     if dist((x_max + x_min) // 2, (y_max + y_min) // 2, x, y, self.errSize):
-                        # print('del')
+                        # #print('del')
                         f['fordel'] = True
                         break
                 self.update_fig()
@@ -894,7 +896,7 @@ class MyWindow(pyglet.window.Window):
                                 if fig['name'] == 'image':
                                     # [{'id': 1, 'name': 'image', 'p': [{'x': 417, 'y': 224}, {'x': 1017, 'y': 561}], 'image': 'tmp/_2020_01_17_21_30_24.png.resize.png', 'thickness': 4, 'fordel': False}]
                                     size = (int(x2 - x1), int(y2 - y1))
-                                    # print(size)
+                                    # #print(size)
                                     self.images[fig['image']] = self.images[fig['image']].resize(size)
                                     # resized_image = self.original_image.resize(size)
 
@@ -1000,17 +1002,17 @@ class MyWindow(pyglet.window.Window):
 
         # file_name = "tmp/shedule.shf"
         # if os.path.exists(file_name):
-        #     print("#read data")
+        #     #print("#read data")
         #     #read data
         #     with open(file_name, "rb") as fp:  # Unpickling
         #         data = pickle.load(fp)
         #     nnam = data['image']
         #     x0, y0, width, height = data['x0'], data['y0'], data['width'], data['height']
-        #     print("Перед self.insert_image_from_file(")
+        #     #print("Перед self.insert_image_from_file(")
         #     self.insert_image_from_file( nnam, x0, y0, width, height)
-        #     print("Після self.insert_image_from_file(")
+        #     #print("Після self.insert_image_from_file(")
         #     # remove file
-        #     print(" remove file")
+        #     #print(" remove file")
         #     os.remove(file_name)
 
 
@@ -1028,10 +1030,10 @@ class MyWindow(pyglet.window.Window):
                 for x in range(0, w, self.step):
                     draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1, smooth=self.isSmooth)
             count = 0
-            print("--- ", 5)
-            print(self.figures)
+            #print("--- ", 5)
+            #print(self.figures)
             for f in self.figures:
-                print(6)
+                #print(6)
                 x_min, y_min, x_max, y_max = border_polyline(f['p'])
                 x_min, y_min = self.canvas_to_screen(x_min, y_min)
                 x_max, y_max = self.canvas_to_screen(x_max, y_max)
@@ -1077,7 +1079,7 @@ class MyWindow(pyglet.window.Window):
                         x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
                         draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'])
                     elif f['name'] == 'image':
-                        print(7)
+                        #print(7)
                         x0 = f['p'][0]['x']
                         y0 = f['p'][0]['y']
                         x = f['p'][1]['x']
