@@ -1152,6 +1152,7 @@ class MyWindow(pyglet.window.Window):
                 self.label.draw()
 
 
+
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self.clear()
         self.cy -= scroll_y * 10
@@ -1201,6 +1202,5 @@ def oglStart():
 
 
 if __name__ == "__main__":
-
     oglStart()
 
