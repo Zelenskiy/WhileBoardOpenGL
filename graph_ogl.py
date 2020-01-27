@@ -540,26 +540,31 @@ def border_polyline(points):
 
     return x_min, y_min, x_max, y_max
 
-# class MyFloatWindow(pyglet.window.Window):
-#
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#
-#     def on_key_press(self, symbol, modifiers):
-#         print("aaaaaaaaa")
-#
+def draw_poly(x1,y1,x2,y2, id=4, numPoints=4,color=(0,0,0,1),fon_color=(1,1,1,1),fill=False):
+    x0, y0 = (x1+x2) // 2, (y1+y2) // 2
+    r = (x0 - x1)
+    draw_fill_rectangle(x0 - r, y0 - r, x0 + r, y0 + r, color=fon_color)
+    if id == 4:
+        angle = 45
+    else:
+        angle = 90
+    if fill:
+        draw_fill_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=2)
+    else:
+        draw_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=2)
 
-# class DlgWindow(pyglet.window.Window):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.set_location(50,100)
-#
-#
-#
-#     def on_mouse_press(self, x, y, button, modifiers):
-#         window.insert_screenshot()
-#         winPanel.close()
-#
-#
-#     def on_close(self):
-#         window.set_visible(True)
+def draw_poly_wo_bg(x1,y1,x2,y2, id=4, numPoints=4,color=(0,0,0,1),fon_color=(1,1,1,1),fill=False, thickness=4):
+    x0, y0 = (x1+x2) // 2, (y1+y2) // 2
+    r = (x0 - x1)
+    if id == 4:
+        angle = 45
+    elif id == 3:
+        angle = -30
+    else:
+        angle = 90
+
+    if fill:
+        draw_fill_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
+    else:
+        draw_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
+
