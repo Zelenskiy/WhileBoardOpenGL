@@ -3,6 +3,7 @@ import time
 
 import subprocess
 import datetime
+import wx
 
 import threading
 
@@ -17,118 +18,100 @@ from pyglet.gl import *
 from pyglet.window import mouse, ImageMouseCursor
 
 from sys import platform
-import wx
+# import wx
 
 # from dialogWindow import *
 import grab
+import os.path
 
 if platform == "win32" or platform == "cygwin":
     pass
 elif platform == "linux":
     pass
 
-winPanel = None
+
+# winPanel = None
 
 
 class MainFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, -1,
-                          style=wx.STAY_ON_TOP | wx.TAB_TRAVERSAL | wx.FRAME_NO_TASKBAR)
+                          style=wx.STAY_ON_TOP | wx.TAB_TRAVERSAL | wx.FRAME_NO_TASKBAR | wx.BORDER_NONE)
         self.SetTransparent(64)
 
         self.panel = MainPanel(self)
         self.Fit()
         self.Centre()
-        self.SetSize(60, 30)
+        self.SetSize(35, 55)
         self.SetPosition((10, 40))
         self.Show()
-
 
 
 class MainPanel(wx.Panel):
 
     def __init__(self, frame):
-        wx.Panel.__init__(self, frame)
+        wx.Panel.__init__(self, frame, )
         self.x0 = 0
         self.y0 = 0
-        self.isDown=False
+        self.isDown = False
 
         # Button 1
         button_sizer = self._button_sizer(frame)
 
         # Main sizer
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add((0, 0))
+        main_sizer.Add((0, 20))
         main_sizer.Add(button_sizer)
         self.SetSizer(main_sizer)
         self.Fit()
 
     def _button_sizer(self, frame):
-
-        bmp = wx.Image("img/pen.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap()
-        cmd_pen = wx.BitmapButton(self, -1, bmp)
-        cmd_err = wx.BitmapButton(self, -1, wx.Image("img/err.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-        # cmd_err = wx.Button(self, label='er')
-        cmd_screenshot = wx.Button(self, label='+')
-        cmd_red = wx.Button(self, label='')
-        cmd_yellow = wx.Button(self, label='')
-        cmd_green = wx.Button(self, label='')
-        cmd_blue = wx.Button(self, label='')
-        cmd_close = wx.Button(self, label='x')
-        cmd_red.SetBackgroundColour(wx.RED)
-        cmd_yellow.SetBackgroundColour(wx.YELLOW)
-        cmd_green.SetBackgroundColour(wx.GREEN)
-        cmd_blue.SetBackgroundColour(wx.BLUE)
+        cmd_screenshot = wx.BitmapButton(self, -1, wx.Image("img/ws_win.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
         button_sizer = wx.BoxSizer(wx.VERTICAL)
-        button_sizer.Add(cmd_pen)
-        button_sizer.Add(cmd_err)
         button_sizer.Add(cmd_screenshot)
-        button_sizer.Add(cmd_red)
-        button_sizer.Add(cmd_yellow)
-        button_sizer.Add(cmd_green)
-        button_sizer.Add(cmd_blue)
-        button_sizer.Add(cmd_close)
-        cmd_pen.Bind(wx.EVT_BUTTON, self.SetPen)
-        cmd_err.Bind(wx.EVT_BUTTON, self.SetErr)
         cmd_screenshot.Bind(wx.EVT_BUTTON, self.OnScrClick)
-        cmd_close.Bind(wx.EVT_BUTTON, self.OnBtnClose)
-        cmd_red.Bind(wx.EVT_BUTTON, lambda color: self.SetColor(self, color=(1, 0, 0, 1)))
-        cmd_yellow.Bind(wx.EVT_BUTTON, lambda color: self.SetColor(self, color=(1, 1, 0, 1)))
-        cmd_green.Bind(wx.EVT_BUTTON, lambda color: self.SetColor(self, color=(0, 1, 0, 1)))
-        cmd_blue.Bind(wx.EVT_BUTTON, lambda color: self.SetColor(self, color=(0, 0, 1, 1)))
-
-        cmd_pen.Bind(wx.EVT_LEFT_DOWN, self.btnDown)
-        cmd_pen.Bind(wx.EVT_MOTION, self.btnMove)
-        cmd_pen.Bind(wx.EVT_LEFT_UP, self.btnUp)
-
+        self.Bind(wx.EVT_LEFT_DOWN, self.pnlDown)
+        self.Bind(wx.EVT_MOTION, self.btnMove)
+        self.Bind(wx.EVT_LEFT_UP, self.btnUp)
 
         return button_sizer
 
-    def btnDown(self,event):
-        print("Down ",event)
+    def btnDownPen(self, event):
+        # print("Down ", event)
         self.isDown = True
-        # widget = self.GetParent()
-        # px, py = widget.GetPosition()
+        self.x0 = event.x
+        self.y0 = event.y
+        window.tool = 1
+
+    def pnlDown(self, event):
+        # print("Down ", event)
+        self.isDown = True
         self.x0 = event.x
         self.y0 = event.y
 
-    def btnMove(self,event):
+    def btnDownEr(self, event):
+        # print("Down ", event)
+        self.isDown = True
+        self.x0 = event.x
+        self.y0 = event.y
+        window.tool = 2
+
+    def btnMove(self, event):
         if self.isDown:
+            # print(event.x, event.y)
             widget = self.GetParent()
             px, py = widget.GetPosition()
             xx = px - self.x0 + event.x
             yy = py - self.y0 + event.y
             widget.SetPosition((xx, yy))
 
-
-    def btnUp(self,event):
-        print("Up ",event)
+    def btnUp(self, event):
+        # print("Up ",event)
 
         self.isDown = False
 
     def OnBtnClose(self, event):
         self.close()
-
 
     def SetPen(self, event):
         window.tool = 1
@@ -137,60 +120,75 @@ class MainPanel(wx.Panel):
         window.tool = 2
 
     def OnScrClick(self, event):
-        insert_screenshot()
+        window.insert_screenshot()
 
     def SetColor(self, event, color=(0, 0, 1, 1)):
         window.penColor = color
 
 
-def resize_image(input_image_path,
-                 output_image_path,
-                 size):
-    original_image = Image.open(input_image_path)
-    original_image.save(output_image_path + '.ori.png')
-    resized_image = original_image.resize(size)
-    resized_image.save(output_image_path)
-
-
-def resize_image2(input_image_path, output_image_path, size):
-    original_image = Image.open(input_image_path)
-    resized_image = original_image.resize(size)
-    resized_image.save(output_image_path)
-
-
-def insert_screenshot():
-    # window.set_visible(False)
-    window.minimize()
-    time.sleep(2)
-    nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-    grab.screenshot_to_file(nnam)
-    width = 600
-    w = window.width
-    h = window.height
-    height = 9 * width // 16
-    x0, y0 = w - width - window.cx, h - height - window.cy
-    insert_image_from_file(nnam, x0, y0, width, height)
-    # window.set_visible(True)
-    window.maximize()
-
-
-def insert_image_from_file(nnam, x0, y0, width, height):
-    k = {}
-    window.id += 1
-    k['id'] = window.id
-    k['name'] = 'image'
-    k['p'] = []
-    k['p'].append({'x': x0, 'y': y0})
-    k['p'].append({'x': x0 + width, 'y': y0 + height})
-    nnam_ = nnam + ".resize.png"
-    resize_image2(nnam, nnam_, (width, height))
-    image = pyglet.image.load(nnam_)
-    window.images[nnam_] = image
-    k['image'] = nnam_
-    k['thickness'] = window.penWidth
-    k['fordel'] = False
-    window.figures.append(k)
-
+# def resize_image(input_image_path,
+#                  output_image_path,
+#                  size):
+#     original_image = Image.open(input_image_path)
+#     original_image.save(output_image_path + '.ori.png')
+#     resized_image = original_image.resize(size)
+#     resized_image.save(output_image_path)
+#
+#
+# def resize_image2(input_image_path, output_image_path, size):
+#     original_image = Image.open(input_image_path)
+#     resized_image = original_image.resize(size)
+#     resized_image.save(output_image_path)
+#
+#
+# def insert_screenshot():
+#     # window.set_visible(False)
+#     #window.minimize()
+#     time.sleep(2)
+#
+#     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+#     grab.screenshot_to_file(nnam)
+#
+#     width = 600
+#     w = window.width
+#     h = window.height
+#     height = 9 * width // 16
+#     x0, y0 = w - width - window.cx, h - height - window.cy
+#     insert_image_from_file(nnam, x0, y0, width, height)
+#
+#
+#
+#     # window.set_visible(True)
+#     #window.maximize()
+#
+#
+# def insert_image_from_file(nnam, x0, y0, width, height):
+#     k = {}
+#     window.id += 1
+#     k['id'] = window.id
+#     k['name'] = 'image'
+#     k['p'] = []
+#     k['p'].append({'x': x0, 'y': y0})
+#     k['p'].append({'x': x0 + width, 'y': y0 + height})
+#     nnam_ = nnam + ".resize.png"
+#     #print(1)
+#
+#     resize_image2(nnam, nnam_, (width, height))
+#     #print(2)
+#
+#     image = pyglet.image.load(nnam_)
+#     #print(3)
+#
+#     window.images[nnam_] = image
+#     #print(4)
+#
+#     k['image'] = nnam_
+#     k['thickness'] = window.penWidth
+#     k['fordel'] = False
+#     window.figures.append(k)
+#     #print(5)
+#     #print("images ", window.images)
+#
 
 class MyWindow(pyglet.window.Window):
 
@@ -198,19 +196,32 @@ class MyWindow(pyglet.window.Window):
     #     # self.set_visible(False)
     #     result = self.dialog.ShowModal()  # показываем модальный диалог
     #     if result == wx.ID_OK:
-    #         print("OK")
+    #         #print("OK")
     #         # self.set_visible(True)
     #         self.set_visible(False)
     #         self.insert_screenshot()
     #         # dialog.Destroy()
     #
     #     else:
-    #         print("Cancel")
+    #         #print("Cancel")
     #         self.set_visible(True)
 
     def draw_color_panel(self):
         for btn in self.colorPanelButtons:
             draw_fill_rectangle(btn['x1'], btn['y1'], btn['x2'], btn['y2'], btn['color'])
+
+    def draw_figures_panel(self):
+        for btn in self.figuresPanelButtons:
+            # Малюємо фігури на відповідних місцях панелі
+            self.polygone = btn['id']
+            if btn['id'] == 4:
+                x0, y0 = (btn['x1']+btn['x2'])//2, (btn['y1']+btn['y2'])//2
+                r = (x0-btn['x1'])
+                draw_fill_rectangle(x0-r,y0-r,x0+r,y0+r, color=self.fonColor)
+                draw_regular_polygon(x0,y0,r, numPoints=3, angleStart=90, color=self.penColor, thickness=2)
+
+
+            # draw_fill_rectangle(btn['x1'], btn['y1'], btn['x2'], btn['y2'], btn['color'])
 
     def draw_width_panel(self):
         for btn in self.widthPanelButtons:
@@ -270,6 +281,8 @@ class MyWindow(pyglet.window.Window):
         self.set_minimum_size(400, 30)
 
         # ============ Options ================
+        self.colorOrrange = (1.0, 0.5, 0.0, 1.0)
+        self.polygone = 4
         self.isGrid = True
         self.isSmooth = False
         self.penWidth = 7
@@ -293,6 +306,7 @@ class MyWindow(pyglet.window.Window):
         self.isBtnClick = False
         self.colorPanelVisible = False
         self.widthPanelVisible = False
+        self.figuresPanelVisible = False
         self.label = None
         self.buttons = [
             {'id': 8, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
@@ -313,8 +327,8 @@ class MyWindow(pyglet.window.Window):
              'sel': False, 'align': 'left'},
             {'id': 102, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 0,
              'sel': False, 'align': 'left'},
-            {'id': 103, 'text': 'width', 'image': pyglet.resource.image('img/add.png'),
-             'tool': 0, 'sel': False, 'align': 'left'},
+            # {'id': 103, 'text': 'width', 'image': pyglet.resource.image('img/add.png'),
+            #  'tool': 0, 'sel': False, 'align': 'left'},
             {'id': 106, 'text': 'arrow', 'image': pyglet.resource.image('img/arr.png'), 'tool': 0,
              'sel': False, 'align': 'left'},
             {'id': 104, 'x': 75, 'y': 5, 'text': '<', 'image': pyglet.resource.image('img/left.png'), 'tool': 0,
@@ -333,10 +347,14 @@ class MyWindow(pyglet.window.Window):
         self.colorPanelButtons = [
             {'id': 1, 'x1': 215, 'y1': 10 + 35, 'x2': 25 + 247, 'y2': 10 + 70, 'color': (1, 0, 0, 1)},
             {'id': 2, 'x1': 215, 'y1': 10 + 70, 'x2': 25 + 247, 'y2': 10 + 105, 'color': (1, 1, 0, 1)},
-            {'id': 3, 'x1': 215, 'y1': 10 + 105, 'x2': 25 + 247, 'y2': 10 + 140, 'color': (0, 1, 0, 1)},
+            {'id': 3, 'x1': 215, 'y1': 10 + 105, 'x2': 25 + 247, 'y2': 10 + 140, 'color': (0, 0.5, 0, 1)},
             {'id': 4, 'x1': 215, 'y1': 10 + 140, 'x2': 25 + 247, 'y2': 10 + 175, 'color': (0, 1, 1, 1)},
             {'id': 5, 'x1': 215, 'y1': 10 + 175, 'x2': 25 + 247, 'y2': 10 + 210, 'color': (0, 0, 1, 1)},
             {'id': 6, 'x1': 215, 'y1': 10 + 210, 'x2': 25 + 247, 'y2': 10 + 245, 'color': (0, 0, 0, 1)},
+            {'id': 7, 'x1': 215, 'y1': 10 + 245, 'x2': 25 + 247, 'y2': 10 + 280, 'color': (1.0, 0.5, 0.0, 1.0)},
+        ]
+        self.figuresPanelButtons = [
+            {'id': 4, 'x1': 150, 'y1': 10 + 35, 'x2': 25 + 150, 'y2': 10 + 70},
         ]
         self.arrowPanelButtons = [
             {'id': 1, 'x1': 320, 'y1': 10 + 35, 'x2': 48 + 320, 'y2': 10 + 70,
@@ -381,6 +399,7 @@ class MyWindow(pyglet.window.Window):
         self.selRes = {}
         self.id = 0
         self.page = 1
+        self.wxStart()
 
         # self.appDialog = wx.App()
         # self.dialog = SubclassDialog()
@@ -441,9 +460,27 @@ class MyWindow(pyglet.window.Window):
         resized_image.save(output_image_path)
 
     def resize_image2(self, input_image_path, output_image_path, size):
+        # print("resize_image2 1")
         original_image = Image.open(input_image_path)
+        # print("resize_image2 2 size=", size)
+        # print("original_image=", original_image)
         resized_image = original_image.resize(size)
+        # print("resize_image2 3")
         resized_image.save(output_image_path)
+        # print("resize_image2 4")
+
+    #no order
+    def insert_from_clipboard(self):
+        nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+        grab.ins_from_clip(nnam)
+        print(nnam)
+
+        width = 600
+        w = window.width
+        h = window.height
+        height = 9 * width // 16
+        x0, y0 = w - width - self.cx, h - height - self.cy
+        window.insert_image_from_file(nnam, x0, y0, width, height)
 
     def insert_screenshot(self):
         window.set_visible(False)
@@ -454,26 +491,40 @@ class MyWindow(pyglet.window.Window):
         h = window.height
         height = 9 * width // 16
         x0, y0 = w - width - self.cx, h - height - self.cy
+        # data = {}
+        # data['image'] =  nnam
+        # data['x0'], data['y0'], data['width'], data['height'] = x0, y0, width, height
+        # file_name = "tmp/shedule.shf"
+        # with open(file_name, "wb") as fp:
+        #     pickle.dump(data, fp)
         window.insert_image_from_file(nnam, x0, y0, width, height)
+
         window.set_visible(True)
         window.maximize()
 
     def insert_image_from_file(self, nnam, x0, y0, width, height):
+        # print("insert_image_from_file 1 ")
         k = {}
-        self.id += 1
+        window.id += 1
+        # print(" id=", self.id)
         k['id'] = self.id
         k['name'] = 'image'
         k['p'] = []
         k['p'].append({'x': x0, 'y': y0})
         k['p'].append({'x': x0 + width, 'y': y0 + height})
         nnam_ = nnam + ".resize.png"
+        # print("insert_image_from_file 2")
         self.resize_image2(nnam, nnam_, (width, height))
+        # print("insert_image_from_file 3")
         image = pyglet.image.load(nnam_)
+        # print("insert_image_from_file 4")
         self.images[nnam_] = image
+        # print("insert_image_from_file 5")
         k['image'] = nnam_
         k['thickness'] = self.penWidth
         k['fordel'] = False
         self.figures.append(k)
+        # print("insert_image_from_file 3")
 
     def update_fig(self):
         new_list = []
@@ -486,17 +537,15 @@ class MyWindow(pyglet.window.Window):
         if symbol == 65307:  # ESC
             # TODO поміняти потім
             self.closeApp()
-            if winPanel != None:
-                winPanel.close()
             # self.on_close()
         elif symbol == 65360:  # Home
             self.page = 1
             self.cx, self.cy = 0, 0
         elif symbol == 100:  # D    Save whiteboard
-            print("save")
+            # print("save")
             self.save()
         elif symbol == 117:  # U    Open whiteboard
-            print("load")
+            # print("load")
             self.load()
             self.clear()
         elif symbol == 65535:  # Delete
@@ -512,8 +561,6 @@ class MyWindow(pyglet.window.Window):
             self.set_color()
         elif symbol == 105:  # Insert image
             names = self.insert_screenshot().split('|')
-            for n in names:
-                print(n)
         elif symbol == 65451:  # Change thickness +
             self.penWidth += 2
         elif symbol == 65453:  # Change thickness
@@ -557,8 +604,9 @@ class MyWindow(pyglet.window.Window):
 
 
         else:
-            print('A key was pressed')
-            print(symbol)
+            pass
+            # print('A key was pressed')
+            # print(symbol)
         self.clear()
 
     def on_mouse_press(self, x, y, button, modifier):
@@ -607,7 +655,6 @@ class MyWindow(pyglet.window.Window):
                         self.f = False
                         self.arr = btn['id']
                         self.arrowPanelVisible = False
-                        # print(self.arr)
             for btn in self.buttons:
                 btn['sel'] = False
                 if btn['align'] == 'right':
@@ -616,9 +663,14 @@ class MyWindow(pyglet.window.Window):
                     xx, yy = btn['x'], btn['y']
                 if (xx < x < xx + 32) and (yy < y < yy + 32):
                     btn['sel'] = True
-                    if btn['id'] == 4 or btn['id'] == 5:  # Fill figure
+                    # if btn['id'] == 4 or btn['id'] == 5:  # Fill figure
+                    #     if self.tool == btn['tool']:
+                    #         self.isFill = not self.isFill
+                    #     self.tool = btn['tool']
+                    if btn['id'] == 4:  # Fill figure
                         if self.tool == btn['tool']:
-                            self.isFill = not self.isFill
+                            self.figuresPanelVisible = not self.figuresPanelVisible
+                            self.draw_figures_panel()
                         self.tool = btn['tool']
                     elif btn['id'] == 26:  # Діалогове вікно
                         # hide main window
@@ -630,6 +682,9 @@ class MyWindow(pyglet.window.Window):
                         self.colorPanelVisible = not self.colorPanelVisible
                     elif btn['id'] == 102:  # Changr width pen
                         self.widthPanelVisible = not self.widthPanelVisible
+                    # elif btn['id'] == 103:  # Insert from Clipboard
+                    #     print("Insert from Clipboard")
+                    #     self.insert_from_clipboard()
                     elif btn['id'] == 106:  # Chang arrow
                         self.arrowPanelVisible = not self.arrowPanelVisible
                     elif btn['id'] == 105:  # Сторінка вправо
@@ -673,7 +728,7 @@ class MyWindow(pyglet.window.Window):
                             if self.selDel != {}:
                                 if (x > xx1) and (x < xx2) and (y > yy1) and (y < yy2):
                                     # Вилучаємо
-                                    print("Вилучаємо")
+                                    # print("Вилучаємо")
                                     fig['fordel'] = True
                                     self.update_fig()
                             self.selFig['fig'] = fig['id']
@@ -738,7 +793,7 @@ class MyWindow(pyglet.window.Window):
                     x_min, y_min = self.canvas_to_screen(x_min, y_min)
                     x_max, y_max = self.canvas_to_screen(x_max, y_max)
                     if dist((x_max + x_min) // 2, (y_max + y_min) // 2, x, y, self.errSize):
-                        # print('del')
+                        # #print('del')
                         f['fordel'] = True
                         break
                 self.update_fig()
@@ -827,7 +882,7 @@ class MyWindow(pyglet.window.Window):
                                 if fig['name'] == 'image':
                                     # [{'id': 1, 'name': 'image', 'p': [{'x': 417, 'y': 224}, {'x': 1017, 'y': 561}], 'image': 'tmp/_2020_01_17_21_30_24.png.resize.png', 'thickness': 4, 'fordel': False}]
                                     size = (int(x2 - x1), int(y2 - y1))
-                                    # print(size)
+                                    # #print(size)
                                     self.images[fig['image']] = self.images[fig['image']].resize(size)
                                     # resized_image = self.original_image.resize(size)
 
@@ -929,6 +984,23 @@ class MyWindow(pyglet.window.Window):
         self.isResize = False
 
     def on_draw(self):
+        # Перевіряємо наявність зовнішніх даних та підвантажуємо їх за потребою
+
+        # file_name = "tmp/shedule.shf"
+        # if os.path.exists(file_name):
+        #     #print("#read data")
+        #     #read data
+        #     with open(file_name, "rb") as fp:  # Unpickling
+        #         data = pickle.load(fp)
+        #     nnam = data['image']
+        #     x0, y0, width, height = data['x0'], data['y0'], data['width'], data['height']
+        #     #print("Перед self.insert_image_from_file(")
+        #     self.insert_image_from_file( nnam, x0, y0, width, height)
+        #     #print("Після self.insert_image_from_file(")
+        #     # remove file
+        #     #print(" remove file")
+        #     os.remove(file_name)
+
         # draw figures in visible part of window
         if self.drawRight:
             # if True:
@@ -942,7 +1014,10 @@ class MyWindow(pyglet.window.Window):
                 for x in range(0, w, self.step):
                     draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1, smooth=self.isSmooth)
             count = 0
+            # print("--- ", 5)
+            # print(self.figures)
             for f in self.figures:
+                # print(6)
                 x_min, y_min, x_max, y_max = border_polyline(f['p'])
                 x_min, y_min = self.canvas_to_screen(x_min, y_min)
                 x_max, y_max = self.canvas_to_screen(x_max, y_max)
@@ -988,6 +1063,7 @@ class MyWindow(pyglet.window.Window):
                         x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
                         draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'])
                     elif f['name'] == 'image':
+                        # print(7)
                         x0 = f['p'][0]['x']
                         y0 = f['p'][0]['y']
                         x = f['p'][1]['x']
@@ -1025,6 +1101,8 @@ class MyWindow(pyglet.window.Window):
                     draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
             # # Це щоб не було засвітки на кнопках
             # rectangle(10000, 10000, 10001, 10001, color=(1, 1, 1, 1), thickness=1)
+            if self.figuresPanelVisible:
+                self.draw_figures_panel()
             if self.colorPanelVisible:
                 self.draw_color_panel()
             if self.widthPanelVisible:
@@ -1040,12 +1118,8 @@ class MyWindow(pyglet.window.Window):
                         x2, y2 = self.canvas_to_screen(x2, y2)
                         draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
                                        color=self.ramkaColor, thickness=self.ramkaThickness)
-                        # витавляємо малюнок корзини
+
                         draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
-                        # self.trash_image.blit(self.selDel['x1'] + self.cx,
-                        #                       self.selDel['y1'] + self.cy)
-                        # self.resize_image.blit(self.selRes['x1'] + self.cx,
-                        #                        self.selRes['y1'] + self.cy)
                         close_cross(self.selDel['x1'] + 0, self.selDel['y1'] + 0,
                                     self.selDel['x2'] + 0, self.selDel['y2'] + 0,
                                     color=self.ramkaColor, thickness=self.ramkaThickness
@@ -1066,8 +1140,6 @@ class MyWindow(pyglet.window.Window):
             if self.isExit:
                 self.label.draw()
 
-        # draw_fill_ellipse(40, 400, 800, 50,  color=(0, 0, 0, 1), thickness=10)
-
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self.clear()
         self.cy -= scroll_y * 10
@@ -1084,27 +1156,21 @@ class MyWindow(pyglet.window.Window):
 
     def closeApp(self):
         raise SystemExit
-        # frame.close()
-        # window.close()
+
+    def wxStart(self):
+        app = wx.App()
+        frame = MainFrame()
+        # frame.SetWindowStyle(style=wx.STAY_ON_TOP)  # | wx.TAB_TRAVERSAL)
+        frame.SetSize(size=(35, 55))
+        frame.SetPosition((120, 600))
+        # frame.SetPosition((1200, 600))
+        frame.Show()
+        y = threading.Thread(target=app.MainLoop)
+        y.setDaemon(True)
+        y.start()
 
 
-
-def wxStart():
-    app = wx.App()
-    frame = MainFrame()
-    frame.SetWindowStyle(style=wx.STAY_ON_TOP)  # | wx.TAB_TRAVERSAL)
-    frame.SetSize(size=(34, 280))
-    frame.Show()
-    # frame.SetPosition()
-    # frame.SetTransparent(64)
-
-    y = threading.Thread(target=app.MainLoop)
-    y.setDaemon(True)
-    y.start()
-
-
-
-window = None
+# window = None
 
 
 def oglStart():
@@ -1119,6 +1185,4 @@ def oglStart():
 
 
 if __name__ == "__main__":
-    wxStart()
     oglStart()
-
