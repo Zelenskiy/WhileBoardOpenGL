@@ -214,7 +214,7 @@ class MyWindow(pyglet.window.Window):
         for btn in self.figuresPanelButtons:
             # Малюємо фігури на відповідних місцях панелі
             self.numVertex = btn['id']
-            draw_poly(btn['x1'], btn['y1'], btn['x2'], btn['y2'], id=btn['id'], numPoints=btn['id'], color=self.penColor,fon_color=self.fonColor)
+            draw_poly(btn['x1'], btn['y1'], btn['x2'], btn['y2'], fill=self.isFill, id=btn['id'], numPoints=btn['id'], color=self.penColor,fon_color=self.fonColor)
 
     def draw_width_panel(self):
         for btn in self.widthPanelButtons:
@@ -311,8 +311,7 @@ class MyWindow(pyglet.window.Window):
             {'id': 3, 'text': 'line', 'image': None, 'tool': 3,
              'sel': False, 'align': 'left'},
             {'id': 6, 'text': 'rectangle', 'image': None, 'tool': 4, 'sel': False, 'align': 'left'},
-            {'id': 5, 'text': 'ellipse', 'image': None,
-             'tool': 5, 'sel': False, 'align': 'left'},
+            {'id': 5, 'text': 'ellipse', 'image': pyglet.resource.image('img/FillNotFill.png'), 'tool': 0, 'sel': False, 'align': 'left'},
             {'id': 26, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
              'sel': False, 'align': 'left'},
             {'id': 101, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 0,
@@ -698,7 +697,8 @@ class MyWindow(pyglet.window.Window):
                         #     self.tool = 4
                         # elif self.polygone == 40:
                         #     self.tool = 5
-
+                    elif btn['id'] == 5:
+                        self.isFill = not self.isFill
                     elif btn['id'] == 26:  # Діалогове вікно
                         # hide main window
                         self.set_visible(False)
@@ -785,9 +785,14 @@ class MyWindow(pyglet.window.Window):
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
+                elif self.tool == 4:  # rectangle
+                    self.x0, self.y0 = self.screen_to_canvas(x, y)
+                    self.poly.clear()
+                    self.poly.append({'x': self.x0, 'y': self.y0})
                 elif self.tool == 5 or self.tool == 6:  # ellipse
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
-
+                    self.poly.clear()
+                    self.poly.append({'x': self.x0, 'y': self.y0})
                 elif self.tool == 26:  # scheenshot mode
                     pass
 
@@ -839,13 +844,8 @@ class MyWindow(pyglet.window.Window):
                     draw_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                                  thickness=self.penWidth)
             elif self.tool == 6:  # polygone
-                if self.isFill:
-                    # draw_fill_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, thickness=self.penWidth)
-                    draw_fill_regular_polygon(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
-                                 thickness=self.penWidth)
-                else:
-                    draw_poly_wo_bg(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
-                                    thickness=self.penWidth, numPoints=self.numVertex, id=self.numVertex)
+                draw_poly_wo_bg(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
+                                    fill=self.isFill, thickness=self.penWidth, numPoints=self.numVertex, id=self.numVertex)
 
             elif self.tool == 4:
                 self.clear()
@@ -974,6 +974,28 @@ class MyWindow(pyglet.window.Window):
                 k['thickness'] = self.penWidth
                 k['fordel'] = False
                 self.figures.append(k)
+            elif self.tool == 6:
+                k = {}
+
+                x0, y0 = self.x0, self.y0
+                xx, yy = self.screen_to_canvas(x, y)
+                # self.poly.append({'x': xx, 'y': y0})
+                # self.poly.append({'x': xx, 'y': yy})
+                self.poly.append({'x': xx, 'y': yy})
+
+                self.id += 1
+                k['id'] = self.id
+                if self.isFill:
+                    k['name'] = 'polygone_fill'
+                else:
+                    k['name'] = 'polygone'
+                k['p'] = self.poly.copy()
+                k['numVertex'] = self.numVertex
+                k['fill'] = self.isFill
+                k['color'] = self.penColor
+                k['thickness'] = self.penWidth
+                k['fordel'] = False
+                self.figures.append(k)
             elif self.tool == 5:
                 k = {}
                 self.poly = []
@@ -1097,6 +1119,15 @@ class MyWindow(pyglet.window.Window):
                         x3, y3 = self.canvas_to_screen(f['p'][2]['x'], f['p'][2]['y'])
                         x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
                         draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'])
+                    elif f['name'] == 'polygone' or f['name'] == 'polygone_fill' :
+                        x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
+                        x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
+                        # x3, y3 = self.canvas_to_screen(f['p'][2]['x'], f['p'][2]['y'])
+                        # x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
+
+                        draw_poly_wo_bg(x1, y1, x2, y2,  id=f['numVertex'], numPoints=f['numVertex'], color=f['color'],
+                                             fill=f['fill'], thickness=f['thickness'])
+                        # draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'])
                     elif f['name'] == 'image':
                         # print(7)
                         x0 = f['p'][0]['x']
@@ -1129,10 +1160,7 @@ class MyWindow(pyglet.window.Window):
                     draw_poly(x + 2, y, x + 28, y + 28, id=self.numVertex, numPoints=self.numVertex,
                               color=self.penColor, fon_color=self.fonColor, fill=self.isFill)
                     draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
-                if btn['id'] == 5:
-                    if self.isFill:
-                        draw_fill_ellipse(x , y , x + 24, y + 24, numPoints=100, color=self.penColor)
-                        draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+
                 if self.tool == btn['tool']:
                     draw_fill_circle(x + 5, y + 34, 3, color=self.penColor)
                     draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
