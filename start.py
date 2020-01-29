@@ -605,7 +605,7 @@ class MyWindow(pyglet.window.Window):
         self.clear()
 
     def on_mouse_press(self, x, y, button, modifier):
-        # window.clear()
+
         self.f = True
         # Перевіряємо чи треба виходити
         if self.isExit:

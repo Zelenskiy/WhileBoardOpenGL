@@ -537,8 +537,8 @@ def border_polyline(points):
             x_min = p['x']
         if p['y'] < y_min:
             y_min = p['y']
-
     return x_min, y_min, x_max, y_max
+
 
 
 def draw_poly(x1, y1, x2, y2, id=4, numPoints=4, color=(0, 0, 0, 1), fon_color=(1, 1, 1, 1), fill=False):
