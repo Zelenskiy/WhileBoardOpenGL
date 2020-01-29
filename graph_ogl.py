@@ -47,7 +47,7 @@ begin
      if Canvas.Pixels[x,y] <> pen_C then
         Canvas.Pixels[x,y] := HightBright(pen_C, fon_C, c);
 end;
-  
+
 """
 
 
@@ -338,10 +338,9 @@ def draw_ramka_top(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glEnd()
 
 
-
 def draw_ellipse(x1, y1, x2, y2, numPoints=1000, color=(0, 0, 0, 1), thickness=1):
-    x0, y0 = (x1+x2)/2, (y1+y2)/2
-    rx, ry = abs(x1-x2)/2, abs(y1-y2)/2
+    x0, y0 = (x1 + x2) / 2, (y1 + y2) / 2
+    rx, ry = abs(x1 - x2) / 2, abs(y1 - y2) / 2
     verts = []
     for i in range(numPoints):
         angle = math.radians(float(i) / numPoints * 360.0)
@@ -352,6 +351,7 @@ def draw_ellipse(x1, y1, x2, y2, numPoints=1000, color=(0, 0, 0, 1), thickness=1
     circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
     glColor4f(*color)
     circle.draw(GL_LINE_LOOP)
+
 
 def draw_fill_ellipse(x1, y1, x2, y2, numPoints=1000, color=(0, 0, 0, 1), thickness=1):
     x0, y0 = (x1 + x2) / 2, (y1 + y2) / 2
@@ -368,6 +368,7 @@ def draw_fill_ellipse(x1, y1, x2, y2, numPoints=1000, color=(0, 0, 0, 1), thickn
     circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
     glColor4f(*color)
     circle.draw(GL_LINE_LOOP)
+
 
 def draw_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
     numPoints = 200
@@ -448,7 +449,6 @@ def draw_fill_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
 #     glVertex2f(x1, y1)
 #     glEnd()
 def draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=(1, 0, 0, 1), thickness=1):
-
     # k = 0
     # for i in range(k):
     #     x1, x2, x3, x4 = x2, x3, x4, x1
@@ -540,26 +540,33 @@ def border_polyline(points):
 
     return x_min, y_min, x_max, y_max
 
-# class MyFloatWindow(pyglet.window.Window):
-#
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#
-#     def on_key_press(self, symbol, modifiers):
-#         print("aaaaaaaaa")
-#
 
-# class DlgWindow(pyglet.window.Window):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.set_location(50,100)
-#
-#
-#
-#     def on_mouse_press(self, x, y, button, modifiers):
-#         window.insert_screenshot()
-#         winPanel.close()
-#
-#
-#     def on_close(self):
-#         window.set_visible(True)
+def draw_poly(x1, y1, x2, y2, id=4, numPoints=4, color=(0, 0, 0, 1), fon_color=(1, 1, 1, 1), fill=False):
+    x0, y0 = (x1 + x2) // 2, (y1 + y2) // 2
+    r = (x0 - x1)
+    draw_fill_rectangle(x0 - r, y0 - r, x0 + r, y0 + r, color=fon_color)
+    if id == 4:
+        angle = 45
+    else:
+        angle = 90
+    if fill:
+        draw_fill_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=2)
+    else:
+        draw_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=2)
+
+
+def draw_poly_wo_bg(x1, y1, x2, y2, id=4, numPoints=4, color=(0, 0, 0, 1), fon_color=(1, 1, 1, 1), fill=False,
+                    thickness=4):
+    x0, y0 = (x1 + x2) // 2, (y1 + y2) // 2
+    r = (x0 - x1)
+    if id == 4:
+        angle = 45
+    elif id == 3:
+        angle = -30
+    else:
+        angle = 90
+
+    if fill:
+        draw_fill_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
+    else:
+        draw_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
