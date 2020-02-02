@@ -586,4 +586,5 @@ def draw_poly_wo_bg(x1, y1, x2, y2, id=4, numPoints=4, color=(0, 0, 0, 1), fon_c
     if fill:
         draw_fill_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
     else:
-        draw_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
+        # draw_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
+        draw_polygon(x1, y1, x2, y2, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
