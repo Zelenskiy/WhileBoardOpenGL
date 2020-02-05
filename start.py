@@ -282,7 +282,7 @@ class MyWindow(pyglet.window.Window):
         self.penWidth = 7
         self.errSize = 20
         self.fullscr = False
-        self.penColor = (0, 0, 1, 1)
+        self.penColor = self.colorOrrange
         self.ramkaColor = (1, 0.5, 0, 1)
         self.ramkaThickness = 2
         self.fonColor = (0.91, 0.98, 0.79, 1.0)
@@ -1238,6 +1238,9 @@ class MyWindow(pyglet.window.Window):
         y.setDaemon(True)
         y.start()
 
+    def on_show(self):
+        window.maximize()
+
 
 # window = None
 
@@ -1247,6 +1250,7 @@ def oglStart():
 
     window = MyWindow(1366, 700, caption="WhiteBoard", resizable=True)
     window.set_location(2, 24)
+
     # window.maximize()
     window.clear()
     window.on_draw()
