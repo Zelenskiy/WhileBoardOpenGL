@@ -246,6 +246,56 @@ class MyWindow(pyglet.window.Window):
         with open("test.wb", "wb") as fp:
             pickle.dump(data, fp)
 
+    def save_options(self):
+        file_name = "settings.wbi"
+        data = {}
+        data['colorOrrange'] = self.colorOrrange
+        data['numVertex'] = self.numVertex
+        data['isGrid'] = self.isGrid
+        data['isSmooth'] = self.isSmooth
+        data['penWidth'] = self.penWidth
+        data['errSize'] = self.errSize
+        data['fullscr'] = self.fullscr
+        data['penColor'] = self.penColor
+        data['ramkaColor'] = self.ramkaColor
+        data['ramkaThickness'] = self.ramkaThickness
+        data['fonColor'] = self.fonColor
+        data['gridColor'] = self.gridColor
+        with open(file_name, "wb") as fp:
+            pickle.dump(data, fp)
+
+    def load_options(self):
+        file_name = "settings.wbi"
+        if os.path.exists(file_name):
+            with open(file_name, "rb") as fp:
+                data = pickle.load(fp)
+            self.colorOrrange = data['colorOrrange']
+            self.numVertex = data['numVertex']
+            self.isGrid = data['isGrid']
+            self.isSmooth = data['isSmooth']
+            self.penWidth = data['penWidth']
+            self.errSize = data['errSize']
+            self.fullscr = data['fullscr']
+            self.penColor = data['penColor']
+            self.ramkaColor = data['ramkaColor']
+            self.ramkaThickness = data['ramkaThickness']
+            self.fonColor = data['fonColor']
+            self.gridColor = data['gridColor']
+        else:
+            self.colorOrrange = (1.0, 0.5, 0.0, 1.0)
+            self.numVertex = 4
+            self.isGrid = True
+            self.isSmooth = False
+            self.penWidth = 7
+            self.errSize = 20
+            self.fullscr = False
+            self.penColor = self.colorOrrange
+            self.ramkaColor = (1, 0.5, 0, 1)
+            self.ramkaThickness = 2
+            self.fonColor = (0.91, 0.98, 0.79, 1.0)
+            self.gridColor = (0.82, 0.82, 0.82, 0.5)
+            self.save_options()
+
     def load(self):
 
         self.figures = []
@@ -275,18 +325,19 @@ class MyWindow(pyglet.window.Window):
         self.set_minimum_size(400, 30)
 
         # ============ Options ================
-        self.colorOrrange = (1.0, 0.5, 0.0, 1.0)
-        self.numVertex = 4
-        self.isGrid = True
-        self.isSmooth = False
-        self.penWidth = 7
-        self.errSize = 20
-        self.fullscr = False
-        self.penColor = self.colorOrrange
-        self.ramkaColor = (1, 0.5, 0, 1)
-        self.ramkaThickness = 2
-        self.fonColor = (0.91, 0.98, 0.79, 1.0)
-        self.gridColor = (0.82, 0.82, 0.82, 0.5)
+        self.load_options()
+        # self.colorOrrange = (1.0, 0.5, 0.0, 1.0)
+        # self.numVertex = 4
+        # self.isGrid = True
+        # self.isSmooth = False
+        # self.penWidth = 7
+        # self.errSize = 20
+        # self.fullscr = False
+        # self.penColor = self.colorOrrange
+        # self.ramkaColor = (1, 0.5, 0, 1)
+        # self.ramkaThickness = 2
+        # self.fonColor = (0.91, 0.98, 0.79, 1.0)
+        # self.gridColor = (0.82, 0.82, 0.82, 0.5)
 
         # ============ End options ================
 
@@ -499,8 +550,6 @@ class MyWindow(pyglet.window.Window):
         # with open(file_name, "wb") as fp:
         #     pickle.dump(data, fp)
         window.insert_image_from_file(nnam, x0, y0, width, height)
-
-
 
     def insert_image_from_file(self, nnam, x0, y0, width, height):
         # print("insert_image_from_file 1 ")
@@ -1226,6 +1275,7 @@ class MyWindow(pyglet.window.Window):
         self.label.draw()
 
     def closeApp(self):
+        self.save_options()
         raise SystemExit
 
     def wxStart(self):
