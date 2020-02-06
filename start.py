@@ -248,7 +248,7 @@ class MyWindow(pyglet.window.Window):
             pickle.dump(data, fp)
 
     def save_options(self):
-        file_name = "settings.ini"
+        file_name = "wb.ini"
 
         data = {}
         data['colorOrrange'] = self.colorOrrange
@@ -270,7 +270,7 @@ class MyWindow(pyglet.window.Window):
             config.write(configfile)
 
     def load_options(self):
-        file_name = "settings.ini"
+        file_name = "wb.ini"
         if os.path.exists(file_name):
             config = configparser.ConfigParser()
             config.read(file_name)
