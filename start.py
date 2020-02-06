@@ -485,6 +485,9 @@ class MyWindow(pyglet.window.Window):
         nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
         grab.screenshot_to_file(nnam)
         width = 600
+        window.set_visible(True)
+        window.maximize()
+
         w = window.width
         h = window.height
         height = 9 * width // 16
@@ -497,8 +500,7 @@ class MyWindow(pyglet.window.Window):
         #     pickle.dump(data, fp)
         window.insert_image_from_file(nnam, x0, y0, width, height)
 
-        window.set_visible(True)
-        window.maximize()
+
 
     def insert_image_from_file(self, nnam, x0, y0, width, height):
         # print("insert_image_from_file 1 ")
