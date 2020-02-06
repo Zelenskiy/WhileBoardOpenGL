@@ -23,6 +23,7 @@ from sys import platform
 # from dialogWindow import *
 import grab
 import os.path
+import configparser
 
 if platform == "win32" or platform == "cygwin":
     pass
@@ -247,7 +248,8 @@ class MyWindow(pyglet.window.Window):
             pickle.dump(data, fp)
 
     def save_options(self):
-        file_name = "settings.wbi"
+        file_name = "settings.ini"
+
         data = {}
         data['colorOrrange'] = self.colorOrrange
         data['numVertex'] = self.numVertex
@@ -261,26 +263,36 @@ class MyWindow(pyglet.window.Window):
         data['ramkaThickness'] = self.ramkaThickness
         data['fonColor'] = self.fonColor
         data['gridColor'] = self.gridColor
-        with open(file_name, "wb") as fp:
-            pickle.dump(data, fp)
+
+        config = configparser.ConfigParser()
+        config['MAIN'] = data
+        with open(file_name, 'w') as configfile:
+            config.write(configfile)
 
     def load_options(self):
-        file_name = "settings.wbi"
+        file_name = "settings.ini"
         if os.path.exists(file_name):
-            with open(file_name, "rb") as fp:
-                data = pickle.load(fp)
-            self.colorOrrange = data['colorOrrange']
-            self.numVertex = data['numVertex']
-            self.isGrid = data['isGrid']
-            self.isSmooth = data['isSmooth']
-            self.penWidth = data['penWidth']
-            self.errSize = data['errSize']
-            self.fullscr = data['fullscr']
-            self.penColor = data['penColor']
-            self.ramkaColor = data['ramkaColor']
-            self.ramkaThickness = data['ramkaThickness']
-            self.fonColor = data['fonColor']
-            self.gridColor = data['gridColor']
+            config = configparser.ConfigParser()
+            config.read(file_name)
+            data = config['MAIN']
+            s = data['colororrange'].strip()[1:-1].split(',')
+            self.colorOrrange = (float(s[0]), float(s[1]), float(s[2]), float(s[3]))
+            s = data['pencolor'].strip()[1:-1].split(',')
+            self.penColor = (float(s[0]), float(s[1]), float(s[2]), float(s[3]))
+            s = data['ramkacolor'].strip()[1:-1].split(',')
+            self.ramkaColor = (float(s[0]), float(s[1]), float(s[2]), float(s[3]))
+            s = data['foncolor'].strip()[1:-1].split(',')
+            self.fonColor = (float(s[0]), float(s[1]), float(s[2]), float(s[3]))
+            s = data['gridcolor'].strip()[1:-1].split(',')
+            self.gridColor = (float(s[0]), float(s[1]), float(s[2]), float(s[3]))
+            self.numVertex = int(data['numvertex'])
+            self.isGrid = data['isgrid'] == 'True'
+            self.isSmooth = data['issmooth'] == 'True'
+            self.penWidth = int(data['penwidth'])
+            self.errSize = int(data['errSize'])
+            self.fullscr = data['fullscr']  == 'True'
+            self.ramkaThickness = int(data['ramkathickness'])
+
         else:
             self.colorOrrange = (1.0, 0.5, 0.0, 1.0)
             self.numVertex = 4
