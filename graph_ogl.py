@@ -99,11 +99,43 @@ def rfpart(x):
     return 1.0 - fpart(x)
 
 
-def draw_line_1(x0, y0, x1, y1, color, thickness=1, smooth=False, dash=(1, 0)):
+def draw_line_1(x0, y0, x1, y1, color, thickness=1, smooth=False, dash=0):
     if smooth:
         draw_vu_line(x0, y0, x1, y1, color, thickness)
     else:
-        draw_line(x0, y0, x1, y1, color, thickness)
+        if dash == 0:
+            draw_line(x0, y0, x1, y1, color, thickness)
+        else:
+            dx = (x1 - x0)
+            dy = (y1 - y0)
+            if dx > 0:
+                sx = 1
+            else:
+                sx = -1
+            if dy > 0:
+                sy = 1
+            else:
+                sy = -1
+            if dx != 0:
+                tangle = math.atan(dy / dx)
+            else:
+                tangle = -sy * math.pi / 2
+            x_old, y_old = x0, y0
+            dash_len = thickness * 4
+            dash_len_x = dash_len * math.cos(tangle)
+            dash_len_y = dash_len * math.sin(tangle)
+            l = math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2)
+            k = int(l / dash_len)
+            for e in range(1, k + 2):
+                x = x0 + sx * (e * dash_len_x - dash_len_x)
+                y = y0 + sx * (e * dash_len_y - dash_len_y)
+                if e % 2 != 1:
+                    draw_line(x_old, y_old, x, y, color, thickness)
+                x_old, y_old = x, y
+            # pass
+            # x_old = x0 + sx * (k * dash_len_x - dash_len_x)
+            # y_old = y0 + sx * (k * dash_len_y - dash_len_y)
+            # draw_line(x_old, y_old, x1, y1, color, thickness)
 
 
 def draw_vu_line(x0, y0, x1, y1, color, thickness=1):
@@ -250,6 +282,14 @@ def longer_for_polyline(xx0, yy0, xx, yy, thickness, k):
     return x0_, y0_, x_, y_
 
 
+# def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
+#     glColor4f(*color)
+#     glLineWidth(thickness)
+#     glBegin(GL_LINES)
+#     glVertex2f(x0, y0)
+#     glVertex2f(x, y)
+#     glEnd()
+
 def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
     glColor4f(*color)
     glLineWidth(thickness)
@@ -264,7 +304,7 @@ def dist_(x0, y0, x, y):
 
 
 def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thickness=4, smooth=False, arrow=0,
-                  dash=(1, 0)):
+                  dash=0):
     # print ("thickness - ", thickness)
     # glColor4f(*color)
     # glLineWidth(thickness)
@@ -284,17 +324,17 @@ def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thic
     x0_, y0_ = x - (l - LineLen) * math.cos(angle), y + (l - LineLen) * math.sin(angle)
     # x_, y_ = x,y
     if arrow == 3:
-        draw_line_1(x0, y0, x_, y_, color, thickness=thickness)
+        draw_line_1(x0, y0, x_, y_, color, thickness=thickness, dash=dash)
         draw_arrow_head(x, y, angle, color, thickness)
     elif arrow == 2:
-        draw_line_1(x0_, y0_, x, y, color, thickness=thickness)
+        draw_line_1(x0_, y0_, x, y, color, thickness=thickness, dash=dash)
         draw_arrow_head(x0, y0, angle2, color, thickness)
     elif arrow == 1:
-        draw_line_1(x0_, y0_, x_, y_, color, thickness=thickness)
+        draw_line_1(x0_, y0_, x_, y_, color, thickness=thickness, dash=dash)
         draw_arrow_head(x, y, angle, color, thickness)
         draw_arrow_head(x0, y0, angle2, color, thickness)
     else:
-        draw_line_1(x0, y0, x, y, color, thickness=thickness)
+        draw_line_1(x0, y0, x, y, color, thickness=thickness, dash=dash)
 
 
 # def rectangle_vulg(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
@@ -383,6 +423,7 @@ def draw_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
     glColor4f(*color)
     circle.draw(GL_LINE_LOOP)
 
+
 def draw_fill_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 0, 0, 1), thickness=1):
     x0, y0 = (x1 + x2) / 2, (y1 + y2) / 2
     rx, ry = abs(x1 - x2) / 2, abs(y1 - y2) / 2
@@ -402,7 +443,7 @@ def draw_fill_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 0, 0
     circle.draw(GL_LINE_LOOP)
 
 
-def draw_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 0, 0, 1), thickness=1):
+def draw_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 0, 0, 1), thickness=1, dash=0):
     x0, y0 = (x1 + x2) / 2, (y1 + y2) / 2
     rx, ry = abs(x1 - x2) / 2, abs(y1 - y2) / 2
     verts = []
@@ -414,7 +455,17 @@ def draw_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 0, 0, 1),
     glLineWidth(thickness)
     circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
     glColor4f(*color)
-    circle.draw(GL_LINE_LOOP)
+    if dash == 0:
+        circle.draw(GL_LINE_LOOP)
+    else:
+        # circle.draw(GL_LINE_LOOP)
+        x0, y0 = verts[0], verts[1]
+        for i in range(0, len(verts) // 2 + 1):
+            x, y = verts[i * 2 - 2], verts[i * 2 - 1]
+            draw_line_mod(x0, y0, x, y, color=color, fon_color=(1, 0, 0, 1), thickness=thickness,
+                          smooth=False, arrow=0, dash=dash)
+            x0, y0 = x, y
+
 
 def draw_regular_polygon(x0, y0, r, numPoints=3, angleStart=90, color=(0, 0, 0, 1), thickness=1):
     # x1, x2 = x0 - r, x0 + r
@@ -483,7 +534,7 @@ def draw_fill_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
 #     glVertex2f(x4, y4)
 #     glVertex2f(x1, y1)
 #     glEnd()
-def draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=(1, 0, 0, 1), thickness=1):
+def draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=(1, 0, 0, 1), thickness=1, dash=0):
     # k = 0
     # for i in range(k):
     #     x1, x2, x3, x4 = x2, x3, x4, x1
@@ -496,25 +547,29 @@ def draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=(1, 0, 0, 1), thickness
     # y2 -= thickness // 2
     # y3 += thickness // 2
     # y4 += thickness // 2
+    draw_line_1(x1, y1, x2, y2, color, thickness=thickness, smooth=False, dash=dash)
+    draw_line_1(x3, y3, x2, y2, color, thickness=thickness, smooth=False, dash=dash)
+    draw_line_1(x3, y3, x4, y4, color, thickness=thickness, smooth=False, dash=dash)
+    draw_line_1(x1, y1, x4, y4, color, thickness=thickness, smooth=False, dash=dash)
 
-    glColor4f(*color)
-    glLineWidth(thickness)
-    glBegin(GL_LINES)
-    glVertex2f(x1, y1)
-    glVertex2f(x2, y2)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex2f(x2, y2)
-    glVertex2f(x3, y3)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex2f(x3, y3)
-    glVertex2f(x4, y4)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex2f(x4, y4)
-    glVertex2f(x1, y1)
-    glEnd()
+    # glColor4f(*color)
+    # glLineWidth(thickness)
+    # glBegin(GL_LINES)
+    # glVertex2f(x1, y1)
+    # glVertex2f(x2, y2)
+    # glEnd()
+    # glBegin(GL_LINES)
+    # glVertex2f(x2, y2)
+    # glVertex2f(x3, y3)
+    # glEnd()
+    # glBegin(GL_LINES)
+    # glVertex2f(x3, y3)
+    # glVertex2f(x4, y4)
+    # glEnd()
+    # glBegin(GL_LINES)
+    # glVertex2f(x4, y4)
+    # glVertex2f(x1, y1)
+    # glEnd()
 
 
 def draw_fill_rectangle(x1, y1, x2, y2, color):
@@ -593,7 +648,7 @@ def draw_poly(x1, y1, x2, y2, id=4, numPoints=4, color=(0, 0, 0, 1), fon_color=(
 
 
 def draw_poly_wo_bg(x1, y1, x2, y2, id=4, numPoints=4, color=(0, 0, 0, 1), fon_color=(1, 1, 1, 1), fill=False,
-                    thickness=4):
+                    thickness=4, dash=0):
     x0, y0 = (x1 + x2) // 2, (y1 + y2) // 2
     r = (x0 - x1)
     if id == 4:
@@ -609,4 +664,4 @@ def draw_poly_wo_bg(x1, y1, x2, y2, id=4, numPoints=4, color=(0, 0, 0, 1), fon_c
 
     else:
         # draw_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
-        draw_polygon(x1, y1, x2, y2, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
+        draw_polygon(x1, y1, x2, y2, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness, dash=dash)

@@ -232,6 +232,7 @@ class MyWindow(pyglet.window.Window):
             draw_fill_rectangle(btn['x1'], btn['y1'], btn['x2'], btn['y2'], self.fonColor)
             btn['image'].blit(btn['x1'], btn['y1'])
             # draw_fill_rectangle(btn['x1'], y - btn['width'] // 2, btn['x2'], y + btn['width'] // 2, self.penColor)
+
     def dash_arrow_panel(self):
         for btn in self.dashPanelButtons:
             h = btn['y2'] - btn['y1']
@@ -259,7 +260,7 @@ class MyWindow(pyglet.window.Window):
 
         data = {}
         data['colorOrrange'] = self.colorOrrange
-        data['numVertex'] = self.numVertex
+        # data['numVertex'] = self.numVertex
         data['isGrid'] = self.isGrid
         data['isSmooth'] = self.isSmooth
         data['penWidth'] = self.penWidth
@@ -292,17 +293,17 @@ class MyWindow(pyglet.window.Window):
             self.fonColor = (float(s[0]), float(s[1]), float(s[2]), float(s[3]))
             s = data['gridcolor'].strip()[1:-1].split(',')
             self.gridColor = (float(s[0]), float(s[1]), float(s[2]), float(s[3]))
-            self.numVertex = int(data['numvertex'])
+            # self.numVertex = int(data['numvertex'])
             self.isGrid = data['isgrid'] == 'True'
             self.isSmooth = data['issmooth'] == 'True'
             self.penWidth = int(data['penwidth'])
             self.errSize = int(data['errSize'])
-            self.fullscr = data['fullscr']  == 'True'
+            self.fullscr = data['fullscr'] == 'True'
             self.ramkaThickness = int(data['ramkathickness'])
 
         else:
             self.colorOrrange = (1.0, 0.5, 0.0, 1.0)
-            self.numVertex = 4
+            # self.numVertex = 4
             self.isGrid = True
             self.isSmooth = False
             self.penWidth = 7
@@ -345,8 +346,9 @@ class MyWindow(pyglet.window.Window):
 
         # ============ Options ================
         self.load_options()
+
+        self.numVertex = 4
         # self.colorOrrange = (1.0, 0.5, 0.0, 1.0)
-        # self.numVertex = 4
         # self.isGrid = True
         # self.isSmooth = False
         # self.penWidth = 7
@@ -572,7 +574,6 @@ class MyWindow(pyglet.window.Window):
         width = 600
         window.set_visible(True)
         window.maximize()
-
 
         w = window.width
         h = window.height
@@ -937,7 +938,7 @@ class MyWindow(pyglet.window.Window):
                 # self.clear()
             elif self.tool == 3:
                 draw_line_mod(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, fon_color=self.fonColor,
-                              thickness=self.penWidth, arrow=self.arr)
+                              thickness=self.penWidth, arrow=self.arr, dash=self.dash)
                 # draw_line(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                 #           thickness=self.penWidth)
             elif self.tool == 5:  # ellipse
@@ -950,7 +951,8 @@ class MyWindow(pyglet.window.Window):
                                  thickness=self.penWidth)
             elif self.tool == 6:  # polygone
                 draw_poly_wo_bg(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
-                                fill=self.isFill, thickness=self.penWidth, numPoints=self.numVertex, id=self.numVertex)
+                                fill=self.isFill, thickness=self.penWidth, numPoints=self.numVertex, id=self.numVertex,
+                                dash=self.dash)
 
             elif self.tool == 4:
                 self.clear()
@@ -971,7 +973,8 @@ class MyWindow(pyglet.window.Window):
                     x2, y2 = self.canvas_to_screen(self.x0, y - self.cy)
                     x3, y3 = self.canvas_to_screen(x - self.cx, y - self.cy)
                     x4, y4 = self.canvas_to_screen(x - self.cx, self.y0)
-                    draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=self.penColor, thickness=self.penWidth)
+                    draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=self.penColor, thickness=self.penWidth,
+                                   dash=self.dash)
 
 
             elif self.tool == 8:
@@ -1055,6 +1058,7 @@ class MyWindow(pyglet.window.Window):
                 k['color'] = self.penColor
                 k['thickness'] = self.penWidth
                 k['arrow'] = self.arr
+                k['dash'] = self.dash
                 k['fordel'] = False
                 self.figures.append(k)
             elif self.tool == 4:
@@ -1077,6 +1081,7 @@ class MyWindow(pyglet.window.Window):
                 k['p'] = self.poly.copy()
                 k['color'] = self.penColor
                 k['thickness'] = self.penWidth
+                k['dash'] = self.dash
                 k['fordel'] = False
                 self.figures.append(k)
             elif self.tool == 6:
@@ -1097,6 +1102,7 @@ class MyWindow(pyglet.window.Window):
                 k['p'] = self.poly.copy()
                 k['numVertex'] = self.numVertex
                 k['fill'] = self.isFill
+                k['dash'] = self.dash
                 k['color'] = self.penColor
                 k['thickness'] = self.penWidth
                 k['fordel'] = False
@@ -1203,7 +1209,7 @@ class MyWindow(pyglet.window.Window):
                         x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
                         x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
                         draw_line_mod(x0, y0, x_, y_, color=f['color'], fon_color=self.fonColor,
-                                      thickness=f['thickness'], arrow=f['arrow'])
+                                      thickness=f['thickness'], arrow=f['arrow'], dash=f['dash'])
                     elif f['name'] == 'ellipse':
                         x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
                         x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
@@ -1224,7 +1230,8 @@ class MyWindow(pyglet.window.Window):
                         x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
                         x3, y3 = self.canvas_to_screen(f['p'][2]['x'], f['p'][2]['y'])
                         x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
-                        draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'])
+                        draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'],
+                                       dash=f['dash'])
                     elif f['name'] == 'polygone' or f['name'] == 'polygone_fill':
                         x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
                         x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
@@ -1232,7 +1239,7 @@ class MyWindow(pyglet.window.Window):
                         # x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
 
                         draw_poly_wo_bg(x1, y1, x2, y2, id=f['numVertex'], numPoints=f['numVertex'], color=f['color'],
-                                        fill=f['fill'], thickness=f['thickness'])
+                                        fill=f['fill'], thickness=f['thickness'], dash=f['dash'])
                         # draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'])
                     elif f['name'] == 'image':
                         # print(7)
@@ -1312,6 +1319,7 @@ class MyWindow(pyglet.window.Window):
             labelPage.draw()
             if self.isExit:
                 self.label.draw()
+        # draw_line_1(400, 400, 300, 200, self.penColor, thickness=1, smooth=False, dash=1)
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self.clear()
@@ -1354,7 +1362,7 @@ class MyWindow(pyglet.window.Window):
 def oglStart():
     global window
 
-    window = MyWindow(1366, 700, caption="WhiteBoard", resizable=True)
+    window = MyWindow(1920, 1080, caption="WhiteBoard", resizable=True)
     window.set_location(2, 24)
 
     # window.maximize()
