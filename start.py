@@ -387,6 +387,8 @@ class MyWindow(pyglet.window.Window):
             #  'tool': 0, 'sel': False, 'align': 'left'},
             {'id': 106, 'text': 'arrow', 'image': pyglet.resource.image('img/arr.png'), 'tool': 0,
              'sel': False, 'align': 'left'},
+            {'id': 107, 'text': 'dash', 'image': pyglet.resource.image('img/dot.png'), 'tool': 0,
+             'sel': False, 'align': 'left'},
             {'id': 104, 'x': 75, 'y': 5, 'text': '<', 'image': pyglet.resource.image('img/left.png'), 'tool': 0,
              'sel': False, 'align': 'right'},
             {'id': 105, 'x': 5, 'y': 5, 'text': '>', 'image': pyglet.resource.image('img/right.png'), 'tool': 0,
@@ -448,6 +450,7 @@ class MyWindow(pyglet.window.Window):
         self.arr = 0
         self.f = True
         self.drawRight = True
+        # self.drawRight = True
 
         self.step = 50
         self.screen_width = 800
@@ -460,6 +463,7 @@ class MyWindow(pyglet.window.Window):
         self.selRes = {}
         self.id = 0
         self.page = 1
+        self.lastCommand = 1
         self.wxStart()
 
         # self.appDialog = wx.App()
@@ -544,12 +548,14 @@ class MyWindow(pyglet.window.Window):
         window.insert_image_from_file(nnam, x0, y0, width, height)
 
     def insert_screenshot(self):
+        window.lastCommand = 11
         window.set_visible(False)
         nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
         grab.screenshot_to_file(nnam)
         width = 600
         window.set_visible(True)
         window.maximize()
+
 
         w = window.width
         h = window.height
@@ -562,6 +568,7 @@ class MyWindow(pyglet.window.Window):
         # with open(file_name, "wb") as fp:
         #     pickle.dump(data, fp)
         window.insert_image_from_file(nnam, x0, y0, width, height)
+        draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
 
     def insert_image_from_file(self, nnam, x0, y0, width, height):
         # print("insert_image_from_file 1 ")
@@ -630,12 +637,16 @@ class MyWindow(pyglet.window.Window):
                 self.penWidth = 1
         elif symbol == 65362:  # move canvas up
             self.cy += 50
+            self.lastCommand = 11
         elif symbol == 65364:  # Change canvas down
             self.cy -= 50
+            self.lastCommand = 11
         elif symbol == 65361:  # Change canvas left
             self.cx -= 50
+            self.lastCommand = 11
         elif symbol == 65363:  # Change canvas right
             self.cx += 50
+            self.lastCommand = 11
         elif symbol == 102:  # full screen
             self.fullscr = not self.fullscr
             self.set_fullscreen(self.fullscr)
@@ -697,6 +708,7 @@ class MyWindow(pyglet.window.Window):
                                 if fig['id'] == self.selFig['fig']:
                                     fig['color'] = self.penColor
 
+                        self.on_draw()
                         break
             if self.figuresPanelVisible:
                 for btn in self.figuresPanelButtons:
@@ -842,7 +854,8 @@ class MyWindow(pyglet.window.Window):
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
-                    self.drawRight = False
+                    self.drawRight = len(self.figures) < 3 or self.lastCommand == 11
+                    # self.drawRight = False
                 elif self.tool == 3:  # line
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
@@ -1106,6 +1119,7 @@ class MyWindow(pyglet.window.Window):
         self.clear()
         self.isMove = False
         self.isResize = False
+        self.lastCommand = 0
 
     def on_draw(self):
         # Перевіряємо наявність зовнішніх даних та підвантажуємо їх за потребою
@@ -1275,6 +1289,7 @@ class MyWindow(pyglet.window.Window):
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self.clear()
         self.cy -= scroll_y * 10
+        self.lastCommand = 11
 
     def on_close(self):
         self.label = pyglet.text.Label('x',
