@@ -121,7 +121,10 @@ def draw_line_1(x0, y0, x1, y1, color, thickness=1, smooth=False, dash=0):
             else:
                 tangle = -sy * math.pi / 2
             x_old, y_old = x0, y0
-            dash_len = thickness * 4
+            if dash==1:
+                dash_len = thickness * 4
+            else:
+                dash_len = thickness * 1
             dash_len_x = dash_len * math.cos(tangle)
             dash_len_y = dash_len * math.sin(tangle)
             l = math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2)

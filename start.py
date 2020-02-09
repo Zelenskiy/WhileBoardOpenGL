@@ -654,16 +654,16 @@ class MyWindow(pyglet.window.Window):
             if self.penWidth < 1:
                 self.penWidth = 1
         elif symbol == 65362:  # move canvas up
-            self.cy += 50
-            self.lastCommand = 11
-        elif symbol == 65364:  # Change canvas down
             self.cy -= 50
             self.lastCommand = 11
+        elif symbol == 65364:  # Change canvas down
+            self.cy += 50
+            self.lastCommand = 11
         elif symbol == 65361:  # Change canvas left
-            self.cx -= 50
+            self.cx += 50
             self.lastCommand = 11
         elif symbol == 65363:  # Change canvas right
-            self.cx += 50
+            self.cx -= 50
             self.lastCommand = 11
         elif symbol == 102:  # full screen
             self.fullscr = not self.fullscr
