@@ -232,6 +232,13 @@ class MyWindow(pyglet.window.Window):
             draw_fill_rectangle(btn['x1'], btn['y1'], btn['x2'], btn['y2'], self.fonColor)
             btn['image'].blit(btn['x1'], btn['y1'])
             # draw_fill_rectangle(btn['x1'], y - btn['width'] // 2, btn['x2'], y + btn['width'] // 2, self.penColor)
+    def dash_arrow_panel(self):
+        for btn in self.dashPanelButtons:
+            h = btn['y2'] - btn['y1']
+            y = btn['y1'] + h // 2
+            draw_fill_rectangle(btn['x1'], btn['y1'], btn['x2'], btn['y2'], self.fonColor)
+            btn['image'].blit(btn['x1'], btn['y1'])
+            # draw_fill_rectangle(btn['x1'], y - btn['width'] // 2, btn['x2'], y + btn['width'] // 2, self.penColor)
 
     def save(self):
         data = {}
@@ -364,6 +371,7 @@ class MyWindow(pyglet.window.Window):
         self.colorPanelVisible = False
         self.widthPanelVisible = False
         self.figuresPanelVisible = False
+        self.dashPanelVisible = False
         self.label = None
         self.buttons = [
             {'id': 8, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
@@ -429,6 +437,14 @@ class MyWindow(pyglet.window.Window):
             {'id': 0, 'x1': 320, 'y1': 10 + 140, 'x2': 48 + 320, 'y2': 10 + 175,
              'image': pyglet.resource.image('img/lineWithArr.png'), 'color': (1, 1, 1, 1)},
         ]
+        self.dashPanelButtons = [
+            {'id': 1, 'x1': 390, 'y1': 10 + 35, 'x2': 48 + 390, 'y2': 10 + 70,
+             'image': pyglet.resource.image('img/shtrLine.png'), 'color': (1, 1, 1, 1)},
+            {'id': 2, 'x1': 390, 'y1': 10 + 70, 'x2': 48 + 390, 'y2': 10 + 105,
+             'image': pyglet.resource.image('img/punktir.png'), 'color': (1, 1, 1, 1)},
+            {'id': 0, 'x1': 390, 'y1': 10 + 105, 'x2': 48 + 390, 'y2': 10 + 140,
+             'image': pyglet.resource.image('img/lineWithArr.png'), 'color': (1, 1, 1, 1)},
+        ]
         self.widthPanelButtons = [
             {'id': 1, 'x1': 250, 'y1': 10 + 35, 'x2': 50 + 282, 'y2': 10 + 70, 'width': 3},
             {'id': 2, 'x1': 250, 'y1': 10 + 70, 'x2': 50 + 282, 'y2': 10 + 105, 'width': 5},
@@ -462,6 +478,7 @@ class MyWindow(pyglet.window.Window):
         self.selDel = {}
         self.selRes = {}
         self.id = 0
+        self.dash = 0
         self.page = 1
         self.lastCommand = 1
         self.wxStart()
@@ -746,6 +763,12 @@ class MyWindow(pyglet.window.Window):
                         self.f = False
                         self.arr = btn['id']
                         self.arrowPanelVisible = False
+            if self.dashPanelVisible:
+                for btn in self.dashPanelButtons:
+                    if btn['x1'] < x < btn['x2'] and btn['y1'] < y < btn['y2']:
+                        self.f = False
+                        self.dash = btn['id']
+                        self.dashPanelVisible = False
             for btn in self.buttons:
                 btn['sel'] = False
                 if btn['align'] == 'right':
@@ -793,6 +816,8 @@ class MyWindow(pyglet.window.Window):
                     #     self.insert_from_clipboard()
                     elif btn['id'] == 106:  # Chang arrow
                         self.arrowPanelVisible = not self.arrowPanelVisible
+                    elif btn['id'] == 107:  # Chang dash
+                        self.dashPanelVisible = not self.dashPanelVisible
                     elif btn['id'] == 105:  # Сторінка вправо
                         self.clear()
                         self.page += 1
@@ -1255,6 +1280,8 @@ class MyWindow(pyglet.window.Window):
                 self.draw_width_panel()
             if self.arrowPanelVisible:
                 self.draw_arrow_panel()
+            if self.dashPanelVisible:
+                self.dash_arrow_panel()
             # рамка виділення
             if self.selFig != {}:
                 for fig in self.figures:
