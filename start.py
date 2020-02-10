@@ -404,6 +404,15 @@ class MyWindow(pyglet.window.Window):
             {'id': 105, 'x': 5, 'y': 5, 'text': '>', 'image': pyglet.resource.image('img/right.png'), 'tool': 0,
              'sel': False, 'align': 'right'},
 
+            {'id': 108, 'x': 75, 'y': 105, 'text': '<', 'image': pyglet.resource.image('img/leftb.png'), 'tool': 0,
+             'sel': False, 'align': 'right'},
+            {'id': 109, 'x': 5, 'y': 105, 'text': '>', 'image': pyglet.resource.image('img/rightb.png'), 'tool': 0,
+             'sel': False, 'align': 'right'},
+            {'id': 110, 'x': 40, 'y': 75, 'text': 'V', 'image': pyglet.resource.image('img/down.png'), 'tool': 0,
+             'sel': False, 'align': 'right'},
+            {'id': 111, 'x': 40, 'y': 135, 'text': 'U', 'image': pyglet.resource.image('img/up.png'), 'tool': 0,
+             'sel': False, 'align': 'right'},
+
         ]
         x = 5
         for b in self.buttons:
@@ -823,6 +832,14 @@ class MyWindow(pyglet.window.Window):
                         self.clear()
                         self.page += 1
                         self.cx = self.page * 100000 - 100000
+                    elif btn['id'] == 108:
+                        self.cx -= 50
+                    elif btn['id'] == 109:
+                        self.cx += 50
+                    elif btn['id'] == 110:
+                        self.cy += 50
+                    elif btn['id'] == 111:
+                        self.cy -= 50
                     elif btn['id'] == 104:  # Сторінка вліво
                         self.clear()
                         self.page -= 1
