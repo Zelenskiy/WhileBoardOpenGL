@@ -424,6 +424,7 @@ def draw_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
     glLineWidth(thickness)
     circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
     glColor4f(*color)
+    # glEnable(GL_BLEND)
     circle.draw(GL_LINE_LOOP)
 
 
@@ -443,6 +444,7 @@ def draw_fill_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 0, 0
     glLineWidth(thickness)
     circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
     glColor4f(*color)
+
     circle.draw(GL_LINE_LOOP)
 
 
@@ -589,8 +591,10 @@ def fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, color):
 
 def fill_3poly(x1, y1, x2, y2, x3, y3, color=(0, 0, 0, 1)):
     r, g, b, a = color
+    glEnable(GL_BLEND)  # transparency
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)  # transparency
     pyglet.graphics.draw(3, pyglet.gl.GL_TRIANGLES, ('v2f', [x1, y1, x2, y2, x3, y3]),
-                         ('c3f', [r, g, b, r, g, b, r, g, b]))
+                         ('c4f', [r, g, b,a, r, g, b,a, r, g, b,a]))
 
 
 class Quad:

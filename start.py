@@ -404,14 +404,22 @@ class MyWindow(pyglet.window.Window):
             {'id': 105, 'x': 5, 'y': 5, 'text': '>', 'image': pyglet.resource.image('img/right.png'), 'tool': 0,
              'sel': False, 'align': 'right'},
 
-            {'id': 108, 'x': 75, 'y': 105, 'text': '<', 'image': pyglet.resource.image('img/leftb.png'), 'tool': 0,
+            {'id': 108, 'x': 75, 'y': 105, 'text': '<', 'image': None, 'tool': 0,
              'sel': False, 'align': 'right'},
-            {'id': 109, 'x': 5, 'y': 105, 'text': '>', 'image': pyglet.resource.image('img/rightb.png'), 'tool': 0,
+            {'id': 109, 'x': 5, 'y': 105, 'text': '>', 'image': None, 'tool': 0,
              'sel': False, 'align': 'right'},
-            {'id': 110, 'x': 40, 'y': 75, 'text': 'V', 'image': pyglet.resource.image('img/down.png'), 'tool': 0,
+            {'id': 110, 'x': 40, 'y': 75, 'text': 'V', 'image': None, 'tool': 0,
              'sel': False, 'align': 'right'},
-            {'id': 111, 'x': 40, 'y': 135, 'text': 'U', 'image': pyglet.resource.image('img/up.png'), 'tool': 0,
+            {'id': 111, 'x': 40, 'y': 135, 'text': 'U', 'image': None, 'tool': 0,
              'sel': False, 'align': 'right'},
+            # {'id': 108, 'x': 75, 'y': 105, 'text': '<', 'image': pyglet.resource.image('img/leftb.png'), 'tool': 0,
+            #  'sel': False, 'align': 'right'},
+            # {'id': 109, 'x': 5, 'y': 105, 'text': '>', 'image': pyglet.resource.image('img/rightb.png'), 'tool': 0,
+            #  'sel': False, 'align': 'right'},
+            # {'id': 110, 'x': 40, 'y': 75, 'text': 'V', 'image': pyglet.resource.image('img/down.png'), 'tool': 0,
+            #  'sel': False, 'align': 'right'},
+            # {'id': 111, 'x': 40, 'y': 135, 'text': 'U', 'image': pyglet.resource.image('img/up.png'), 'tool': 0,
+            #  'sel': False, 'align': 'right'},
 
         ]
         x = 5
@@ -834,6 +842,7 @@ class MyWindow(pyglet.window.Window):
                         self.cx = self.page * 100000 - 100000
                     elif btn['id'] == 108:
                         self.cx -= 50
+
                     elif btn['id'] == 109:
                         self.cx += 50
                     elif btn['id'] == 110:
@@ -1290,6 +1299,19 @@ class MyWindow(pyglet.window.Window):
                     draw_poly(x + 2, y, x + 28, y + 28, id=self.numVertex, numPoints=self.numVertex,
                               color=self.penColor, fon_color=self.fonColor, fill=self.isFill)
                     draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+
+                if btn['id'] == 108 or btn['id'] == 109 or btn['id'] == 110 or btn['id'] == 111:
+                    angl = {108: 180, 109: 0, 110: 270, 111: 90, }
+                    draw_fill_polygon(x + 2, y + 28, x + 28, y, angleStart=angl[btn['id']], numPoints=3,
+                                      color=(0, 1, 0.5, 0.5))
+                # if btn['id'] == 108:
+                #     draw_fill_polygon(x + 2, y + 28, x + 28, y, angleStart=180, numPoints=3, color=(0, 1, 0.5, 0.5))
+                # if btn['id'] == 109:
+                #     draw_fill_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=3, color=(0, 1, 0.5, 0.5))
+                # if btn['id'] == 110:
+                #     draw_fill_polygon(x + 2, y + 28, x + 28, y, angleStart=270, numPoints=3, color=(0, 1, 0.5, 0.5))
+                # if btn['id'] == 111:
+                #     draw_fill_polygon(x + 2, y + 28, x + 28, y, angleStart=90, numPoints=3, color=(0, 1, 0.5, 0.5))
 
                 if self.tool == btn['tool']:
                     draw_fill_circle(x + 5, y + 34, 3, color=self.penColor)
