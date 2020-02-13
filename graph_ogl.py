@@ -436,7 +436,8 @@ def draw_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
     circle.draw(GL_LINE_LOOP)
 
 
-def draw_fill_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 0, 0, 1), thickness=1):
+
+def draw_fill_reg_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 0, 0, 1), thickness=1):
     x0, y0 = (x1 + x2) / 2, (y1 + y2) / 2
     rx, ry = abs(x1 - x2) / 2, abs(y1 - y2) / 2
     verts = []
@@ -455,10 +456,27 @@ def draw_fill_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 0, 0
 
     circle.draw(GL_LINE_LOOP)
 
+def draw_fill_polygon(points, color=(0, 0, 0, 1), thickness=1):
+    verts = []
+    numPoints = len(points)
+    x1, y1 = points[0]['x'], points[0]['y']
+    x2, y2 = points[1]['x'], points[1]['y']
+    for p in points:
+        x,y = p['x'],p['y']
+        fill_3poly(x1, y1, x2, y2, x, y, color)
+        x2, y2 = x1, y1
+        x1, y1 = x, y
+        verts+=[x, y]
+    # fill_3poly(x0, y0, x, y, verts[0], verts[1], color)
+    glLineWidth(thickness)
+    circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
+    glColor4f(*color)
+    circle.draw(GL_LINE_LOOP)
 
 def draw_polygon(points, color=(0, 0, 0, 1), thickness=1, dash=0):
     glLineWidth(thickness)
     verts = []
+    xstart, ystart = points[0]['x'], points[0]['y']
     for p in points:
         verts.append(p['x'])
         verts.append(p['y'])
@@ -484,7 +502,7 @@ def border_to_points(x1, y1, x2, y2, numPoints=3,angleStart=90):
         angle = math.radians(float(i) / numPoints * 360.0 + angleStart)
         x = rx * math.cos(angle) + x0
         y = ry * math.sin(angle) + y0
-        verts += {'x':x, 'y':y}
+        verts.append({'x':x, 'y':y})
     return verts
 
 def draw_regular_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 0, 0, 1), thickness=1, dash=0):
@@ -706,7 +724,7 @@ def draw_poly_wo_bg(x1, y1, x2, y2, id=4, numPoints=4, color=(0, 0, 0, 1), fon_c
 
     if fill:
         # draw_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
-        draw_fill_polygon(x1, y1, x2, y2, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
+        draw_fill_reg_polygon(x1, y1, x2, y2, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)
 
     else:
         # draw_regular_polygon(x0, y0, r, numPoints=numPoints, angleStart=angle, color=color, thickness=thickness)

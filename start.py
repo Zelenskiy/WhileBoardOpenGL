@@ -1220,10 +1220,10 @@ class MyWindow(pyglet.window.Window):
                     xx, yy = self.screen_to_canvas(x, y)
                     # self.poly.append({'x': xx, 'y': y0})
                     # self.poly.append({'x': xx, 'y': yy})
+                    x0, y0 = self.poly[0]['x'], self.poly[0]['y']
+                    points = border_to_points(x0, y0,xx, yy,numPoints=self.numVertex)
 
-                    # points = border_to_points(
-
-                    self.poly.append({'x': xx, 'y': yy})
+                    # self.poly.append({'x': xx, 'y': yy})
 
                     self.id += 1
                     k['id'] = self.id
@@ -1231,8 +1231,8 @@ class MyWindow(pyglet.window.Window):
                         k['name'] = 'polygone_fill'
                     else:
                         k['name'] = 'polygone'
-                    k['p'] = self.poly.copy()
-                    k['numVertex'] = self.numVertex
+                    k['p'] = points
+                    # k['numVertex'] = self.numVertex
                     k['fill'] = self.isFill
                     k['dash'] = self.dash
                     k['color'] = self.penColor
@@ -1283,7 +1283,7 @@ class MyWindow(pyglet.window.Window):
         self.isMove = False
         self.isResize = False
         self.lastCommand = 0
-        print(self.figures)
+        # print(self.figures)
     def on_draw(self):
         # Перевіряємо наявність зовнішніх даних та підвантажуємо їх за потребою
 
@@ -1367,13 +1367,20 @@ class MyWindow(pyglet.window.Window):
                         points = [{'x': x1, 'y': y1}, {'x': x2, 'y': y2}, {'x': x3, 'y': y3}, {'x': x4, 'y': y4}]
                         draw_polygon(points, color=f['color'], thickness=f['thickness'], dash=f['dash'])
                     elif f['name'] == 'polygone' or f['name'] == 'polygone_fill':
-                        x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
-                        x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
+                        # x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
+                        # x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
                         # x3, y3 = self.canvas_to_screen(f['p'][2]['x'], f['p'][2]['y'])
                         # x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
-
-                        draw_poly_wo_bg(x1, y1, x2, y2, id=f['numVertex'], numPoints=f['numVertex'], color=f['color'],
-                                        fill=f['fill'], thickness=f['thickness'], dash=f['dash'])
+                        np = []
+                        for p in f['p']:
+                            x,y = self.canvas_to_screen(p['x'], p['y'])
+                            np.append({'x':x, 'y':y})
+                        if f['fill']:
+                            draw_fill_polygon(np, color=f['color'], thickness=f['thickness'])
+                        else:
+                            draw_polygon(np, color=f['color'], thickness=f['thickness'],dash=f['dash'])
+                        # draw_poly_wo_bg(x1, y1, x2, y2, id=f['numVertex'], numPoints=f['numVertex'], color=f['color'],
+                        #                 fill=f['fill'], thickness=f['thickness'], dash=f['dash'])
                         # draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'])
                     elif f['name'] == 'image':
                         # print(7)
@@ -1421,16 +1428,16 @@ class MyWindow(pyglet.window.Window):
                 # y = y + self.pnly - 75
 
                 if btn['id'] == 112:
-                    draw_fill_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=4,
-                                      color=(0, 0.5, 0.5, 0.5))
+                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=4,
+                                          color=(0, 0.5, 0.5, 0.5))
                 if btn['id'] == 108:
-                    draw_fill_polygon(x + 2, y + 28, x + 28, y, angleStart=180, numPoints=3, color=(0, 0.5, 0.5, 0.5))
+                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=180, numPoints=3, color=(0, 0.5, 0.5, 0.5))
                 if btn['id'] == 109:
-                    draw_fill_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=3, color=(0, 0.5, 0.5, 0.5))
+                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=3, color=(0, 0.5, 0.5, 0.5))
                 if btn['id'] == 110:
-                    draw_fill_polygon(x + 2, y + 28, x + 28, y, angleStart=270, numPoints=3, color=(0, 0.5, 0.5, 0.5))
+                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=270, numPoints=3, color=(0, 0.5, 0.5, 0.5))
                 if btn['id'] == 111:
-                    draw_fill_polygon(x + 2, y + 28, x + 28, y, angleStart=90, numPoints=3, color=(0, 0.5, 0.5, 0.5))
+                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=90, numPoints=3, color=(0, 0.5, 0.5, 0.5))
 
                 if self.tool == btn['tool']:
                     draw_fill_circle(x + 5, y + 34, 3, color=self.penColor)
