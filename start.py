@@ -9,6 +9,8 @@ import wx
 
 import threading
 
+from numpy.ma.bench import timer
+
 from graph_ogl import *
 
 import pickle
@@ -406,7 +408,7 @@ class MyWindow(pyglet.window.Window):
             {'id': 3, 'text': 'line', 'image': None, 'tool': 3,
              'sel': False, 'align': 'left'},
             {'id': 6, 'text': 'rectangle', 'image': None, 'tool': 4, 'sel': False, 'align': 'left'},
-            {'id': 5, 'text': 'ellipse', 'image': pyglet.resource.image('img/FillNotFill.png'), 'tool': 0, 'sel': False,
+            {'id': 5, 'text': 'setFill', 'image': pyglet.resource.image('img/FillNotFill.png'), 'tool': 0, 'sel': False,
              'align': 'left'},
             {'id': 26, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
              'sel': False, 'align': 'left'},
@@ -863,12 +865,19 @@ class MyWindow(pyglet.window.Window):
                         #     self.tool = 5
                     elif btn['id'] == 5:
                         self.isFill = not self.isFill
+                        #Зафарбовуємо чи ні виділену фігуру
+                        if self.tool==8 and self.selFig !={}:
+                            print("3333333=",self.selFig['fig'])
+                            self.selFig['figobj']['fill'] = self.isFill
                     elif btn['id'] == 26:  # Діалогове вікно
                         # hide main window
                         self.set_visible(False)
                         # show panel window
-                        self.show_screenshot_panel()
-
+                        # self.show_screenshot_panel()
+                        time.sleep(2)
+                        self.insert_screenshot()
+                        self.set_visible(True)
+                        # self.switch_to()
                     elif btn['id'] == 101:  # Changr color pen
                         self.colorPanelVisible = not self.colorPanelVisible
                     elif btn['id'] == 102:  # Changr width pen
@@ -935,6 +944,7 @@ class MyWindow(pyglet.window.Window):
                                     fig['fordel'] = True
                                     self.update_fig()
                             self.selFig['fig'] = fig['id']
+                            self.selFig['figobj'] = fig
 
                             fl = True
 
@@ -943,7 +953,7 @@ class MyWindow(pyglet.window.Window):
                             self.selFig = {}
                             self.selDel = {}
                             # canvas.config(cursor="tcross")
-                            pass
+
                 if self.tool == 9:
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
@@ -1231,6 +1241,7 @@ class MyWindow(pyglet.window.Window):
                     k['center'] = {'x':xcenter, 'y':ycenter}
                     k['thickness'] = self.penWidth
                     k['dash'] = self.dash
+                    k['fill'] = self.isFill
                     k['fordel'] = False
                     self.figures.append(k)
                 elif self.tool == 6:
@@ -1373,21 +1384,16 @@ class MyWindow(pyglet.window.Window):
                     #     x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
                     #     num = max(abs(x0 - x_), abs(y0 - y_)) * 4
                     #     draw_fill_ellipse(x0, y0, x_, y_, numPoints=num, color=f['color'], thickness=f['thickness'])
-                    elif f['name'] == 'quadrangle_fill':
+                    elif f['name'] == 'quadrangle_fill' or f['name'] == 'quadrangle':
                         x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
                         x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
                         x3, y3 = self.canvas_to_screen(f['p'][2]['x'], f['p'][2]['y'])
                         x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
-                        fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, f['color'])
-                    elif f['name'] == 'quadrangle':
-                        x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
-                        x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
-                        x3, y3 = self.canvas_to_screen(f['p'][2]['x'], f['p'][2]['y'])
-                        x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
-                        # draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'],
-                        #                dash=f['dash'])
-                        points = [{'x': x1, 'y': y1}, {'x': x2, 'y': y2}, {'x': x3, 'y': y3}, {'x': x4, 'y': y4}]
-                        draw_polygon(points, color=f['color'], thickness=f['thickness'], dash=f['dash'])
+                        if f['fill']:
+                            fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, f['color'])
+                        else:
+                            points = [{'x': x1, 'y': y1}, {'x': x2, 'y': y2}, {'x': x3, 'y': y3}, {'x': x4, 'y': y4}]
+                            draw_polygon(points, color=f['color'], thickness=f['thickness'], dash=f['dash'])
                     elif f['name'] == 'polygone' or f['name'] == 'polygone_fill':
                         np = []
                         for p in f['p']:
