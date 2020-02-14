@@ -1087,6 +1087,10 @@ class MyWindow(pyglet.window.Window):
                                     for p in fig['p']:
                                         p['x'] += dx
                                         p['y'] += dy
+                                    xcenter, ycenter = fig['center']['x'], fig['center']['y']
+                                    xcenter += dx
+                                    ycenter += dy
+                                    fig['center'] = {'x': xcenter, 'y': ycenter}
                                     self.selDel['x1'] += dx
                                     self.selDel['y1'] += dy
                                     self.selDel['x2'] += dx
@@ -1096,9 +1100,8 @@ class MyWindow(pyglet.window.Window):
                                     self.selRes['x2'] += dx
                                     self.selRes['y2'] += dy
                                 else: # Якщо крутимо
-                                    print("Крутимо")
                                     self.isRotate = True
-                                    x0, y0 = (x1 + x2) / 2 - self.cx, (y1 + y2) / 2 - self.cy
+                                    x0, y0 = (fig['center']['x'], fig['center']['y'])
                                     angle = math.atan(-dx/100)
 
                                     for p in fig['p']:
@@ -1160,6 +1163,10 @@ class MyWindow(pyglet.window.Window):
                     k['id'] = self.id
                     k['name'] = 'polyline'
                     k['p'] = self.poly.copy()
+                    x0, y0 = self.x0, self.y0
+                    x0,y0,xx,yy = border_polyline(k['p'])
+                    xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                    k['center'] = {'x': xcenter, 'y': ycenter}
                     k['color'] = self.penColor
                     k['thickness'] = self.penWidth
                     k['fordel'] = False
@@ -1176,12 +1183,15 @@ class MyWindow(pyglet.window.Window):
                     self.figures.append(k)
                 elif self.tool == 3:
                     k = {}
+                    x0, y0 = self.screen_to_canvas(self.x0, self.y0)
                     xx, yy = self.screen_to_canvas(x, y)
                     self.poly.append({'x': xx, 'y': yy})
                     self.id += 1
                     k['id'] = self.id
                     k['name'] = 'line'
                     k['p'] = self.poly.copy()
+                    xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                    k['center'] = {'x': xcenter, 'y': ycenter}
                     k['color'] = self.penColor
                     k['thickness'] = self.penWidth
                     k['arrow'] = self.arr
@@ -1191,7 +1201,8 @@ class MyWindow(pyglet.window.Window):
                 elif self.tool == 4:
                     k = {}
 
-                    x0, y0 = self.x0, self.y0
+                    # x0, y0 = self.screen_to_canvas(self.x0, self.y0)
+                    x0, y0 = self.poly[0]['x'], self.poly[0]['y']
                     xx, yy = self.screen_to_canvas(x, y)
                     self.poly.append({'x': xx, 'y': y0})
                     self.poly.append({'x': xx, 'y': yy})
@@ -1207,6 +1218,8 @@ class MyWindow(pyglet.window.Window):
                         k['name'] = 'quadrangle'
                     k['p'] = self.poly.copy()
                     k['color'] = self.penColor
+                    xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                    k['center'] = {'x':xcenter, 'y':ycenter}
                     k['thickness'] = self.penWidth
                     k['dash'] = self.dash
                     k['fordel'] = False
@@ -1232,6 +1245,9 @@ class MyWindow(pyglet.window.Window):
                     else:
                         k['name'] = 'polygone'
                     k['p'] = points
+                    x0, y0, xx, yy = border_polyline(k['p'])
+                    xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                    k['center'] = {'x': xcenter, 'y': ycenter}
                     # k['numVertex'] = self.numVertex
                     k['fill'] = self.isFill
                     k['dash'] = self.dash
@@ -1367,10 +1383,6 @@ class MyWindow(pyglet.window.Window):
                         points = [{'x': x1, 'y': y1}, {'x': x2, 'y': y2}, {'x': x3, 'y': y3}, {'x': x4, 'y': y4}]
                         draw_polygon(points, color=f['color'], thickness=f['thickness'], dash=f['dash'])
                     elif f['name'] == 'polygone' or f['name'] == 'polygone_fill':
-                        # x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
-                        # x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
-                        # x3, y3 = self.canvas_to_screen(f['p'][2]['x'], f['p'][2]['y'])
-                        # x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
                         np = []
                         for p in f['p']:
                             x,y = self.canvas_to_screen(p['x'], p['y'])
@@ -1379,9 +1391,6 @@ class MyWindow(pyglet.window.Window):
                             draw_fill_polygon(np, color=f['color'], thickness=f['thickness'])
                         else:
                             draw_polygon(np, color=f['color'], thickness=f['thickness'],dash=f['dash'])
-                        # draw_poly_wo_bg(x1, y1, x2, y2, id=f['numVertex'], numPoints=f['numVertex'], color=f['color'],
-                        #                 fill=f['fill'], thickness=f['thickness'], dash=f['dash'])
-                        # draw_rectangle(x1, y1, x2, y2, x3, y3, x4, y4, color=f['color'], thickness=f['thickness'])
                     elif f['name'] == 'image':
                         # print(7)
                         x0 = f['p'][0]['x']
@@ -1462,7 +1471,7 @@ class MyWindow(pyglet.window.Window):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
                         x1, y1 = self.canvas_to_screen(x1, y1)
                         x2, y2 = self.canvas_to_screen(x2, y2)
-                        draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
+                        draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2, center=(self.canvas_to_screen(fig['center']['x'],fig['center']['y'])),
                                        color=self.ramkaColor, thickness=self.ramkaThickness)
 
                         draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
