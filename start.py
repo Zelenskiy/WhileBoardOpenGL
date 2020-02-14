@@ -414,12 +414,16 @@ class MyWindow(pyglet.window.Window):
              'sel': False, 'align': 'left'},
             {'id': 102, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 0,
              'sel': False, 'align': 'left'},
+
             # {'id': 103, 'text': 'width', 'image': pyglet.resource.image('img/add.png'),
             #  'tool': 0, 'sel': False, 'align': 'left'},
             {'id': 106, 'text': 'arrow', 'image': pyglet.resource.image('img/arr.png'), 'tool': 0,
              'sel': False, 'align': 'left'},
             {'id': 107, 'text': 'dash', 'image': pyglet.resource.image('img/dot.png'), 'tool': 0,
              'sel': False, 'align': 'left'},
+            # {'id': 113, 'text': 'open', 'image': pyglet.resource.image('img/open.png'), 'tool': 0,
+            #  'sel': False, 'align': 'left'},
+
             {'id': 104, 'x': 75, 'y': 5, 'text': '<', 'image': pyglet.resource.image('img/left.png'), 'tool': 0,
              'sel': False, 'align': 'right'},
             {'id': 105, 'x': 5, 'y': 5, 'text': '>', 'image': pyglet.resource.image('img/right.png'), 'tool': 0,
@@ -1083,7 +1087,8 @@ class MyWindow(pyglet.window.Window):
                                 self.isMove = True
                                 self.isResize = False
                                 # Якщо перетягуємо
-                                if (not (y2 - 40 < y < y2)) and not self.isRotate :
+                                xser = (x1+x2)/2
+                                if (not ((y2 - 40 < y < y2)and(xser - 40 < x < xser + 40)) ) and not self.isRotate :
                                     for p in fig['p']:
                                         p['x'] += dx
                                         p['y'] += dy
@@ -1105,8 +1110,9 @@ class MyWindow(pyglet.window.Window):
                                     angle = math.atan(-dx/100)
 
                                     for p in fig['p']:
-                                        p['x'] = (p['x']-x0)*math.cos(angle)-(p['y']-y0)*math.sin(angle)+x0
-                                        p['y'] = (p['x']-x0)*math.sin(angle)+(p['y']-y0)*math.cos(angle)+y0
+                                        xx,yy = p['x'], p['y']
+                                        p['x'] = (xx-x0)*math.cos(angle)-(yy-y0)*math.sin(angle)+x0
+                                        p['y'] = (xx-x0)*math.sin(angle)+(yy-y0)*math.cos(angle)+y0
 
                             xr1, yr1, xr2, yr2 = self.selRes['x1'], self.selRes['y1'], self.selRes['x2'], self.selRes[
                                 'y2']
@@ -1123,6 +1129,14 @@ class MyWindow(pyglet.window.Window):
                                     ky = (p['y'] - yy2) / (yy - yy2)
                                     p['x'] += kx * dx
                                     p['y'] += ky * dy
+
+                                xcenter, ycenter = fig['center']['x'], fig['center']['y']
+                                kx = (xcenter - xx1) / (xx - xx1)
+                                ky = (ycenter - yy2) / (yy - yy2)
+                                xcenter += kx * dx
+                                ycenter += ky * dy
+                                fig['center'] = {'x': xcenter, 'y': ycenter}
+
                                 self.selDel['x1'] = x1
                                 self.selDel['y1'] = y1
                                 self.selDel['x2'] = x1 + 20
@@ -1270,6 +1284,8 @@ class MyWindow(pyglet.window.Window):
                     else:
                         k['name'] = 'ellipse'
                     k['p'] = self.poly.copy()
+                    xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                    k['center'] = {'x': xcenter, 'y': ycenter}
                     k['color'] = self.penColor
                     k['thickness'] = self.penWidth
                     k['arrow'] = self.arr

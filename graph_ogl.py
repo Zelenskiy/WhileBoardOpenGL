@@ -366,16 +366,16 @@ def draw_ramka_top(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1, center=(0,0)):
     glColor4f(*color)
     glLineWidth(thickness)
     xc0,yc0 = center
-    draw_circle(xc0, yc0, 10, color=(1, 0, 0, 1), thickness=1)
-    draw_line(xc0-20, yc0, xc0+20, yc0,  color=(1, 0, 0, 1), thickness=1)
-    draw_line(xc0, yc0-20, xc0, yc0+20, color=(1, 0, 0, 1), thickness=1)
+    draw_circle(xc0, yc0, 10, color=color, thickness=1)
+    draw_line(xc0-20, yc0, xc0+20, yc0,  color=color, thickness=1)
+    draw_line(xc0, yc0-20, xc0, yc0+20, color=color, thickness=1)
 
     # draw_circle((x0 + x) // 2, (y0 + y) // 2, 10, color=(1, 0, 0, 1), thickness=1)
     # draw_line((x0 + x) // 2 - 20, (y0 + y) // 2, (x0 + x) // 2 + 20, (y0 + y) // 2, color=(1, 0, 0, 1), thickness=1)
     # draw_line((x0 + x) // 2 , (y0 + y) // 2-20, (x0 + x) // 2, (y0 + y) // 2+20, color=(1, 0, 0, 1), thickness=1)
 
-    draw_line_mod((x0 + x) // 2 - 15, y - 12, (x0 + x) // 2, y - 6, color=(1, 0, 0, 1), thickness=2, arrow=2)
-    draw_line_mod((x0 + x) // 2 + 15, y - 12,(x0 + x) // 2 , y - 6,  color=(1, 0, 0, 1), thickness=2, arrow=2)
+    draw_line_mod((x0 + x) // 2 - 15, y - 12, (x0 + x) // 2, y - 6, color=color, thickness=2, arrow=2)
+    draw_line_mod((x0 + x) // 2 + 15, y - 12,(x0 + x) // 2 , y - 6,  color=color, thickness=2, arrow=2)
     glBegin(GL_LINES)
     glVertex2f(x0, y - 10)
     glVertex2f(x0, y)
