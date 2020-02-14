@@ -655,28 +655,23 @@ class MyWindow(pyglet.window.Window):
         draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
 
     def insert_image_from_file(self, nnam, x0, y0, width, height):
-        # print("insert_image_from_file 1 ")
         k = {}
         window.id += 1
-        # print(" id=", self.id)
         k['id'] = self.id
         k['name'] = 'image'
         k['p'] = []
         k['p'].append({'x': x0, 'y': y0})
         k['p'].append({'x': x0 + width, 'y': y0 + height})
         nnam_ = nnam + ".resize.png"
-        # print("insert_image_from_file 2")
         self.resize_image2(nnam, nnam_, (width, height))
-        # print("insert_image_from_file 3")
         image = pyglet.image.load(nnam_)
-        # print("insert_image_from_file 4")
         self.images[nnam_] = image
-        # print("insert_image_from_file 5")
         k['image'] = nnam_
+        xcenter, ycenter = (x0 + x0 + width) / 2, (y0 + y0 + height) / 2
+        k['center'] = {'x': xcenter, 'y': ycenter}
         k['thickness'] = self.penWidth
         k['fordel'] = False
         self.figures.append(k)
-        # print("insert_image_from_file 3")
 
     def update_fig(self):
         new_list = []
@@ -1191,6 +1186,9 @@ class MyWindow(pyglet.window.Window):
                     k['id'] = self.id
                     k['name'] = 'polyline'
                     k['p'] = self.poly.copy()
+                    x0, y0, xx, yy = border_polyline(k['p'])
+                    xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                    k['center'] = {'x': xcenter, 'y': ycenter}
                     k['color'] = self.fonColor
                     k['thickness'] = self.errSize
                     k['fordel'] = False
