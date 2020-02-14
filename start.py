@@ -488,7 +488,7 @@ class MyWindow(pyglet.window.Window):
              'y2': 10 + 70 + 35 + 35 + 35, 'tool': 6},
             {'id': 40, 'x1': 150 + 30 + 30, 'y1': 10 + 35 + 35 + 35 + 35 + 35, 'x2': 25 + 150 + 30 + 30,
              'y2': 10 + 70 + 35 + 35 + 35 + 35,
-             'tool': 5},
+             'tool': 6},
         ]
         self.arrowPanelButtons = [
             {'id': 1, 'x1': 320 + 25 + 30, 'y1': 10 + 35, 'x2': 48 + 320 + 25 + 30, 'y2': 10 + 70,
@@ -1042,14 +1042,14 @@ class MyWindow(pyglet.window.Window):
                               thickness=self.penWidth, arrow=self.arr, dash=self.dash)
                 # draw_line(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                 #           thickness=self.penWidth)
-            elif self.tool == 5:  # ellipse
-                if self.isFill:
-                    # draw_fill_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, thickness=self.penWidth)
-                    draw_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
-                                 thickness=self.penWidth)
-                else:
-                    draw_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
-                                 thickness=self.penWidth)
+            # elif self.tool == 5:  # ellipse
+            #     if self.isFill:
+            #         # draw_fill_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, thickness=self.penWidth)
+            #         draw_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
+            #                      thickness=self.penWidth)
+            #     else:
+            #         draw_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
+            #                      thickness=self.penWidth)
             elif self.tool == 6:  # polygone
                 draw_poly_wo_bg(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                                 fill=self.isFill, thickness=self.penWidth, numPoints=self.numVertex, id=self.numVertex,
@@ -1221,9 +1221,6 @@ class MyWindow(pyglet.window.Window):
                     self.poly.append({'x': xx, 'y': y0})
                     self.poly.append({'x': xx, 'y': yy})
                     self.poly.append({'x': x0, 'y': yy})
-                    # self.poly.append({'x': x0 - self.cx, 'y': y - self.cy})
-                    # self.poly.append({'x': x - self.cx, 'y': y - self.cy})
-                    # self.poly.append({'x': x - self.cx, 'y': y0 - self.cy})
                     self.id += 1
                     k['id'] = self.id
                     if self.isFill:
@@ -1240,17 +1237,12 @@ class MyWindow(pyglet.window.Window):
                     self.figures.append(k)
                 elif self.tool == 6:
                     k = {}
-
-
-
                     x0, y0 = self.x0, self.y0
                     xx, yy = self.screen_to_canvas(x, y)
                     # self.poly.append({'x': xx, 'y': y0})
                     # self.poly.append({'x': xx, 'y': yy})
                     x0, y0 = self.poly[0]['x'], self.poly[0]['y']
                     points = border_to_points(x0, y0,xx, yy,numPoints=self.numVertex)
-
-                    # self.poly.append({'x': xx, 'y': yy})
 
                     self.id += 1
                     k['id'] = self.id
@@ -1269,28 +1261,28 @@ class MyWindow(pyglet.window.Window):
                     k['thickness'] = self.penWidth
                     k['fordel'] = False
                     self.figures.append(k)
-                elif self.tool == 5:
-                    k = {}
-                    self.poly = []
-
-                    x0, y0 = self.x0, self.y0
-                    xx, yy = self.screen_to_canvas(x, y)
-                    self.poly.append({'x': x0, 'y': y0})
-                    self.poly.append({'x': xx, 'y': yy})
-                    self.id += 1
-                    k['id'] = self.id
-                    if self.isFill:
-                        k['name'] = 'ellipse_fill'
-                    else:
-                        k['name'] = 'ellipse'
-                    k['p'] = self.poly.copy()
-                    xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
-                    k['center'] = {'x': xcenter, 'y': ycenter}
-                    k['color'] = self.penColor
-                    k['thickness'] = self.penWidth
-                    k['arrow'] = self.arr
-                    k['fordel'] = False
-                    self.figures.append(k)
+                # elif self.tool == 5:
+                #     k = {}
+                #     self.poly = []
+                #
+                #     x0, y0 = self.x0, self.y0
+                #     xx, yy = self.screen_to_canvas(x, y)
+                #     self.poly.append({'x': x0, 'y': y0})
+                #     self.poly.append({'x': xx, 'y': yy})
+                #     self.id += 1
+                #     k['id'] = self.id
+                #     if self.isFill:
+                #         k['name'] = 'ellipse_fill'
+                #     else:
+                #         k['name'] = 'ellipse'
+                #     k['p'] = self.poly.copy()
+                #     xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                #     k['center'] = {'x': xcenter, 'y': ycenter}
+                #     k['color'] = self.penColor
+                #     k['thickness'] = self.penWidth
+                #     k['arrow'] = self.arr
+                #     k['fordel'] = False
+                #     self.figures.append(k)
                 elif self.tool == 8:
                     if self.isResize:
                         # Зміна розміру малюнка
@@ -1374,15 +1366,15 @@ class MyWindow(pyglet.window.Window):
                         x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
                         draw_line_mod(x0, y0, x_, y_, color=f['color'], fon_color=self.fonColor,
                                       thickness=f['thickness'], arrow=f['arrow'], dash=f['dash'])
-                    elif f['name'] == 'ellipse':
-                        x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
-                        x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
-                        draw_ellipse(x0, y0, x_, y_, color=f['color'], thickness=f['thickness'])
-                    elif f['name'] == 'ellipse_fill':
-                        x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
-                        x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
-                        num = max(abs(x0 - x_), abs(y0 - y_)) * 4
-                        draw_fill_ellipse(x0, y0, x_, y_, numPoints=num, color=f['color'], thickness=f['thickness'])
+                    # elif f['name'] == 'ellipse':
+                    #     x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
+                    #     x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
+                    #     draw_ellipse(x0, y0, x_, y_, color=f['color'], thickness=f['thickness'])
+                    # elif f['name'] == 'ellipse_fill':
+                    #     x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
+                    #     x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
+                    #     num = max(abs(x0 - x_), abs(y0 - y_)) * 4
+                    #     draw_fill_ellipse(x0, y0, x_, y_, numPoints=num, color=f['color'], thickness=f['thickness'])
                     elif f['name'] == 'quadrangle_fill':
                         x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
                         x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])

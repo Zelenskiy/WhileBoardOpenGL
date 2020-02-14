@@ -464,15 +464,16 @@ def draw_fill_reg_polygon(x1, y1, x2, y2, numPoints=3, angleStart=90, color=(0, 
 def draw_fill_polygon(points, color=(0, 0, 0, 1), thickness=1):
     verts = []
     numPoints = len(points)
+    x_min, y_min, x_max, y_max=border_polyline(points)
+    x0,y0 = (x_min+x_max)/2, (y_min+y_max)/2
     x1, y1 = points[0]['x'], points[0]['y']
-    x2, y2 = points[1]['x'], points[1]['y']
+    x2, y2 = points[-1]['x'], points[-1]['y']
+    fill_3poly(x1, y1, x2, y2, x0, y0, color)
     for p in points:
         x,y = p['x'],p['y']
-        fill_3poly(x1, y1, x2, y2, x, y, color)
-        x2, y2 = x1, y1
+        fill_3poly(x1, y1, x, y, x0, y0, color)
         x1, y1 = x, y
         verts+=[x, y]
-    # fill_3poly(x0, y0, x, y, verts[0], verts[1], color)
     glLineWidth(thickness)
     circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
     glColor4f(*color)
