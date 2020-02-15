@@ -355,9 +355,62 @@ class MyWindow(pyglet.window.Window):
                 image = pyglet.image.load(nnam_)
                 self.images[nnam_] = image
 
+    def set_shot(self):
+        self.set_visible(False)
+        time.sleep(2)
+        self.insert_screenshot()
+        self.set_visible(True)
+
+    def set_fill(self):
+        # print("Зафарбовуємо чи ні виділену фігуру")
+        self.isFill = not self.isFill
+        # Зафарбовуємо чи ні виділену фігуру
+        if self.tool == 8 and self.selFig != {}:
+            self.selFig['figobj']['fill'] = self.isFill
+
+    def set_colorpanel_visible(self):
+        self.colorPanelVisible = not self.colorPanelVisible
+
+    def set_widthpanel_visible(self):
+        self.widthPanelVisible = not self.widthPanelVisible
+
+    def set_arrowpanel_visible(self):
+        self.arrowPanelVisible = not self.arrowPanelVisible
+
+    def set_dashpanel_visible(self):
+        self.dashPanelVisible = not self.dashPanelVisible
+
+    def set_page_right(self):
+        self.clear()
+        self.page += 1
+        self.cx = self.page * 100000 - 100000
+        self.cy = 0
+
+    def set_page_left(self):
+        self.clear()
+        self.page -= 1
+        if self.page < 1:
+            self.page = 1
+        self.cx = self.page * 100000 - 100000
+        self.cy = 0
+
+    def drag_panel(self):
+        self.dragPanel = True
+
+    def move_108(self):
+        self.cx -= 50
+
+    def move_109(self):
+        self.cx += 50
+
+    def move_110(self):
+        self.cy += 50
+
+    def move_111(self):
+        self.cy -= 50
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # E9FBCA    233/255,251/255,202/255
         self.set_minimum_size(400, 30)
 
         # ============ Options ================
@@ -396,68 +449,66 @@ class MyWindow(pyglet.window.Window):
         self.pnly = 75
         self.buttons = [
             {'id': 20, 'text': 'Hand', 'image': pyglet.resource.image('img/hand.png'), 'tool': 20,
-             'sel': False, 'align': 'left', 'command':'set_hand'},
+             'sel': False, 'align': 'left', 'command': 'set_hand'},
             {'id': 8, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
-             'sel': False, 'align': 'left'},
+             'sel': False, 'align': 'left', 'command': ''},
             {'id': 1, 'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1,
-             'sel': True, 'align': 'left'},
+             'sel': True, 'align': 'left', 'command': ''},
             {'id': 2, 'text': 'Erazer', 'image': pyglet.resource.image('img/err.png'), 'tool': 2,
-             'sel': False, 'align': 'left'},
+             'sel': False, 'align': 'left', 'command': ''},
             {'id': 9, 'text': 'FonErazer', 'image': pyglet.resource.image('img/errFon.png'), 'tool': 9,
-             'sel': False, 'align': 'left'},
+             'sel': False, 'align': 'left', 'command': ''},
             {'id': 3, 'text': 'line', 'image': None, 'tool': 3,
-             'sel': False, 'align': 'left'},
-            {'id': 6, 'text': 'rectangle', 'image': None, 'tool': 4, 'sel': False, 'align': 'left'},
+             'sel': False, 'align': 'left', 'command': ''},
+            {'id': 6, 'text': 'rectangle', 'image': None, 'tool': 4, 'sel': False, 'align': 'left', 'command': ''},
             {'id': 5, 'text': 'setFill', 'image': pyglet.resource.image('img/FillNotFill.png'), 'tool': 0, 'sel': False,
-             'align': 'left'},
+             'align': 'left', 'command': 'set_fill'},
             {'id': 26, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
-             'sel': False, 'align': 'left'},
+             'sel': False, 'align': 'left', 'command': 'set_shot'},
             {'id': 101, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 0,
-             'sel': False, 'align': 'left'},
+             'sel': False, 'align': 'left', 'command': 'set_colorpanel_visible'},
             {'id': 102, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 0,
-             'sel': False, 'align': 'left'},
+             'sel': False, 'align': 'left', 'command': 'set_widthpanel_visible'},
 
             # {'id': 103, 'text': 'width', 'image': pyglet.resource.image('img/add.png'),
-            #  'tool': 0, 'sel': False, 'align': 'left'},
+            #  'tool': 0, 'sel': False, 'align': 'left', 'command':''},
             {'id': 106, 'text': 'arrow', 'image': pyglet.resource.image('img/arr.png'), 'tool': 0,
-             'sel': False, 'align': 'left'},
+             'sel': False, 'align': 'left', 'command': 'set_arrowpanel_visible'},
             {'id': 107, 'text': 'dash', 'image': pyglet.resource.image('img/dot.png'), 'tool': 0,
-             'sel': False, 'align': 'left'},
+             'sel': False, 'align': 'left', 'command': 'set_dashpanel_visible'},
             # {'id': 113, 'text': 'open', 'image': pyglet.resource.image('img/open.png'), 'tool': 0,
-            #  'sel': False, 'align': 'left'},
+            #  'sel': False, 'align': 'left', 'command':''},
 
             {'id': 104, 'x': 75, 'y': 5, 'text': '<', 'image': pyglet.resource.image('img/left.png'), 'tool': 0,
-             'sel': False, 'align': 'right'},
+             'sel': False, 'align': 'right', 'command': 'set_page_left'},
             {'id': 105, 'x': 5, 'y': 5, 'text': '>', 'image': pyglet.resource.image('img/right.png'), 'tool': 0,
-             'sel': False, 'align': 'right'},
+             'sel': False, 'align': 'right', 'command': 'set_page_right'},
 
             {'id': 108, 'x': 75, 'y': 105, 'text': '<', 'image': None, 'tool': 0,
-             'sel': False, 'align': 'right'},
+             'sel': False, 'align': 'right', 'command': 'move_108'},
             {'id': 109, 'x': 5, 'y': 105, 'text': '>', 'image': None, 'tool': 0,
-             'sel': False, 'align': 'right'},
+             'sel': False, 'align': 'right', 'command': 'move_109'},
             {'id': 112, 'x': 40, 'y': 105, 'text': '...', 'image': None, 'tool': 0,
-             'sel': False, 'align': 'right'},
+             'sel': False, 'align': 'right', 'command': 'drag_panel'},
             {'id': 110, 'x': 40, 'y': 75, 'text': 'V', 'image': None, 'tool': 0,
-             'sel': False, 'align': 'right'},
+             'sel': False, 'align': 'right', 'command': 'move_110'},
             {'id': 111, 'x': 40, 'y': 135, 'text': 'U', 'image': None, 'tool': 0,
-             'sel': False, 'align': 'right'},
+             'sel': False, 'align': 'right', 'command': 'move_111'},
 
             # {'id': 108, 'x': 75, 'y': 105, 'text': '<', 'image': pyglet.resource.image('img/leftb.png'), 'tool': 0,
-            #  'sel': False, 'align': 'right'},
+            #  'sel': False, 'align': 'right', 'command':''},
             # {'id': 109, 'x': 5, 'y': 105, 'text': '>', 'image': pyglet.resource.image('img/rightb.png'), 'tool': 0,
-            #  'sel': False, 'align': 'right'},
+            #  'sel': False, 'align': 'right', 'command':''},
             # {'id': 110, 'x': 40, 'y': 75, 'text': 'V', 'image': pyglet.resource.image('img/down.png'), 'tool': 0,
-            #  'sel': False, 'align': 'right'},
+            #  'sel': False, 'align': 'right', 'command':''},
             # {'id': 111, 'x': 40, 'y': 135, 'text': 'U', 'image': pyglet.resource.image('img/up.png'), 'tool': 0,
-            #  'sel': False, 'align': 'right'},
+            #  'sel': False, 'align': 'right', 'command':''},
 
         ]
-
         self.btnPnl = []
         for b in self.buttons:
             if 108 <= b['id'] <= 112:
                 self.btnPnl.append(b)
-
         x = 5
         for b in self.buttons:
             if b['align'] == 'left':
@@ -466,63 +517,92 @@ class MyWindow(pyglet.window.Window):
                 x += 35
 
         self.colorPanelButtons = [
-            {'id': 1, 'x1': 215 + 65 + 30, 'y1': 10 + 35, 'x2': 25 + 247 + 65 + 30, 'y2': 10 + 70,
-             'color': (1, 0, 0, 1)},
-            {'id': 2, 'x1': 215 + 65 + 30, 'y1': 10 + 70, 'x2': 25 + 247 + 65 + 30, 'y2': 10 + 105,
-             'color': (1, 1, 0, 1)},
-            {'id': 3, 'x1': 215 + 65 + 30, 'y1': 10 + 105, 'x2': 25 + 247 + 65 + 30, 'y2': 10 + 140,
-             'color': (0, 0.5, 0, 1)},
-            {'id': 4, 'x1': 215 + 65 + 30, 'y1': 10 + 140, 'x2': 25 + 247 + 65 + 30, 'y2': 10 + 175,
-             'color': (0, 1, 1, 1)},
-            {'id': 5, 'x1': 215 + 65 + 30, 'y1': 10 + 175, 'x2': 25 + 247 + 65 + 30, 'y2': 10 + 210,
-             'color': (0, 0, 1, 1)},
-            {'id': 6, 'x1': 215 + 65 + 30, 'y1': 10 + 210, 'x2': 25 + 247 + 65 + 30, 'y2': 10 + 245,
-             'color': (0, 0, 0, 1)},
-            {'id': 7, 'x1': 215 + 65 + 30, 'y1': 10 + 245, 'x2': 25 + 247 + 65 + 30, 'y2': 10 + 280,
-             'color': (1.0, 0.5, 0.0, 1.0)},
+            {'id': 1, 'color': (1, 0, 0, 1)},
+            {'id': 2, 'color': (1, 1, 0, 1)},
+            {'id': 3, 'color': (0, 0.5, 0, 1)},
+            {'id': 4, 'color': (0, 1, 1, 1)},
+            {'id': 5, 'color': (0, 0, 1, 1)},
+            {'id': 6, 'color': (0, 0, 0, 1)},
+            {'id': 7, 'color': (1.0, 0.5, 0.0, 1.0)},
         ]
         self.figuresPanelButtons = [
-            {'id': 3, 'x1': 150 + 30 + 30, 'y1': 10 + 35, 'x2': 25 + 150 + 30 + 30, 'y2': 10 + 70, 'tool': 6},
-            {'id': 4, 'x1': 150 + 30 + 30, 'y1': 10 + 35 + 35, 'x2': 25 + 150 + 30 + 30, 'y2': 10 + 70 + 35, 'tool': 4},
-            {'id': 5, 'x1': 150 + 30 + 30, 'y1': 10 + 35 + 35 + 35, 'x2': 25 + 150 + 30 + 30, 'y2': 10 + 70 + 35 + 35,
-             'tool': 6},
-            {'id': 6, 'x1': 150 + 30 + 30, 'y1': 10 + 35 + 35 + 35 + 35, 'x2': 25 + 150 + 30 + 30,
-             'y2': 10 + 70 + 35 + 35 + 35, 'tool': 6},
-            {'id': 40, 'x1': 150 + 30 + 30, 'y1': 10 + 35 + 35 + 35 + 35 + 35, 'x2': 25 + 150 + 30 + 30,
-             'y2': 10 + 70 + 35 + 35 + 35 + 35,
-             'tool': 6},
+            {'id': 3, 'tool': 6},
+            {'id': 4, 'tool': 4},
+            {'id': 5, 'tool': 6},
+            {'id': 6, 'tool': 6},
+            {'id': 40, 'tool': 6},
         ]
         self.arrowPanelButtons = [
-            {'id': 1, 'x1': 320 + 25 + 30, 'y1': 10 + 35, 'x2': 48 + 320 + 25 + 30, 'y2': 10 + 70,
-             'image': pyglet.resource.image('img/lineArr2.png'), 'color': (1, 1, 1, 1)},
-            {'id': 2, 'x1': 320 + 25 + 30, 'y1': 10 + 70, 'x2': 48 + 320 + 25 + 30, 'y2': 10 + 105,
-             'image': pyglet.resource.image('img/lineArr1.png'), 'color': (1, 1, 1, 1)},
-            {'id': 3, 'x1': 320 + 25 + 30, 'y1': 10 + 105, 'x2': 48 + 320 + 25 + 30, 'y2': 10 + 140,
-             'image': pyglet.resource.image('img/lineArr.png'), 'color': (1, 1, 1, 1)},
-            {'id': 0, 'x1': 320 + 25 + 30, 'y1': 10 + 140, 'x2': 48 + 320 + 25 + 30, 'y2': 10 + 175,
-             'image': pyglet.resource.image('img/lineWithArr.png'), 'color': (1, 1, 1, 1)},
+            {'id': 1, 'image': pyglet.resource.image('img/lineArr2.png'), 'color': (1, 1, 1, 1)},
+            {'id': 2, 'image': pyglet.resource.image('img/lineArr1.png'), 'color': (1, 1, 1, 1)},
+            {'id': 3, 'image': pyglet.resource.image('img/lineArr.png'), 'color': (1, 1, 1, 1)},
+            {'id': 0, 'image': pyglet.resource.image('img/lineWithArr.png'), 'color': (1, 1, 1, 1)},
         ]
         self.dashPanelButtons = [
-            {'id': 1, 'x1': 390 + 5 + 30, 'y1': 10 + 35, 'x2': 48 + 390 + 5 + 30, 'y2': 10 + 70,
-             'image': pyglet.resource.image('img/shtrLine.png'), 'color': (1, 1, 1, 1)},
-            {'id': 2, 'x1': 390 + 5 + 30, 'y1': 10 + 70, 'x2': 48 + 390 + 5 + 30, 'y2': 10 + 105,
-             'image': pyglet.resource.image('img/punktir.png'), 'color': (1, 1, 1, 1)},
-            {'id': 0, 'x1': 390 + 5 + 30, 'y1': 10 + 105, 'x2': 48 + 390 + 5 + 30, 'y2': 10 + 140,
-             'image': pyglet.resource.image('img/lineWithArr.png'), 'color': (1, 1, 1, 1)},
+            {'id': 1, 'image': pyglet.resource.image('img/shtrLine.png'), 'color': (1, 1, 1, 1)},
+            {'id': 2, 'image': pyglet.resource.image('img/punktir.png'), 'color': (1, 1, 1, 1)},
+            {'id': 0, 'image': pyglet.resource.image('img/lineWithArr.png'), 'color': (1, 1, 1, 1)},
         ]
         self.widthPanelButtons = [
-            {'id': 1, 'x1': 250 + 65 + 30, 'y1': 10 + 35, 'x2': 50 + 282 + 65 + 30, 'y2': 10 + 70, 'width': 3},
-            {'id': 2, 'x1': 250 + 65 + 30, 'y1': 10 + 70, 'x2': 50 + 282 + 65 + 30, 'y2': 10 + 105, 'width': 5},
-            {'id': 3, 'x1': 250 + 65 + 30, 'y1': 10 + 105, 'x2': 50 + 282 + 65 + 30, 'y2': 10 + 140, 'width': 9},
-            {'id': 4, 'x1': 250 + 65 + 30, 'y1': 10 + 140, 'x2': 50 + 282 + 65 + 30, 'y2': 10 + 175, 'width': 13},
-            {'id': 5, 'x1': 250 + 65 + 30, 'y1': 10 + 175, 'x2': 50 + 282 + 65 + 30, 'y2': 10 + 210, 'width': 17},
-            {'id': 6, 'x1': 250 + 65 + 30, 'y1': 10 + 210, 'x2': 50 + 282 + 65 + 30, 'y2': 10 + 245, 'width': 23},
-            {'id': 7, 'x1': 250 + 65 + 30, 'y1': 10 + 245, 'x2': 50 + 282 + 65 + 30, 'y2': 10 + 280, 'width': 29},
-            {'id': 8, 'x1': 250 + 65 + 30, 'y1': 10 + 280, 'x2': 50 + 282 + 65 + 30, 'y2': 10 + 315, 'width': 37},
-            # {'id': 9, 'x1': 250, 'y1': 10 + 315, 'x2': 50 + 282, 'y2': 10 + 350, 'width': 45},
-            # {'id': 5, 'x1': 250, 'y1': 10 + 175, 'x2': 282, 'y2': 10 + 210, 'width': 32},
+            {'id': 1, 'width': 3},
+            {'id': 2, 'width': 5},
+            {'id': 3, 'width': 9},
+            {'id': 4, 'width': 13},
+            {'id': 5, 'width': 17},
+            {'id': 6, 'width': 23},
+            {'id': 7, 'width': 29},
+            {'id': 8, 'width': 37},
 
         ]
+        x_palitra, x_figures, x_arrow, x_dash, x_width = 0, 0, 0, 0, 0
+        for b in self.buttons:
+            if b['id'] == 101:
+                x_palitra = b['x']
+            if b['id'] == 6:
+                x_figures = b['x']
+            if b['id'] == 106:
+                x_arrow = b['x']
+            if b['id'] == 107:
+                x_dash = b['x']
+            if b['id'] == 102:
+                x_width = b['x']
+
+        y0 = 10
+        for cp_btn in self.colorPanelButtons:
+            cp_btn['x1'] = x_palitra
+            cp_btn['x2'] = x_palitra + 55
+            y0 += 35
+            cp_btn['y1'] = y0
+            cp_btn['y2'] = y0 + 35
+        y0 = 10
+        for f_btn in self.figuresPanelButtons:
+            f_btn['x1'] = x_figures
+            f_btn['x2'] = x_figures + 25
+            y0 += 35
+            f_btn['y1'] = y0
+            f_btn['y2'] = y0 + 35
+        y0 = 10
+        for a_btn in self.arrowPanelButtons:
+            a_btn['x1'] = x_arrow
+            a_btn['x2'] = x_arrow + 55
+            y0 += 35
+            a_btn['y1'] = y0
+            a_btn['y2'] = y0 + 35
+        y0 = 10
+        for d_btn in self.dashPanelButtons:
+            d_btn['x1'] = x_dash
+            d_btn['x2'] = x_dash + 55
+            y0 += 35
+            d_btn['y1'] = y0
+            d_btn['y2'] = y0 + 35
+        y0 = 10
+        for w_btn in self.widthPanelButtons:
+            w_btn['x1'] = x_width
+            w_btn['x2'] = x_width + 55
+            y0 += 35
+            w_btn['y1'] = y0
+            w_btn['y2'] = y0 + 25
+
         self.poly = []
         self.x0, self.y0 = 0, 0
         self.cx, self.cy = 0, 0
@@ -684,17 +764,13 @@ class MyWindow(pyglet.window.Window):
 
     def on_key_press(self, symbol, modifiers):
         if symbol == 65307:  # ESC
-            # TODO поміняти потім
             self.closeApp()
-            # self.on_close()
         elif symbol == 65360:  # Home
             self.page = 1
             self.cx, self.cy = 0, 0
         elif symbol == 100:  # D    Save whiteboard
-            # print("save")
             self.save()
         elif symbol == 117:  # U    Open whiteboard
-            # print("load")
             self.load()
             self.clear()
         elif symbol == 65535:  # Delete
@@ -776,7 +852,7 @@ class MyWindow(pyglet.window.Window):
 
         if button == mouse.LEFT:
             self.f = True
-            # Якщо панель кольору видима
+            # Якщо панель ... видима
             if self.colorPanelVisible:
                 for btn in self.colorPanelButtons:
                     if btn['x1'] < x < btn['x2'] and btn['y1'] < y < btn['y2']:
@@ -846,6 +922,8 @@ class MyWindow(pyglet.window.Window):
                     #         self.isFill = not self.isFill
                     #     self.tool = btn['tool']
                     tool = 4
+                    if btn['command'] != '':
+                        eval('self.' + btn['command'] + '()')
                     if btn['id'] == 6:
                         if self.numVertex == 4:
                             tool = 4
@@ -863,53 +941,9 @@ class MyWindow(pyglet.window.Window):
                         #     self.tool = 4
                         # elif self.polygone == 40:
                         #     self.tool = 5
-                    elif btn['id'] == 5:
-                        self.isFill = not self.isFill
-                        #Зафарбовуємо чи ні виділену фігуру
-                        if self.tool==8 and self.selFig !={}:
-                            self.selFig['figobj']['fill'] = self.isFill
-                    elif btn['id'] == 26:  # Діалогове вікно
-                        # hide main window
-                        self.set_visible(False)
-                        # show panel window
-                        # self.show_screenshot_panel()
-                        time.sleep(2)
-                        self.insert_screenshot()
-                        self.set_visible(True)
-                        # self.switch_to()
-                    elif btn['id'] == 101:  # Changr color pen
-                        self.colorPanelVisible = not self.colorPanelVisible
-                    elif btn['id'] == 102:  # Changr width pen
-                        self.widthPanelVisible = not self.widthPanelVisible
-                    # elif btn['id'] == 103:  # Insert from Clipboard
-                    #     print("Insert from Clipboard")
-                    #     self.insert_from_clipboard()
-                    elif btn['id'] == 106:  # Chang arrow
-                        self.arrowPanelVisible = not self.arrowPanelVisible
-                    elif btn['id'] == 107:  # Chang dash
-                        self.dashPanelVisible = not self.dashPanelVisible
-                    elif btn['id'] == 105:  # Сторінка вправо
-                        self.clear()
-                        self.page += 1
-                        self.cx = self.page * 100000 - 100000
-                        self.cy = 0
-                    elif btn['id'] == 112:
-                        self.dragPanel = True
-                    elif btn['id'] == 108:
-                        self.cx -= 50
-                    elif btn['id'] == 109:
-                        self.cx += 50
-                    elif btn['id'] == 110:
-                        self.cy += 50
-                    elif btn['id'] == 111:
-                        self.cy -= 50
-                    elif btn['id'] == 104:  # Сторінка вліво
-                        self.clear()
-                        self.page -= 1
-                        if self.page < 1:
-                            self.page = 1
-                        self.cx = self.page * 100000 - 100000
-                        self.cy = 0
+
+
+
                     else:
                         if btn['tool'] != 0:
                             self.tool = btn['tool']
@@ -923,8 +957,6 @@ class MyWindow(pyglet.window.Window):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
                         x1, y1 = self.canvas_to_screen(x1, y1)
                         x2, y2 = self.canvas_to_screen(x2, y2)
-                        # x1, y1, x2, y2 = x1 + self.cx, y1 + self.cy, x2 + self.cx, y2 + self.cy
-                        # x -=self.cx; y -=self.cy
                         if ((x > x1) and (x < x2) and (y > y1) and (y < y2)) or (
                                 x2 - 18 + 20 < x < x2 - 2 + 20 and y1 + 2 - 20 < y < y1 + 20 - 20):
                             self.selDel = {'x1': x1, 'y1': y1,
@@ -939,7 +971,6 @@ class MyWindow(pyglet.window.Window):
                             if self.selDel != {}:
                                 if (x > xx1) and (x < xx2) and (y > yy1) and (y < yy2):
                                     # Вилучаємо
-                                    # print("Вилучаємо")
                                     fig['fordel'] = True
                                     self.update_fig()
                             self.selFig['fig'] = fig['id']
@@ -964,7 +995,6 @@ class MyWindow(pyglet.window.Window):
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
                     self.drawRight = len(self.figures) < 3 or self.lastCommand == 11
-                    # self.drawRight = False
                 elif self.tool == 3:  # line
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
@@ -974,20 +1004,12 @@ class MyWindow(pyglet.window.Window):
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
-                # elif self.tool == 4:  # rectangle
-                #     self.x0, self.y0 = self.screen_to_canvas(x, y)
-                #     self.poly.clear()
-                #     self.poly.append({'x': self.x0, 'y': self.y0})
                 elif self.tool == 5 or self.tool == 6:  # ellipse
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
                 elif self.tool == 26:  # scheenshot mode
                     pass
-            # xx, yy = self.pnlx, self.pnly
-            # # print ("pnlx=",self.pnlx, " pnly=",self.pnly )
-            # if (xx < x < xx + 100) and (yy < y < yy + 100) and not self.f:
-            #     self.dragPanel = True
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         # print("tool=",self.tool)
@@ -1087,12 +1109,12 @@ class MyWindow(pyglet.window.Window):
                             x1, y1 = self.canvas_to_screen(x1, y1)
                             x2, y2 = self.canvas_to_screen(x2, y2)
                             if ((
-                                        x1 < x < x2 and y1 < y < y2) or self.isMove) and not self.isResize :
+                                        x1 < x < x2 and y1 < y < y2) or self.isMove) and not self.isResize:
                                 self.isMove = True
                                 self.isResize = False
                                 # Якщо перетягуємо
-                                xser = (x1+x2)/2
-                                if (not ((y2 - 20 < y < y2)and(xser - 10 < x < xser + 10)) ) and not self.isRotate :
+                                xser = (x1 + x2) / 2
+                                if (not ((y2 - 20 < y < y2) and (xser - 10 < x < xser + 10))) and not self.isRotate:
                                     for p in fig['p']:
                                         p['x'] += dx
                                         p['y'] += dy
@@ -1108,16 +1130,16 @@ class MyWindow(pyglet.window.Window):
                                     self.selRes['y1'] += dy
                                     self.selRes['x2'] += dx
                                     self.selRes['y2'] += dy
-                                else: # Якщо крутимо
-                                    if fig['name']!='image':
+                                else:  # Якщо крутимо
+                                    if fig['name'] != 'image':
                                         self.isRotate = True
                                         x0, y0 = (fig['center']['x'], fig['center']['y'])
-                                        angle = math.atan(-dx/100)
+                                        angle = math.atan(-dx / 100)
 
                                         for p in fig['p']:
-                                            xx,yy = p['x'], p['y']
-                                            p['x'] = (xx-x0)*math.cos(angle)-(yy-y0)*math.sin(angle)+x0
-                                            p['y'] = (xx-x0)*math.sin(angle)+(yy-y0)*math.cos(angle)+y0
+                                            xx, yy = p['x'], p['y']
+                                            p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
+                                            p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
 
                             xr1, yr1, xr2, yr2 = self.selRes['x1'], self.selRes['y1'], self.selRes['x2'], self.selRes[
                                 'y2']
@@ -1164,7 +1186,7 @@ class MyWindow(pyglet.window.Window):
                             # print(xs, ys)
                             # if ((xs - 20 < x < xs + 20) and (ys < y < ys + 40)) or self.isRotate:
                             #     print(11111111111111111111111111111111)
-                                # self.isRotate = True
+                            # self.isRotate = True
 
     def on_mouse_release(self, x, y, button, modifiers):
         self.dragPanel = False
@@ -1183,7 +1205,7 @@ class MyWindow(pyglet.window.Window):
                     k['name'] = 'polyline'
                     k['p'] = self.poly.copy()
                     x0, y0 = self.x0, self.y0
-                    x0,y0,xx,yy = border_polyline(k['p'])
+                    x0, y0, xx, yy = border_polyline(k['p'])
                     xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
                     k['center'] = {'x': xcenter, 'y': ycenter}
                     k['color'] = self.penColor
@@ -1238,7 +1260,7 @@ class MyWindow(pyglet.window.Window):
                     k['p'] = self.poly.copy()
                     k['color'] = self.penColor
                     xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
-                    k['center'] = {'x':xcenter, 'y':ycenter}
+                    k['center'] = {'x': xcenter, 'y': ycenter}
                     k['thickness'] = self.penWidth
                     k['dash'] = self.dash
                     k['fill'] = self.isFill
@@ -1251,7 +1273,7 @@ class MyWindow(pyglet.window.Window):
                     # self.poly.append({'x': xx, 'y': y0})
                     # self.poly.append({'x': xx, 'y': yy})
                     x0, y0 = self.poly[0]['x'], self.poly[0]['y']
-                    points = border_to_points(x0, y0,xx, yy,numPoints=self.numVertex)
+                    points = border_to_points(x0, y0, xx, yy, numPoints=self.numVertex)
 
                     self.id += 1
                     k['id'] = self.id
@@ -1317,6 +1339,7 @@ class MyWindow(pyglet.window.Window):
         self.isResize = False
         self.lastCommand = 0
         # print(self.figures)
+
     def on_draw(self):
         # Перевіряємо наявність зовнішніх даних та підвантажуємо їх за потребою
 
@@ -1348,10 +1371,7 @@ class MyWindow(pyglet.window.Window):
             #     for x in range(0, w, self.step):
             #         draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=1)
             count = 0
-            # print("--- ", 5)
-            # print(self.figures)
             for f in self.figures:
-                # print(6)
                 x_min, y_min, x_max, y_max = border_polyline(f['p'])
                 x_min, y_min = self.canvas_to_screen(x_min, y_min)
                 x_max, y_max = self.canvas_to_screen(x_max, y_max)
@@ -1363,7 +1383,6 @@ class MyWindow(pyglet.window.Window):
                         for p in f['p']:
                             x = p['x']
                             y = p['y']
-                            # line(x0 , y0 , x , y , color=f['color'], thickness=f['thickness'])
                             xx0, yy0 = self.canvas_to_screen(x0, y0)
                             xx, yy = self.canvas_to_screen(x, y)
                             xx0, yy0, xx, yy = longer_for_polyline(xx0, yy0, xx, yy, f['thickness'], 0.2)
@@ -1375,15 +1394,6 @@ class MyWindow(pyglet.window.Window):
                         x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
                         draw_line_mod(x0, y0, x_, y_, color=f['color'], fon_color=self.fonColor,
                                       thickness=f['thickness'], arrow=f['arrow'], dash=f['dash'])
-                    # elif f['name'] == 'ellipse':
-                    #     x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
-                    #     x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
-                    #     draw_ellipse(x0, y0, x_, y_, color=f['color'], thickness=f['thickness'])
-                    # elif f['name'] == 'ellipse_fill':
-                    #     x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
-                    #     x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
-                    #     num = max(abs(x0 - x_), abs(y0 - y_)) * 4
-                    #     draw_fill_ellipse(x0, y0, x_, y_, numPoints=num, color=f['color'], thickness=f['thickness'])
                     elif f['name'] == 'quadrangle_fill' or f['name'] == 'quadrangle':
                         x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
                         x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
@@ -1397,14 +1407,13 @@ class MyWindow(pyglet.window.Window):
                     elif f['name'] == 'polygone' or f['name'] == 'polygone_fill':
                         np = []
                         for p in f['p']:
-                            x,y = self.canvas_to_screen(p['x'], p['y'])
-                            np.append({'x':x, 'y':y})
+                            x, y = self.canvas_to_screen(p['x'], p['y'])
+                            np.append({'x': x, 'y': y})
                         if f['fill']:
                             draw_fill_polygon(np, color=f['color'], thickness=f['thickness'])
                         else:
-                            draw_polygon(np, color=f['color'], thickness=f['thickness'],dash=f['dash'])
+                            draw_polygon(np, color=f['color'], thickness=f['thickness'], dash=f['dash'])
                     elif f['name'] == 'image':
-                        # print(7)
                         x0 = f['p'][0]['x']
                         y0 = f['p'][0]['y']
                         x = f['p'][1]['x']
@@ -1441,24 +1450,20 @@ class MyWindow(pyglet.window.Window):
                               color=self.penColor, fon_color=self.fonColor, fill=self.isFill)
                     draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
 
-                # if btn['id'] == 108 or btn['id'] == 109 or btn['id'] == 110 or btn['id'] == 111:
-                #     angl = {108: 180, 109: 0, 110: 270, 111: 90, }
-                #     draw_fill_polygon(x + 2+self.pnlx, y + 28+self.pnly, x + 28+self.pnlx, y+self.pnly, angleStart=angl[btn['id']], numPoints=3,
-                #                       color=(0, 1, 0.5, 0.5))
-                # x = x + self.pnlx - 75
-                # y = y + self.pnly - 75
-
                 if btn['id'] == 112:
                     draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=4,
                                           color=(0, 0.5, 0.5, 0.5))
                 if btn['id'] == 108:
-                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=180, numPoints=3, color=(0, 0.5, 0.5, 0.5))
+                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=180, numPoints=3,
+                                          color=(0, 0.5, 0.5, 0.5))
                 if btn['id'] == 109:
                     draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=3, color=(0, 0.5, 0.5, 0.5))
                 if btn['id'] == 110:
-                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=270, numPoints=3, color=(0, 0.5, 0.5, 0.5))
+                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=270, numPoints=3,
+                                          color=(0, 0.5, 0.5, 0.5))
                 if btn['id'] == 111:
-                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=90, numPoints=3, color=(0, 0.5, 0.5, 0.5))
+                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=90, numPoints=3,
+                                          color=(0, 0.5, 0.5, 0.5))
 
                 if self.tool == btn['tool']:
                     draw_fill_circle(x + 5, y + 34, 3, color=self.penColor)
@@ -1483,9 +1488,10 @@ class MyWindow(pyglet.window.Window):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
                         x1, y1 = self.canvas_to_screen(x1, y1)
                         x2, y2 = self.canvas_to_screen(x2, y2)
-                        ff = fig['name']!='image'
-                        draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2, center=(self.canvas_to_screen(fig['center']['x'],fig['center']['y'])),
-                                       color=self.ramkaColor, thickness=self.ramkaThickness,rotate=ff)
+                        ff = fig['name'] != 'image'
+                        draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
+                                       center=(self.canvas_to_screen(fig['center']['x'], fig['center']['y'])),
+                                       color=self.ramkaColor, thickness=self.ramkaThickness, rotate=ff)
 
                         draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
                         close_cross(self.selDel['x1'] + 0, self.selDel['y1'] + 0,
