@@ -310,24 +310,12 @@ def dist_(x0, y0, x, y):
 
 def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thickness=4, smooth=False, arrow=0,
                   dash=0):
-    # print ("thickness - ", thickness)
-    # glColor4f(*color)
-    # glLineWidth(thickness)
-    # glBegin(GL_LINES)
-    # glVertex2f(x0, y0)
-    # glVertex2f(x, y)
-    # glEnd()
-
-    # Рисуємо стрілки
-    LW = 1
-
     LineLen = 4.74 * thickness
     l = dist_(x0, y0, x, y)
     angle = math.atan2(y0 - y, x - x0)
     angle2 = math.atan2(y - y0, x0 - x)
     x_, y_ = x0 + (l - LineLen) * math.cos(angle), y0 - (l - LineLen) * math.sin(angle)
     x0_, y0_ = x - (l - LineLen) * math.cos(angle), y + (l - LineLen) * math.sin(angle)
-    # x_, y_ = x,y
     if arrow == 3:
         draw_line_1(x0, y0, x_, y_, color=color, thickness=thickness, dash=dash)
         draw_arrow_head(x, y, angle, color=color, thickness=thickness)
@@ -342,40 +330,16 @@ def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thic
         draw_line_1(x0, y0, x, y, color=color, thickness=thickness, dash=dash)
 
 
-# def rectangle_vulg(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
-#     # x0,y0 = x0-10,y0-10
-#     glColor4f(*color)
-#     glLineWidth(thickness)
-#     glBegin(GL_LINES)
-#     glVertex2f(x0, y0)
-#     glVertex2f(x, y0)
-#     glEnd()
-#     glBegin(GL_LINES)
-#     glVertex2f(x, y0)
-#     glVertex2f(x, y)
-#     glEnd()
-#     glBegin(GL_LINES)
-#     glVertex2f(x, y)
-#     glVertex2f(x0, y)
-#     glEnd()
-#     glBegin(GL_LINES)
-#     glVertex2f(x0, y)
-#     glVertex2f(x0, y0)
-#     glEnd()
-def draw_ramka_top(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1, center=(0,0)):
+def draw_ramka_top(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1, center=(0,0), rotate=True):
     glColor4f(*color)
     glLineWidth(thickness)
     xc0,yc0 = center
     draw_circle(xc0, yc0, 10, color=color, thickness=1)
     draw_line(xc0-20, yc0, xc0+20, yc0,  color=color, thickness=1)
     draw_line(xc0, yc0-20, xc0, yc0+20, color=color, thickness=1)
-
-    # draw_circle((x0 + x) // 2, (y0 + y) // 2, 10, color=(1, 0, 0, 1), thickness=1)
-    # draw_line((x0 + x) // 2 - 20, (y0 + y) // 2, (x0 + x) // 2 + 20, (y0 + y) // 2, color=(1, 0, 0, 1), thickness=1)
-    # draw_line((x0 + x) // 2 , (y0 + y) // 2-20, (x0 + x) // 2, (y0 + y) // 2+20, color=(1, 0, 0, 1), thickness=1)
-
-    draw_line_mod((x0 + x) // 2 - 15, y - 12, (x0 + x) // 2, y - 6, color=color, thickness=2, arrow=2)
-    draw_line_mod((x0 + x) // 2 + 15, y - 12,(x0 + x) // 2 , y - 6,  color=color, thickness=2, arrow=2)
+    if rotate:
+        draw_line_mod((x0 + x) // 2 - 15, y - 12, (x0 + x) // 2, y - 6, color=color, thickness=2, arrow=2)
+        draw_line_mod((x0 + x) // 2 + 15, y - 12,(x0 + x) // 2 , y - 6,  color=color, thickness=2, arrow=2)
     glBegin(GL_LINES)
     glVertex2f(x0, y - 10)
     glVertex2f(x0, y)

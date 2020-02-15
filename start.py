@@ -396,7 +396,7 @@ class MyWindow(pyglet.window.Window):
         self.pnly = 75
         self.buttons = [
             {'id': 20, 'text': 'Hand', 'image': pyglet.resource.image('img/hand.png'), 'tool': 20,
-             'sel': False, 'align': 'left'},
+             'sel': False, 'align': 'left', 'command':'set_hand'},
             {'id': 8, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
              'sel': False, 'align': 'left'},
             {'id': 1, 'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1,
@@ -867,7 +867,6 @@ class MyWindow(pyglet.window.Window):
                         self.isFill = not self.isFill
                         #Зафарбовуємо чи ні виділену фігуру
                         if self.tool==8 and self.selFig !={}:
-                            print("3333333=",self.selFig['fig'])
                             self.selFig['figobj']['fill'] = self.isFill
                     elif btn['id'] == 26:  # Діалогове вікно
                         # hide main window
@@ -1093,7 +1092,7 @@ class MyWindow(pyglet.window.Window):
                                 self.isResize = False
                                 # Якщо перетягуємо
                                 xser = (x1+x2)/2
-                                if (not ((y2 - 40 < y < y2)and(xser - 40 < x < xser + 40)) ) and not self.isRotate :
+                                if (not ((y2 - 20 < y < y2)and(xser - 10 < x < xser + 10)) ) and not self.isRotate :
                                     for p in fig['p']:
                                         p['x'] += dx
                                         p['y'] += dy
@@ -1110,14 +1109,15 @@ class MyWindow(pyglet.window.Window):
                                     self.selRes['x2'] += dx
                                     self.selRes['y2'] += dy
                                 else: # Якщо крутимо
-                                    self.isRotate = True
-                                    x0, y0 = (fig['center']['x'], fig['center']['y'])
-                                    angle = math.atan(-dx/100)
+                                    if fig['name']!='image':
+                                        self.isRotate = True
+                                        x0, y0 = (fig['center']['x'], fig['center']['y'])
+                                        angle = math.atan(-dx/100)
 
-                                    for p in fig['p']:
-                                        xx,yy = p['x'], p['y']
-                                        p['x'] = (xx-x0)*math.cos(angle)-(yy-y0)*math.sin(angle)+x0
-                                        p['y'] = (xx-x0)*math.sin(angle)+(yy-y0)*math.cos(angle)+y0
+                                        for p in fig['p']:
+                                            xx,yy = p['x'], p['y']
+                                            p['x'] = (xx-x0)*math.cos(angle)-(yy-y0)*math.sin(angle)+x0
+                                            p['y'] = (xx-x0)*math.sin(angle)+(yy-y0)*math.cos(angle)+y0
 
                             xr1, yr1, xr2, yr2 = self.selRes['x1'], self.selRes['y1'], self.selRes['x2'], self.selRes[
                                 'y2']
@@ -1483,8 +1483,9 @@ class MyWindow(pyglet.window.Window):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
                         x1, y1 = self.canvas_to_screen(x1, y1)
                         x2, y2 = self.canvas_to_screen(x2, y2)
+                        ff = fig['name']!='image'
                         draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2, center=(self.canvas_to_screen(fig['center']['x'],fig['center']['y'])),
-                                       color=self.ramkaColor, thickness=self.ramkaThickness)
+                                       color=self.ramkaColor, thickness=self.ramkaThickness,rotate=ff)
 
                         draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
                         close_cross(self.selDel['x1'] + 0, self.selDel['y1'] + 0,
