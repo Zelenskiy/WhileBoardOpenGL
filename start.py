@@ -255,7 +255,8 @@ class MyWindow(pyglet.window.Window):
             {'id': 6, 'text': 'rectangle', 'image': None, 'tool': 4, 'sel': False, 'align': 'left', 'command': ''},
             {'id': 5, 'text': 'setFill', 'image': pyglet.resource.image('img/FillNotFill.png'), 'tool': 0, 'sel': False,
              'align': 'left', 'command': 'set_fill'},
-            {'id': 55, 'text': 'setMultiselect', 'image': pyglet.resource.image('img/multisel.png'), 'tool': 0, 'sel': False,
+            {'id': 55, 'text': 'setMultiselect', 'image': pyglet.resource.image('img/multisel.png'), 'tool': 0,
+             'sel': False,
              'align': 'left', 'command': 'set_multisel'},
             {'id': 26, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
              'sel': False, 'align': 'left', 'command': 'set_shot'},
@@ -612,6 +613,7 @@ class MyWindow(pyglet.window.Window):
 
     def set_colorpanel_visible(self):
         self.colorPanelVisible = not self.colorPanelVisible
+
     def set_multisel(self):
         self.multiSelect = not self.multiSelect
 
@@ -652,8 +654,6 @@ class MyWindow(pyglet.window.Window):
 
     def move_111(self):
         self.cy -= 50
-
-
 
     def alignToBottomRight(self, win):
         dw, dh = wx.DisplaySize()
@@ -888,7 +888,6 @@ class MyWindow(pyglet.window.Window):
                         #     self.polygone = 4
                         self.figuresPanelVisible = False
 
-
                         break
             if self.widthPanelVisible:
                 for btn in self.widthPanelButtons:
@@ -958,13 +957,10 @@ class MyWindow(pyglet.window.Window):
             if self.f:
                 if self.tool != 8: self.selFigs = []
                 if self.tool == 8:
-                    # if keyboard.is_pressed('Esc'):
-                    print("modifier",modifier)
-                    if  not self.multiSelect:
+                    if not self.multiSelect:
                         self.selFigs = []
                     # if modifier!=[]
                     flag = False
-
 
                     for fig in reversed(self.figures):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
@@ -976,9 +972,9 @@ class MyWindow(pyglet.window.Window):
                             # selDel = {}
                             # selRes = {}
                             selDel = {'x1': x1, 'y1': y1,
-                                           'x2': x1 + 20, 'y2': y1 + 20}
+                                      'x2': x1 + 20, 'y2': y1 + 20}
                             selRes = {'x1': x2 - 18 + 20, 'y1': y1 + 2 - 20,
-                                           'x2': x2 - 2 + 20, 'y2': y1 + 20 - 20}
+                                      'x2': x2 - 2 + 20, 'y2': y1 + 20 - 20}
                             # canvas.config(cursor="fleur")
                             xx1 = selDel['x1']
                             yy1 = selDel['y1']
@@ -989,7 +985,7 @@ class MyWindow(pyglet.window.Window):
                                     # Вилучаємо
                                     fig['fordel'] = True
                                     self.update_fig()
-                            print ("self.selFigs->",self.selFigs)
+
                             self.selFigs.append({})
                             self.selFigs[-1]['fig'] = fig['id']
                             self.selFigs[-1]['figobj'] = fig
@@ -1035,7 +1031,7 @@ class MyWindow(pyglet.window.Window):
                 #     pass
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        print("drawRight=",self.drawRight)
+
         if self.drawRight: self.clear()
         if self.dragPanel:
             for b in self.btnPnl:
@@ -1125,13 +1121,18 @@ class MyWindow(pyglet.window.Window):
                 self.cy += dy
             elif self.tool == 8:
                 # self.clear()
+                if len(self.selFigs)>1:
+                    self.isRotate = False
+                psum=[]
+                for selFig in self.selFigs:
+                    psum +=selFig['figobj']['p']
+                x1, y1, x2, y2 = border_polyline(psum)
+
                 for selFig in self.selFigs:
                     fig = selFig['figobj']
-                    x1, y1, x2, y2 = border_polyline(fig['p'])
                     x1, y1 = self.canvas_to_screen(x1, y1)
                     x2, y2 = self.canvas_to_screen(x2, y2)
-                    if ((
-                                x1 < x < x2 and y1 < y < y2) or self.isMove) and not self.isResize:
+                    if ((x1 < x < x2 and y1 < y < y2) or self.isMove) and not self.isResize:
                         self.isMove = True
                         self.isResize = False
                         # Якщо перетягуємо
@@ -1163,7 +1164,8 @@ class MyWindow(pyglet.window.Window):
                                     p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
                                     p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
 
-                    xr1, yr1, xr2, yr2 = selFig['selRes']['x1'], selFig['selRes']['y1'], selFig['selRes']['x2'], selFig['selRes']['y2']
+                    xr1, yr1, xr2, yr2 = selFig['selRes']['x1'], selFig['selRes']['y1'], selFig['selRes']['x2'], \
+                                         selFig['selRes']['y2']
                     if (
                             xr1 - 10 < x < xr2 + 10 and yr1 - 10 < y < yr2 + 10) or self.isResize:
                         self.isMove = False
@@ -1198,7 +1200,6 @@ class MyWindow(pyglet.window.Window):
                             # [{'id': 1, 'name': 'image', 'p': [{'x': 417, 'y': 224}, {'x': 1017, 'y': 561}], 'image': 'tmp/_2020_01_17_21_30_24.png.resize.png', 'thickness': 4, 'fordel': False}]
                             size = (int(x2 - x1), int(y2 - y1))
                             self.images[fig['image']] = self.images[fig['image']].resize(size)
-
 
     def on_mouse_release(self, x, y, button, modifiers):
         self.dragPanel = False
@@ -1507,14 +1508,14 @@ class MyWindow(pyglet.window.Window):
                 #     resize_arr(selFig['selRes']['x1'] + 0, selFig['selRes']['y2'] + 0,
                 #                selFig['selRes']['x2'] + 0, selFig['selRes']['y1'] + 0,
                 #                color=self.ramkaColor, thickness=self.ramkaThickness)
-                pSel =[]
+                pSel = []
 
                 for selFig in self.selFigs:
                     fig = selFig['figobj']
                     pSel += fig['p']
 
                 x1, y1, x2, y2 = border_polyline(pSel)
-                x_center, y_center, = (x1+x2)/2,(y1+y2)/2
+                x_center, y_center, = (x1 + x2) / 2, (y1 + y2) / 2
                 x1, y1 = self.canvas_to_screen(x1, y1)
                 x2, y2 = self.canvas_to_screen(x2, y2)
                 ff = fig['name'] != 'image'
@@ -1523,14 +1524,14 @@ class MyWindow(pyglet.window.Window):
                                color=self.ramkaColor, thickness=self.ramkaThickness, rotate=ff)
 
                 draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
-                    # close_cross(selFig['selDel']['x1'] + 0, selFig['selDel']['y1'] + 0,
-                    #             selFig['selDel']['x2'] + 0, selFig['selDel']['y2'] + 0,
-                    #             color=self.ramkaColor, thickness=self.ramkaThickness
-                    #             )
-                    #
-                    # resize_arr(selFig['selRes']['x1'] + 0, selFig['selRes']['y2'] + 0,
-                    #            selFig['selRes']['x2'] + 0, selFig['selRes']['y1'] + 0,
-                    #            color=self.ramkaColor, thickness=self.ramkaThickness)
+                # close_cross(selFig['selDel']['x1'] + 0, selFig['selDel']['y1'] + 0,
+                #             selFig['selDel']['x2'] + 0, selFig['selDel']['y2'] + 0,
+                #             color=self.ramkaColor, thickness=self.ramkaThickness
+                #             )
+                #
+                # resize_arr(selFig['selRes']['x1'] + 0, selFig['selRes']['y2'] + 0,
+                #            selFig['selRes']['x2'] + 0, selFig['selRes']['y1'] + 0,
+                #            color=self.ramkaColor, thickness=self.ramkaThickness)
 
             labelPage = pyglet.text.Label(str(self.page),
                                           font_name='Arial',
