@@ -340,6 +340,12 @@ def draw_ramka_top(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1, center=(0,0), 
     if rotate:
         draw_line_mod((x0 + x) // 2 - 15, y - 12, (x0 + x) // 2, y - 6, color=color, thickness=2, arrow=2)
         draw_line_mod((x0 + x) // 2 + 15, y - 12,(x0 + x) // 2 , y - 6,  color=color, thickness=2, arrow=2)
+    #кнопка видалення фігури
+    draw_line(x0 + 4, y0 + 4, x0 + 20, y0 + 20,  color, thickness=4)
+    draw_line(x0 + 4, y0 +20, x0 + 20, y0 + 4, color, thickness=4)
+    #кнопка зміни розмірів фігури
+    draw_line_mod(x-5,y0+5,x+25,y0-25,color=color, thickness=4,arrow=1)
+
     glBegin(GL_LINES)
     glVertex2f(x0, y - 10)
     glVertex2f(x0, y)
