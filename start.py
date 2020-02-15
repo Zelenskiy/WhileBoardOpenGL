@@ -1110,6 +1110,7 @@ class MyWindow(pyglet.window.Window):
                 self.cx += dx
                 self.cy += dy
             elif self.tool == 8:
+                self.clear()
                 for selFig in self.selFigs:
                     fig = selFig['figobj']
                     x1, y1, x2, y2 = border_polyline(fig['p'])
@@ -1148,8 +1149,7 @@ class MyWindow(pyglet.window.Window):
                                     p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
                                     p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
 
-                    xr1, yr1, xr2, yr2 = self.selRes['x1'], self.selRes['y1'], self.selRes['x2'], self.selRes[
-                        'y2']
+                    xr1, yr1, xr2, yr2 = selFig['selRes']['x1'], selFig['selRes']['y1'], selFig['selRes']['x2'], selFig['selRes']['y2']
                     if (
                             xr1 - 10 < x < xr2 + 10 and yr1 - 10 < y < yr2 + 10) or self.isResize:
                         self.isMove = False
@@ -1358,6 +1358,7 @@ class MyWindow(pyglet.window.Window):
         # draw figures in visible part of window
         # self.clear()
         # if True:
+        print("draw")
         if self.drawRight:
             w = self.width
             h = self.height
