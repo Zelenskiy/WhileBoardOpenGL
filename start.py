@@ -240,7 +240,7 @@ class MyWindow(pyglet.window.Window):
         self.pnly = 75
         self.buttons = [
             {'id': 20, 'text': 'Hand', 'image': pyglet.resource.image('img/hand.png'), 'tool': 20,
-             'sel': False, 'align': 'left', 'command': 'set_hand'},
+             'sel': False, 'align': 'left', 'command': ''},
             {'id': 8, 'text': 'Pen', 'image': pyglet.resource.image('img/ar.png'), 'tool': 8,
              'sel': False, 'align': 'left', 'command': ''},
             {'id': 1, 'text': 'Pen', 'image': pyglet.resource.image('img/pen.png'), 'tool': 1,
@@ -1110,7 +1110,7 @@ class MyWindow(pyglet.window.Window):
                 self.cx += dx
                 self.cy += dy
             elif self.tool == 8:
-                self.clear()
+                # self.clear()
                 for selFig in self.selFigs:
                     fig = selFig['figobj']
                     x1, y1, x2, y2 = border_polyline(fig['p'])
