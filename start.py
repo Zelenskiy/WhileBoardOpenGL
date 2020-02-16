@@ -239,6 +239,7 @@ class MyWindow(pyglet.window.Window):
         self.label = None
         self.pnlx = 75
         self.pnly = 75
+        self.imMultisel = [pyglet.resource.image('img/multisel_no.png'), pyglet.resource.image('img/multisel.png')]
         self.buttons = [
             {'id': 20, 'text': 'Hand', 'image': pyglet.resource.image('img/hand.png'), 'tool': 20,
              'sel': False, 'align': 'left', 'command': ''},
@@ -255,9 +256,8 @@ class MyWindow(pyglet.window.Window):
             {'id': 6, 'text': 'rectangle', 'image': None, 'tool': 4, 'sel': False, 'align': 'left', 'command': ''},
             {'id': 5, 'text': 'setFill', 'image': pyglet.resource.image('img/FillNotFill.png'), 'tool': 0, 'sel': False,
              'align': 'left', 'command': 'set_fill'},
-            {'id': 55, 'text': 'setMultiselect', 'image': pyglet.resource.image('img/multisel.png'), 'tool': 0,
-             'sel': False,
-             'align': 'left', 'command': 'set_multisel'},
+            {'id': 55, 'text': 'setMultiselect', 'image': self.imMultisel[0], 'tool': 0,
+             'sel': False, 'align': 'left', 'command': 'set_multisel'},
             {'id': 26, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
              'sel': False, 'align': 'left', 'command': 'set_shot'},
             {'id': 101, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 0,
@@ -616,6 +616,13 @@ class MyWindow(pyglet.window.Window):
 
     def set_multisel(self):
         self.multiSelect = not self.multiSelect
+        for b in self.buttons:
+            if b['id'] == 55:
+                if self.multiSelect:
+                    b['image'] = self.imMultisel[1]
+                else:
+                    b['image'] = self.imMultisel[0]
+                break
 
     def set_widthpanel_visible(self):
         self.widthPanelVisible = not self.widthPanelVisible
@@ -960,15 +967,24 @@ class MyWindow(pyglet.window.Window):
                     if not self.multiSelect:
                         self.selFigs = []
                     # if modifier!=[]
-                    flag = False
+                    pSel = []
+                    for selFig in self.selFigs:
+                        fig = selFig['figobj']
+                        pSel += fig['p']
+                    cx1, cy1, cx2, cy2 = border_polyline(pSel)
+                    cx1, cy1 = self.canvas_to_screen(cx1, cy1)
+                    cx2, cy2 = self.canvas_to_screen(cx2, cy2)
 
+                    flag3 = ((cx2 < x < cx2 + 40) and (cy1 - 40 < y < cy1))
+                    flag2 = ((cx1 < x < cx2) and (cy1 < y < cy2)) or flag3
+                    flag = False
                     for fig in reversed(self.figures):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
                         x1, y1 = self.canvas_to_screen(x1, y1)
                         x2, y2 = self.canvas_to_screen(x2, y2)
                         if ((x > x1) and (x < x2) and (y > y1) and (y < y2)) or (
                                 x2 - 18 + 20 < x < x2 - 2 + 20 and y1 + 2 - 20 < y < y1 + 20 - 20):
-
+                            flag = True
                             # selDel = {}
                             # selRes = {}
                             selDel = {'x1': x1, 'y1': y1,
@@ -985,23 +1001,35 @@ class MyWindow(pyglet.window.Window):
                                     # Вилучаємо
                                     fig['fordel'] = True
                                     self.update_fig()
-
-                            self.selFigs.append({})
-                            self.selFigs[-1]['fig'] = fig['id']
-                            self.selFigs[-1]['figobj'] = fig
-                            self.selFigs[-1]['selDel'] = selDel
-                            self.selFigs[-1]['selRes'] = selRes
-
-                            fl = True
-
-                            break
-                            flag = True
-                        else:
-                            # self.selFigs = []
-                            # self.selDel = {}
-                            # canvas.config(cursor="tcross")
-                            pass
-                    # if not flag: self.selFigs = []
+                            # Якщо ця фігура виділена, то повторно її не виділяємо
+                            f1 = False
+                            for sF in self.selFigs:
+                                if sF['figobj']['id'] == fig['id']:
+                                    f1 = True
+                                    break
+                            if not f1:
+                                self.selFigs.append({})
+                                self.selFigs[-1]['fig'] = fig['id']
+                                self.selFigs[-1]['figobj'] = fig
+                                self.selFigs[-1]['selDel'] = selDel
+                                self.selFigs[-1]['selRes'] = selRes
+                                break
+                    # Якщо клацнули поза фігурами, виділення знімаємо зі всіх
+                    if not flag and not flag2:
+                        self.selFigs = []
+                    # pSel = []
+                    # for selFig in self.selFigs:
+                    #     fig = selFig['figobj']
+                    #     pSel += fig['p']
+                    # x1, y1, x2, y2 = border_polyline(pSel)
+                    # x_center, y_center, = (x1 + x2) / 2, (y1 + y2) / 2
+                    # x1, y1 = self.canvas_to_screen(x1, y1)
+                    # x2, y2 = self.canvas_to_screen(x2, y2)
+                    # if (x1 < x < x2) and (y1 < y < y2):
+                    #     # Вилучаємо
+                    #
+                    #     fig['fordel'] = True
+                    #     self.update_fig()
 
                 elif self.tool == 9:
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
@@ -1018,7 +1046,6 @@ class MyWindow(pyglet.window.Window):
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
-
                 elif self.tool == 4:  # rectangle
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
@@ -1099,7 +1126,6 @@ class MyWindow(pyglet.window.Window):
                 draw_poly_wo_bg(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                                 fill=self.isFill, thickness=self.penWidth, numPoints=self.numVertex, id=self.numVertex,
                                 dash=self.dash)
-
             elif self.tool == 4:
                 self.clear()
                 if self.isFill:
@@ -1120,91 +1146,72 @@ class MyWindow(pyglet.window.Window):
                 self.cx += dx
                 self.cy += dy
             elif self.tool == 8:
-                # self.clear()
-                if len(self.selFigs)>1:
-                    self.isRotate = False
-                psum=[]
-                for selFig in self.selFigs:
-                    psum +=selFig['figobj']['p']
-                x1, y1, x2, y2 = border_polyline(psum)
-
+                # print("len->",len(self.selFigs) )
+                # if len(self.selFigs) > 1:
+                #     self.isRotate = False
+                pSel = []
                 for selFig in self.selFigs:
                     fig = selFig['figobj']
-                    x1, y1 = self.canvas_to_screen(x1, y1)
-                    x2, y2 = self.canvas_to_screen(x2, y2)
-                    if ((x1 < x < x2 and y1 < y < y2) or self.isMove) and not self.isResize:
-                        self.isMove = True
-                        self.isResize = False
-                        # Якщо перетягуємо
-                        xser = (x1 + x2) / 2
-                        if (not ((y2 - 20 < y < y2) and (xser - 10 < x < xser + 10))) and not self.isRotate:
-                            for p in fig['p']:
-                                p['x'] += dx
-                                p['y'] += dy
-                            xcenter, ycenter = fig['center']['x'], fig['center']['y']
-                            xcenter += dx
-                            ycenter += dy
-                            fig['center'] = {'x': xcenter, 'y': ycenter}
-                            selFig['selDel']['x1'] += dx
-                            selFig['selDel']['y1'] += dy
-                            selFig['selDel']['x2'] += dx
-                            selFig['selDel']['y2'] += dy
-                            selFig['selRes']['x1'] += dx
-                            selFig['selRes']['y1'] += dy
-                            selFig['selRes']['x2'] += dx
-                            selFig['selRes']['y2'] += dy
-                        else:  # Якщо крутимо
-                            if fig['name'] != 'image':
-                                self.isRotate = True
-                                x0, y0 = (fig['center']['x'], fig['center']['y'])
-                                angle = math.atan(-dx / 100)
+                    pSel += fig['p']
+                cx1, cy1, cx2, cy2 = border_polyline(pSel)
+                cx1, cy1 = self.canvas_to_screen(cx1, cy1)
+                cx2, cy2 = self.canvas_to_screen(cx2, cy2)
+                x_center, y_center, = (cx1 + cx2) / 2, (cy1 + cy2) / 2
+                # Умова для перетягування
+                if (((cx1 < x < cx2 and cy1 < y < cy2) and not ((cy2 - 20 < y < cy2) and (
+                        x_center - 10 < x < x_center + 10)) or self.isMove) and not self.isResize) and (not self.isRotate):
+                    # print("Тягнемо")
+                    print("self.isRotate", self.isRotate)
+                    self.isResize = False
+                    self.isMove = True
+                    self.isRotate = False
+                    for p in pSel:
+                        p['x'] += dx
+                        p['y'] += dy
+                # Умова для зміни розмірів
+                elif (((cx2 < x < cx2 + 40) and (cy1 - 40 < y < cy1)) or self.isResize) and (not self.isRotate):
+                    self.isResize = True
+                    self.isMove = False
+                    self.isRotate = False
 
-                                for p in fig['p']:
-                                    xx, yy = p['x'], p['y']
-                                    p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
-                                    p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
+                    xx, yy = self.screen_to_canvas(x, y)
+                    cx1, cy1 = self.screen_to_canvas(cx1, cy1)
+                    cx2, cy2 = self.screen_to_canvas(cx2, cy2)
+                    for p in pSel:
+                        kx = (p['x'] - cx1) / (xx - cx1)
+                        ky = (p['y'] - cy2) / (yy - cy2)
+                        p['x'] += kx * dx
+                        p['y'] += ky * dy
 
-                    xr1, yr1, xr2, yr2 = selFig['selRes']['x1'], selFig['selRes']['y1'], selFig['selRes']['x2'], \
-                                         selFig['selRes']['y2']
-                    if (
-                            xr1 - 10 < x < xr2 + 10 and yr1 - 10 < y < yr2 + 10) or self.isResize:
-                        self.isMove = False
-                        self.isResize = True
-                        # Координати верхньої лівої точки x1, y2
-                        xx, yy = self.screen_to_canvas(x, y)
-                        xx1, yy1 = self.screen_to_canvas(x1, y1)
-                        xx2, yy2 = self.screen_to_canvas(x2, y2)
-                        for p in fig['p']:
-                            kx = (p['x'] - xx1) / (xx - xx1)
-                            ky = (p['y'] - yy2) / (yy - yy2)
-                            p['x'] += kx * dx
-                            p['y'] += ky * dy
+                # умова для обертання
+                elif ((cy2 - 20 < y < cy2) and (x_center - 10 < x < x_center + 10)) or self.isRotate:
+                    self.isResize = False
+                    self.isMove = False
+                    self.isRotate = True
+                    x0, y0 = self.screen_to_canvas(x_center, y_center)
+                    angle = math.atan(-dx / 100)
+                    for p in pSel:
+                        xx, yy = p['x'], p['y']
+                        p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
+                        p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
 
-                        xcenter, ycenter = fig['center']['x'], fig['center']['y']
-                        kx = (xcenter - xx1) / (xx - xx1)
-                        ky = (ycenter - yy2) / (yy - yy2)
-                        xcenter += kx * dx
-                        ycenter += ky * dy
-                        fig['center'] = {'x': xcenter, 'y': ycenter}
-
-                        selFig['selDel']['x1'] = x1
-                        selFig['selDel']['y1'] = y1
-                        selFig['selDel']['x2'] = x1 + 20
-                        selFig['selDel']['y2'] = y1 + 20
-
-                        selFig['selRes']['x1'] = x2
-                        selFig['selRes']['y1'] = y1 - 20
-                        selFig['selRes']['x2'] = x2 + 20
-                        selFig['selRes']['y2'] = y1
-                        if fig['name'] == 'image':
-                            # [{'id': 1, 'name': 'image', 'p': [{'x': 417, 'y': 224}, {'x': 1017, 'y': 561}], 'image': 'tmp/_2020_01_17_21_30_24.png.resize.png', 'thickness': 4, 'fordel': False}]
-                            size = (int(x2 - x1), int(y2 - y1))
-                            self.images[fig['image']] = self.images[fig['image']].resize(size)
+                     #     else:  # Якщо крутимо
+                #         if True:
+                #             self.isRotate = True
+                #             angle = math.atan(-dx / 100)
+                #             x0, y0 = x_center, y_center
+                #             for p in pSel:
+                #                 xx, yy = p['x'], p['y']
+                #                 p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
+                #                 p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
+                #
+                # xr1, yr1, xr2, yr2 = selFig['selRes']['x1'], selFig['selRes']['y1'], selFig['selRes']['x2'], \
+                #                      selFig['selRes']['y2']
 
     def on_mouse_release(self, x, y, button, modifiers):
         self.dragPanel = False
         self.drawRight = True
-        self.isRotate = False
+
         xx, yy = self.width - 75 - self.pnlx, 75 + self.pnly
         if not ((xx < x < xx + 100) and (yy < y < yy + 100)):
             if self.f:
@@ -1349,6 +1356,7 @@ class MyWindow(pyglet.window.Window):
         self.clear()
         self.isMove = False
         self.isResize = False
+        self.isRotate = False
         self.lastCommand = 0
         # print(self.figures)
 
@@ -1509,11 +1517,18 @@ class MyWindow(pyglet.window.Window):
                 #                selFig['selRes']['x2'] + 0, selFig['selRes']['y1'] + 0,
                 #                color=self.ramkaColor, thickness=self.ramkaThickness)
                 pSel = []
-
+                r, g, b, a = self.ramkaColor
+                ramkaColorChild = ((1 + r) / 2, (1 + g) / 2, (1 + b) / 2, a)
                 for selFig in self.selFigs:
                     fig = selFig['figobj']
                     pSel += fig['p']
-
+                    cx1, cy1, cx2, cy2 = border_polyline(fig['p'])
+                    cx1, cy1 = self.canvas_to_screen(cx1, cy1)
+                    cx2, cy2 = self.canvas_to_screen(cx2, cy2)
+                    x_center, y_center, = (cx1 + cx2) / 2, (cy1 + cy2) / 2
+                    draw_ramka_top(cx1 - 2, cy1 - 2, cx2 + 2, cy2 + 2,
+                                   center=(self.canvas_to_screen(x_center, y_center)),
+                                   color=ramkaColorChild, thickness=self.ramkaThickness, rotate=False, resize=False)
                 x1, y1, x2, y2 = border_polyline(pSel)
                 x_center, y_center, = (x1 + x2) / 2, (y1 + y2) / 2
                 x1, y1 = self.canvas_to_screen(x1, y1)
@@ -1521,7 +1536,7 @@ class MyWindow(pyglet.window.Window):
                 ff = fig['name'] != 'image'
                 draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
                                center=(self.canvas_to_screen(x_center, y_center)),
-                               color=self.ramkaColor, thickness=self.ramkaThickness, rotate=ff)
+                               color=self.ramkaColor, thickness=self.ramkaThickness, rotate=ff, resize=True)
 
                 draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
                 # close_cross(selFig['selDel']['x1'] + 0, selFig['selDel']['y1'] + 0,
