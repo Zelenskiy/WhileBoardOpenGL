@@ -290,6 +290,9 @@ class MyWindow(pyglet.window.Window):
             {'id': 111, 'x': 40, 'y': 135, 'text': 'U', 'image': None, 'tool': 0,
              'sel': False, 'align': 'right', 'command': 'move_111'},
 
+            {'id': 56, 'x': -500, 'y': -500, 'text': 'del selected', 'image': pyglet.resource.image('img/close.png'), 'tool': 0,
+             'sel': False, 'align': '', 'command': 'del_selected'},
+
             # {'id': 108, 'x': 75, 'y': 105, 'text': '<', 'image': pyglet.resource.image('img/leftb.png'), 'tool': 0,
             #  'sel': False, 'align': 'right', 'command':''},
             # {'id': 109, 'x': 5, 'y': 105, 'text': '>', 'image': pyglet.resource.image('img/rightb.png'), 'tool': 0,
@@ -596,6 +599,17 @@ class MyWindow(pyglet.window.Window):
                 nnam_ = fig['image']
                 image = pyglet.image.load(nnam_)
                 self.images[nnam_] = image
+    def del_selected(self):
+        for sel in self.selFigs:
+            fig = sel['figobj']
+            fig['fordel'] = True
+        self.selFigs = []
+        self.update_fig()
+        for b in self.buttons:
+            if b['id'] == 56:
+                b['x'] = -500
+                b['y'] = -500
+                break
 
     def set_shot(self):
         self.set_visible(False)
@@ -776,6 +790,8 @@ class MyWindow(pyglet.window.Window):
             if not f['fordel']:
                 new_list.append(f)
         self.figures = new_list.copy()
+        self.selFigs = []
+
 
     def on_key_press(self, symbol, modifiers):
         if symbol == 65307:  # ESC
@@ -1017,6 +1033,12 @@ class MyWindow(pyglet.window.Window):
                     # Якщо клацнули поза фігурами, виділення знімаємо зі всіх
                     if not flag and not flag2:
                         self.selFigs = []
+                    if len(self.selFigs)>1:
+                        for b in self.buttons:
+                            if b['id'] == 56:
+                                b['x'] = cx1 - 20
+                                b['y'] = cy2 - 20
+                                break
                     # pSel = []
                     # for selFig in self.selFigs:
                     #     fig = selFig['figobj']
@@ -1496,7 +1518,7 @@ class MyWindow(pyglet.window.Window):
             if self.dashPanelVisible:
                 self.dash_arrow_panel()
             # рамка виділення
-            if self.selFigs != []:
+            if len(self.selFigs)>0:
                 # for selFig in self.selFigs:
                 #     fig = selFig['figobj']
                 #     x1, y1, x2, y2 = border_polyline(fig['p'])
@@ -1528,17 +1550,23 @@ class MyWindow(pyglet.window.Window):
                     x_center, y_center, = (cx1 + cx2) / 2, (cy1 + cy2) / 2
                     draw_ramka_top(cx1 - 2, cy1 - 2, cx2 + 2, cy2 + 2,
                                    center=(self.canvas_to_screen(x_center, y_center)),
-                                   color=ramkaColorChild, thickness=self.ramkaThickness, rotate=False, resize=False)
+                                   color=ramkaColorChild, thickness=self.ramkaThickness, rotate=False, resize=False, close=True)
                 x1, y1, x2, y2 = border_polyline(pSel)
                 x_center, y_center, = (x1 + x2) / 2, (y1 + y2) / 2
                 x1, y1 = self.canvas_to_screen(x1, y1)
                 x2, y2 = self.canvas_to_screen(x2, y2)
-                ff = fig['name'] != 'image'
+                # ff = fig['name'] != 'image'
                 draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
                                center=(self.canvas_to_screen(x_center, y_center)),
-                               color=self.ramkaColor, thickness=self.ramkaThickness, rotate=ff, resize=True)
+                               color=self.ramkaColor, thickness=self.ramkaThickness, rotate=True, resize=True, close=False)
 
                 draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
+                # Якщо виділено більше одної фігури малюємо кнопку вилучення виділених фігур
+
+
+                draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
+
+
                 # close_cross(selFig['selDel']['x1'] + 0, selFig['selDel']['y1'] + 0,
                 #             selFig['selDel']['x2'] + 0, selFig['selDel']['y2'] + 0,
                 #             color=self.ramkaColor, thickness=self.ramkaThickness
