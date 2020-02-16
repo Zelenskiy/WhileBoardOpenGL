@@ -1033,12 +1033,15 @@ class MyWindow(pyglet.window.Window):
                     # Якщо клацнули поза фігурами, виділення знімаємо зі всіх
                     if not flag and not flag2:
                         self.selFigs = []
-                    if len(self.selFigs)>1:
-                        for b in self.buttons:
-                            if b['id'] == 56:
-                                b['x'] = cx1 - 20
-                                b['y'] = cy2 - 20
-                                break
+                    # cx1, cy1, cx2, cy2 = border_polyline(pSel)
+                    # cx1, cy1 = self.canvas_to_screen(cx1, cy1)
+                    # cx2, cy2 = self.canvas_to_screen(cx2, cy2)
+                    # if len(self.selFigs)>1:
+                    #     for b in self.buttons:
+                    #         if b['id'] == 56:
+                    #             b['x'] = cx1 - 20
+                    #             b['y'] = cy2 - 20
+                    #             break
                     # pSel = []
                     # for selFig in self.selFigs:
                     #     fig = selFig['figobj']
@@ -1217,18 +1220,18 @@ class MyWindow(pyglet.window.Window):
                         p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
                         p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
 
-                     #     else:  # Якщо крутимо
-                #         if True:
-                #             self.isRotate = True
-                #             angle = math.atan(-dx / 100)
-                #             x0, y0 = x_center, y_center
-                #             for p in pSel:
-                #                 xx, yy = p['x'], p['y']
-                #                 p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
-                #                 p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
-                #
-                # xr1, yr1, xr2, yr2 = selFig['selRes']['x1'], selFig['selRes']['y1'], selFig['selRes']['x2'], \
-                #                      selFig['selRes']['y2']
+                cx1, cy1, cx2, cy2 = border_polyline(pSel)
+                cx1, cy1 = self.canvas_to_screen(cx1, cy1)
+                cx2, cy2 = self.canvas_to_screen(cx2, cy2)
+                if len(self.selFigs) > 1:
+                    for b in self.buttons:
+                        if b['id'] == 56:
+                            b['x'] = cx1 - 20
+                            b['y'] = cy2 - 20
+                            break
+
+
+
 
     def on_mouse_release(self, x, y, button, modifiers):
         self.dragPanel = False
@@ -1374,6 +1377,19 @@ class MyWindow(pyglet.window.Window):
                                         self.update_fig()
                                         self.insert_image_from_file(ori_image_name, x0, y0, width, height)
                                         break
+                    pSel = []
+                    for selFig in self.selFigs:
+                        fig = selFig['figobj']
+                        pSel += fig['p']
+                    cx1, cy1, cx2, cy2 = border_polyline(pSel)
+                    cx1, cy1 = self.canvas_to_screen(cx1, cy1)
+                    cx2, cy2 = self.canvas_to_screen(cx2, cy2)
+                    if len(self.selFigs) > 1:
+                        for b in self.buttons:
+                            if b['id'] == 56:
+                                b['x'] = cx1 - 20
+                                b['y'] = cy2 - 20
+                                break
 
         self.clear()
         self.isMove = False

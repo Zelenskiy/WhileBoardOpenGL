@@ -334,10 +334,10 @@ def draw_ramka_top(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1, center=(0,0), 
     glColor4f(*color)
     glLineWidth(thickness)
     xc0,yc0 = center
-    draw_circle(xc0, yc0, 10, color=color, thickness=1)
-    draw_line(xc0-20, yc0, xc0+20, yc0,  color=color, thickness=1)
-    draw_line(xc0, yc0-20, xc0, yc0+20, color=color, thickness=1)
     if rotate:
+        draw_circle(xc0, yc0, 10, color=color, thickness=1)
+        draw_line(xc0-20, yc0, xc0+20, yc0,  color=color, thickness=1)
+        draw_line(xc0, yc0-20, xc0, yc0+20, color=color, thickness=1)
         draw_line_mod((x0 + x) // 2 - 15, y - 12, (x0 + x) // 2, y - 6, color=color, thickness=2, arrow=2)
         draw_line_mod((x0 + x) // 2 + 15, y - 12,(x0 + x) // 2 , y - 6,  color=color, thickness=2, arrow=2)
     #кнопка видалення фігури
