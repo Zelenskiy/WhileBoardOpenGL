@@ -1001,6 +1001,7 @@ class MyWindow(pyglet.window.Window):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
                         x1, y1 = self.canvas_to_screen(x1, y1)
                         x2, y2 = self.canvas_to_screen(x2, y2)
+                        #x-5,y0+5,x+25,y0-25
                         if ((x1 < x < x2) and (y1 < y < y2)):
                             flag4 = False
                         if ((x > x1) and (x < x2) and (y > y1) and (y < y2)) or (
@@ -1187,8 +1188,8 @@ class MyWindow(pyglet.window.Window):
                         for p in pSel:
                             p['x'] += dx
                             p['y'] += dy
-                    # Умова для зміни розмірів
-                    elif (((cx2 < x < cx2 + 40) and (cy1 - 40 < y < cy1)) or self.isResize) and (not self.isRotate):
+                    # Умова для зміни розмірів #x-5,y0+5,x+25,y0-25
+                    elif (((cx2-5 < x < cx2 + 25) and (cy1 - 25 < y < cy1+5)) or self.isResize) and (not self.isRotate):
                         self.isResize = True
                         self.isMove = False
                         self.isRotate = False
@@ -1408,6 +1409,12 @@ class MyWindow(pyglet.window.Window):
             w = self.width
             h = self.height
             count = 0
+            if self.isGrid:
+                for y in range(0, h, self.step):
+                    draw_line_1(0, y, w, y, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=0)
+                for x in range(0, w, self.step):
+                    draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=0)
+
             # print("len figures ", len(self.figures))
             for f in self.figures:
                 x_min, y_min, x_max, y_max = border_polyline(f['p'])
@@ -1463,11 +1470,6 @@ class MyWindow(pyglet.window.Window):
 
                         # image.blit(x + self.cx, y + self.cy )
             # Draw grid
-            if self.isGrid:
-                for y in range(0, h, self.step):
-                    draw_line_1(0, y, w, y, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=0)
-                for x in range(0, w, self.step):
-                    draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=0)
             # Це щоб не було засвітки на кнопках
             draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
             # Draw buttons
@@ -1586,6 +1588,17 @@ class MyWindow(pyglet.window.Window):
             labelPage.draw()
             if self.isExit:
                 self.label.draw()
+
+            # glPushMatrix()
+            # glRotatef(0, 0, 0, 1)
+            # label2 = pyglet.text.Label("12345",
+            #                               font_name='Arial',
+            #                               font_size=24,
+            #                               x=200, y=200,
+            #                               anchor_x='center', anchor_y='center')
+            # label2.set_style("color", (3, 105, 25, 255))
+            # glPopMatrix()
+            # label2.draw()
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self.clear()
