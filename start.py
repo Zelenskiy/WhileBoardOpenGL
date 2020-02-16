@@ -1039,7 +1039,7 @@ class MyWindow(pyglet.window.Window):
                     if not flag and not flag2:
                         self.selFigs = []
                     # Починаємо виділення рамкою
-                    if not flag and not (self.isRotate or self.isMove or self.isResize) and not flag4:
+                    if not flag and not (self.isRotate or self.isMove or self.isResize) and not flag4 and len(self.selFigs)<1:
                         self.selectRamka = True
                         self.multiSelect = False
                         self.set_multisel()
@@ -1047,17 +1047,18 @@ class MyWindow(pyglet.window.Window):
                         self.y0 = y
 
 
-                elif self.tool == 9:
+                elif self.tool == 1 or self.tool == 9:
+                    self.drawRight = False
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
                     self.drawRight = len(self.figures) < 3 or self.lastCommand == 11
-                elif self.tool == 1:
-                    # self.clear()
-                    self.x0, self.y0 = self.screen_to_canvas(x, y)
-                    self.poly.clear()
-                    self.poly.append({'x': self.x0, 'y': self.y0})
-                    # self.drawRight = len(self.figures) < 3 or self.lastCommand == 11
+                # elif self.tool == 1:
+                #     # self.clear()
+                #     self.x0, self.y0 = self.screen_to_canvas(x, y)
+                #     self.poly.clear()
+                #     self.poly.append({'x': self.x0, 'y': self.y0})
+                #     # self.drawRight = len(self.figures) < 3 or self.lastCommand == 11
                 elif self.tool == 3:  # line
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
@@ -1081,7 +1082,7 @@ class MyWindow(pyglet.window.Window):
                 b['x'] -= dx
                 b['y'] += dy
         elif self.f:
-            if self.tool == 1:
+            if self.tool == 1 or self.tool == 9:
                 xx, yy = self.screen_to_canvas(x, y)
                 self.poly.append({'x': xx, 'y': yy})
                 x0 = self.poly[0]['x']
@@ -1091,27 +1092,31 @@ class MyWindow(pyglet.window.Window):
                     y_ = p['y']
                     xx0, yy0 = self.canvas_to_screen(x0, y0)
                     xx_, yy_ = self.canvas_to_screen(x_, y_)
-                    # draw_fill_circle(xx0, yy0, int(self.penWidth * 0.4), self.penColor)
-                    # draw_fill_circle(xx, yy, int(self.penWidth * 0.4), self.penColor)
-                    # draw_line(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth)
-                    xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, self.penWidth, 0.2)
-                    draw_line_1(xx0, yy0, xx_, yy_, color=self.penColor, thickness=self.penWidth, smooth=self.isSmooth)
+                    if self.tool == 1:
+                        pW = self.penWidth
+                        color = self.penColor
+                    else:
+                        pW = self.errSize
+                        color = self.fonColor
+                    # xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, pW, 0.2)
+                    draw_line_1(xx0, yy0, xx_, yy_, color=color, thickness=pW, smooth=self.isSmooth)
                     x0, y0 = x_, y_
                 self.x0, self.y0 = self.screen_to_canvas(x, y)
-            elif self.tool == 9:  # Витирання кольором фону
-                xx, yy = self.screen_to_canvas(x, y)
-                self.poly.append({'x': xx, 'y': yy})
-                x0 = self.poly[0]['x']
-                y0 = self.poly[0]['y']
-                for p in self.poly:
-                    x_ = p['x']
-                    y_ = p['y']
-                    xx0, yy0 = self.canvas_to_screen(x0, y0)
-                    xx_, yy_ = self.canvas_to_screen(x_, y_)
-                    xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, self.penWidth, 0.2)
-                    draw_line_1(xx0, yy0, xx_, yy_, color=self.fonColor, thickness=self.errSize, smooth=False)
-                    x0, y0 = x_, y_
-                self.x0, self.y0 = self.screen_to_canvas(x, y)
+            # elif self.tool == 9:  # Витирання кольором фону
+            #     # self.drawRight = True
+            #     xx, yy = self.screen_to_canvas(x, y)
+            #     self.poly.append({'x': xx, 'y': yy})
+            #     x0 = self.poly[0]['x']
+            #     y0 = self.poly[0]['y']
+            #     for p in self.poly:
+            #         x_ = p['x']
+            #         y_ = p['y']
+            #         xx0, yy0 = self.canvas_to_screen(x0, y0)
+            #         xx_, yy_ = self.canvas_to_screen(x_, y_)
+            #         xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, self.penWidth, 0.2)
+            #         draw_line_1(xx0, yy0, xx_, yy_, color=self.fonColor, thickness=self.errSize, smooth=False)
+            #         x0, y0 = x_, y_
+            #     self.x0, self.y0 = self.screen_to_canvas(x, y)
             elif self.tool == 2:
                 draw_line(x + self.errSize // 2, y + self.errSize // 2,
                           x - self.errSize // 2, y - self.errSize // 2, color=(1, 1, 0, 1), thickness=self.errSize)
@@ -1246,7 +1251,7 @@ class MyWindow(pyglet.window.Window):
                 if self.f:
                     # self.clear()
 
-                    if self.tool == 1:
+                    if self.tool == 1 or self.tool == 9:
                         k = {}
                         self.id += 1
                         k['id'] = self.id
@@ -1255,24 +1260,30 @@ class MyWindow(pyglet.window.Window):
                         x0, y0 = self.x0, self.y0
                         x0, y0, xx, yy = border_polyline(k['p'])
                         xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                        if self.tool == 1:
+                            pW = self.penWidth
+                            color = self.penColor
+                        else:
+                            pW = self.errSize
+                            color = self.fonColor
                         k['center'] = {'x': xcenter, 'y': ycenter}
-                        k['color'] = self.penColor
-                        k['thickness'] = self.penWidth
+                        k['color'] = color
+                        k['thickness'] = pW
                         k['fordel'] = False
                         self.figures.append(k)
-                    if self.tool == 9:
-                        k = {}
-                        self.id += 1
-                        k['id'] = self.id
-                        k['name'] = 'polyline'
-                        k['p'] = self.poly.copy()
-                        x0, y0, xx, yy = border_polyline(k['p'])
-                        xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
-                        k['center'] = {'x': xcenter, 'y': ycenter}
-                        k['color'] = self.fonColor
-                        k['thickness'] = self.errSize
-                        k['fordel'] = False
-                        self.figures.append(k)
+                    # if self.tool == 9:
+                    #     k = {}
+                    #     self.id += 1
+                    #     k['id'] = self.id
+                    #     k['name'] = 'polyline'
+                    #     k['p'] = self.poly.copy()
+                    #     x0, y0, xx, yy = border_polyline(k['p'])
+                    #     xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                    #     k['center'] = {'x': xcenter, 'y': ycenter}
+                    #     k['color'] = self.fonColor
+                    #     k['thickness'] = self.errSize
+                    #     k['fordel'] = False
+                    #     self.figures.append(k)
                     elif self.tool == 3:
                         k = {}
                         x0, y0 = self.screen_to_canvas(self.x0, self.y0)
@@ -1430,7 +1441,7 @@ class MyWindow(pyglet.window.Window):
                             y = p['y']
                             xx0, yy0 = self.canvas_to_screen(x0, y0)
                             xx, yy = self.canvas_to_screen(x, y)
-                            xx0, yy0, xx, yy = longer_for_polyline(xx0, yy0, xx, yy, f['thickness'], 0.2)
+                            # xx0, yy0, xx, yy = longer_for_polyline(xx0, yy0, xx, yy, f['thickness'], 0.2)
                             draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'],
                                         smooth=self.isSmooth)
                             x0, y0 = x, y
@@ -1581,7 +1592,6 @@ class MyWindow(pyglet.window.Window):
             labelPage = pyglet.text.Label(str(self.page),
                                           font_name='Arial',
                                           font_size=24,
-                                          # x=400, y=200,
                                           x=self.width - 60, y=22,
                                           anchor_x='center', anchor_y='center')
             labelPage.set_style("color", (3, 105, 25, 255))
