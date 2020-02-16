@@ -996,19 +996,20 @@ class MyWindow(pyglet.window.Window):
                     flag3 = ((cx2 < x < cx2 + 40) and (cy1 - 40 < y < cy1))
                     flag2 = ((cx1 < x < cx2) and (cy1 < y < cy2)) or flag3
                     flag = False
+                    flag4 = False
                     for fig in reversed(self.figures):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
                         x1, y1 = self.canvas_to_screen(x1, y1)
                         x2, y2 = self.canvas_to_screen(x2, y2)
+                        if ((x1 < x < x2) and (y1 < y < y2)):
+                            flag4 = False
                         if ((x > x1) and (x < x2) and (y > y1) and (y < y2)) or (
-                                x2 - 18 + 20 < x < x2 - 2 + 20 and y1 + 2 - 20 < y < y1 + 20 - 20):
+                                (x2 + 2 < x < x2 + 18) and (y1 - 18 < y < y1)):
                             flag = True
-                            # selDel = {}
-                            # selRes = {}
                             selDel = {'x1': x1, 'y1': y1,
                                       'x2': x1 + 20, 'y2': y1 + 20}
-                            selRes = {'x1': x2 - 18 + 20, 'y1': y1 + 2 - 20,
-                                      'x2': x2 - 2 + 20, 'y2': y1 + 20 - 20}
+                            # selRes = {'x1': x2 - 18 + 20, 'y1': y1 + 2 - 20,
+                            #           'x2': x2 - 2 + 20, 'y2': y1 + 20 - 20}
                             # canvas.config(cursor="fleur")
                             xx1 = selDel['x1']
                             yy1 = selDel['y1']
@@ -1030,13 +1031,14 @@ class MyWindow(pyglet.window.Window):
                                 self.selFigs[-1]['fig'] = fig['id']
                                 self.selFigs[-1]['figobj'] = fig
                                 self.selFigs[-1]['selDel'] = selDel
-                                self.selFigs[-1]['selRes'] = selRes
+                                # self.selFigs[-1]['selRes'] = selRes
                                 break
+
                     # Якщо клацнули поза фігурами, виділення знімаємо зі всіх
                     if not flag and not flag2:
                         self.selFigs = []
                     # Починаємо виділення рамкою
-                    if not flag and not (self.isRotate or self.isMove or self.isResize):
+                    if not flag and not (self.isRotate or self.isMove or self.isResize) and not flag4:
                         self.selectRamka = True
                         self.multiSelect = False
                         self.set_multisel()
@@ -1161,9 +1163,9 @@ class MyWindow(pyglet.window.Window):
             elif self.tool == 8:
                 if self.selectRamka:
                     x0, y0 = self.canvas_to_screen(self.x0, self.y0)
-                    print("222222222")
-                    draw_polygon([{'x':x0, 'y':y0},{'x':x, 'y':y0},{'x':x, 'y':y},{'x':x0, 'y':y}],
-                                 color=self.ramkaColor,thickness=1,dash=1)
+                    # print("222222222")
+                    draw_polygon([{'x': x0, 'y': y0}, {'x': x, 'y': y0}, {'x': x, 'y': y}, {'x': x0, 'y': y}],
+                                 color=self.ramkaColor, thickness=1, dash=1)
                 else:
                     pSel = []
                     for selFig in self.selFigs:
@@ -1176,7 +1178,7 @@ class MyWindow(pyglet.window.Window):
                     # Умова для перетягування
                     if (((cx1 < x < cx2 and cy1 < y < cy2) and not ((cy2 - 20 < y < cy2) and (
                             x_center - 10 < x < x_center + 10)) or self.isMove) and not self.isResize) and (
-                    not self.isRotate):
+                            not self.isRotate):
                         # print("Тягнемо")
                         print("self.isRotate", self.isRotate)
                         self.isResize = False
