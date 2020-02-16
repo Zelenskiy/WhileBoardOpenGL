@@ -1391,6 +1391,7 @@ class MyWindow(pyglet.window.Window):
                                 b['y'] = cy2 - 20
                                 break
 
+
         self.clear()
         self.isMove = False
         self.isResize = False

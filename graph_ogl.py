@@ -330,6 +330,7 @@ def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thic
         draw_line_1(x0, y0, x, y, color=color, thickness=thickness, dash=dash)
 
 
+
 def draw_ramka_top(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1, center=(0,0), rotate=True, resize=True, close=True):
     glColor4f(*color)
     glLineWidth(thickness)
