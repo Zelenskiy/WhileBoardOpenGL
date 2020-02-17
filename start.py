@@ -1674,18 +1674,26 @@ class MyWindow(pyglet.window.Window):
         window.maximize()
 
 
+
 # window = None
 
 
 def oglStart():
     global window
 
-    window = MyWindow(1920, 1080, caption="WhiteBoard", resizable=True)
+    window = MyWindow(1920, 1080, caption="WhiteBoard", resizable=True, visible=False)
+    context = window.context
+    # config = context.config
+    # config.double_buffer
+
+
+
     window.set_location(2, 24)
 
     # window.maximize()
     window.clear()
     window.on_draw()
+    window.set_visible()
     pyglet.app.run()
 
 
