@@ -779,6 +779,13 @@ class MyWindow(pyglet.window.Window):
         nnam_ = nnam + ".resize.png"
         self.resize_image2(nnam, nnam_, (width, height))
         image = pyglet.image.load(nnam_)
+        # image = pyglet.resource.image(
+        #     # image name
+        #     nnam_,
+        #
+        #     # rotates the image 90 degrees clockwise
+        #     #rotate=90,
+        # )
         self.images[nnam_] = image
         k['image'] = nnam_
         xcenter, ycenter = (x0 + x0 + width) / 2, (y0 + y0 + height) / 2
@@ -1076,7 +1083,7 @@ class MyWindow(pyglet.window.Window):
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
 
-        if self.drawRight: self.clear()
+        # if self.drawRight: self.clear()
         if self.dragPanel:
             for b in self.btnPnl:
                 b['x'] -= dx
@@ -1131,6 +1138,7 @@ class MyWindow(pyglet.window.Window):
                 self.update_fig()
                 # self.clear()
             elif self.tool == 3:
+                self.clear()
                 draw_line_mod(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, fon_color=self.fonColor,
                               thickness=self.penWidth, arrow=self.arr, dash=self.dash)
                 # draw_line(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
@@ -1144,6 +1152,7 @@ class MyWindow(pyglet.window.Window):
             #         draw_ellipse(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
             #                      thickness=self.penWidth)
             elif self.tool == 6:  # polygone
+                self.clear()
                 draw_poly_wo_bg(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                                 fill=self.isFill, thickness=self.penWidth, numPoints=self.numVertex, id=self.numVertex,
                                 dash=self.dash)
@@ -1167,6 +1176,7 @@ class MyWindow(pyglet.window.Window):
                 self.cx += dx
                 self.cy += dy
             elif self.tool == 8:
+                self.clear()
                 if self.selectRamka:
                     x0, y0 = self.canvas_to_screen(self.x0, self.y0)
                     # print("222222222")
@@ -1416,6 +1426,7 @@ class MyWindow(pyglet.window.Window):
         # self.clear()
         # if True:
         # print("draw")
+        self.drawRight = True
         if self.drawRight:
             w = self.width
             h = self.height
@@ -1475,8 +1486,11 @@ class MyWindow(pyglet.window.Window):
                         x = f['p'][1]['x']
                         y = f['p'][1]['y']
                         image = self.images[f['image']]
+                        texture = image.get_transform(flip_x=False, flip_y=False, rotate=0)
+                        # print(texture)
                         # Це щоб не було засвітки
                         draw_line(-10000, -10000, -10001, -10001, (1, 1, 1, 1), thickness=1)
+
                         image.blit(x0 + self.cx, y0 + self.cy)
 
                         # image.blit(x + self.cx, y + self.cy )
