@@ -1486,12 +1486,17 @@ class MyWindow(pyglet.window.Window):
                         x = f['p'][1]['x']
                         y = f['p'][1]['y']
                         image = self.images[f['image']]
-                        texture = image.get_transform(flip_x=False, flip_y=False, rotate=0)
+                        # texture = image.get_transform(flip_x=False, flip_y=False, rotate=0)
                         # print(texture)
                         # Це щоб не було засвітки
                         draw_line(-10000, -10000, -10001, -10001, (1, 1, 1, 1), thickness=1)
 
                         image.blit(x0 + self.cx, y0 + self.cy)
+                        # ----------------------
+                        texture = image.get_texture()
+                        print(texture)
+
+                        # ----------------------
 
                         # image.blit(x + self.cx, y + self.cy )
             # Draw grid
