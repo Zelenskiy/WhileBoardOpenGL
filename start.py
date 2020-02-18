@@ -1705,12 +1705,10 @@ class MyWindow(pyglet.window.Window):
         self.maximize()
 
 
-# window = None
 
 
 def oglStart():
     global window
-
     window = MyWindow(1920, 1080, caption="WhiteBoard", resizable=True, visible=False)
     context = window.context
     # config = context.config
