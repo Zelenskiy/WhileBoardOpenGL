@@ -1,15 +1,15 @@
 #!/usr/bin/python3.6
 import glob
 import os
+import shutil
 import time
 
 import subprocess
 import datetime
-import wx
+# import wx
 
-import threading
+# import threading
 
-from numpy.ma.bench import timer
 
 from graph_ogl import *
 
@@ -40,98 +40,98 @@ elif platform == "linux":
 # winPanel = None
 
 
-class MainFrame(wx.Frame):
-    def __init__(self):
-        wx.Frame.__init__(self, None, -1,
-                          style=wx.STAY_ON_TOP | wx.TAB_TRAVERSAL | wx.FRAME_NO_TASKBAR | wx.BORDER_NONE)
-        self.SetTransparent(64)
+# class MainFrame(wx.Frame):
+#     def __init__(self):
+#         wx.Frame.__init__(self, None, -1,
+#                           style=wx.STAY_ON_TOP | wx.TAB_TRAVERSAL | wx.FRAME_NO_TASKBAR | wx.BORDER_NONE)
+#         self.SetTransparent(64)
+#
+#         self.panel = MainPanel(self)
+#         self.Fit()
+#         self.Centre()
+#         self.SetSize(35, 55)
+#         self.SetPosition((10, 40))
+#         self.Show()
 
-        self.panel = MainPanel(self)
-        self.Fit()
-        self.Centre()
-        self.SetSize(35, 55)
-        self.SetPosition((10, 40))
-        self.Show()
 
-
-class MainPanel(wx.Panel):
-
-    def __init__(self, frame):
-        wx.Panel.__init__(self, frame, )
-        self.x0 = 0
-        self.y0 = 0
-        self.isDown = False
-        self.isRotate = False
-
-        # Button 1
-        button_sizer = self._button_sizer(frame)
-
-        # Main sizer
-        main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add((0, 20))
-        main_sizer.Add(button_sizer)
-        self.SetSizer(main_sizer)
-        self.Fit()
-
-    def _button_sizer(self, frame):
-        cmd_screenshot = wx.BitmapButton(self, -1, wx.Image("img/ws_win.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
-        button_sizer = wx.BoxSizer(wx.VERTICAL)
-        button_sizer.Add(cmd_screenshot)
-        cmd_screenshot.Bind(wx.EVT_BUTTON, self.OnScrClick)
-        self.Bind(wx.EVT_LEFT_DOWN, self.pnlDown)
-        self.Bind(wx.EVT_MOTION, self.btnMove)
-        self.Bind(wx.EVT_LEFT_UP, self.btnUp)
-
-        return button_sizer
-
-    def btnDownPen(self, event):
-        # print("Down ", event)
-        self.isDown = True
-        self.x0 = event.x
-        self.y0 = event.y
-        window.tool = 1
-
-    def pnlDown(self, event):
-        # print("Down ", event)
-        self.isDown = True
-        self.x0 = event.x
-        self.y0 = event.y
-
-    def btnDownEr(self, event):
-        # print("Down ", event)
-        self.isDown = True
-        self.x0 = event.x
-        self.y0 = event.y
-        window.tool = 2
-
-    def btnMove(self, event):
-        if self.isDown:
-            # print(event.x, event.y)
-            widget = self.GetParent()
-            px, py = widget.GetPosition()
-            xx = px - self.x0 + event.x
-            yy = py - self.y0 + event.y
-            widget.SetPosition((xx, yy))
-
-    def btnUp(self, event):
-        # print("Up ",event)
-
-        self.isDown = False
-
-    def OnBtnClose(self, event):
-        self.close()
-
-    def SetPen(self, event):
-        window.tool = 1
-
-    def SetErr(self, event):
-        window.tool = 2
-
-    def OnScrClick(self, event):
-        window.insert_screenshot()
-
-    def SetColor(self, event, color=(0, 0, 1, 1)):
-        window.penColor = color
+# class MainPanel(wx.Panel):
+#
+#     def __init__(self, frame):
+#         wx.Panel.__init__(self, frame, )
+#         self.x0 = 0
+#         self.y0 = 0
+#         self.isDown = False
+#         self.isRotate = False
+#
+#         # Button 1
+#         button_sizer = self._button_sizer(frame)
+#
+#         # Main sizer
+#         main_sizer = wx.BoxSizer(wx.VERTICAL)
+#         main_sizer.Add((0, 20))
+#         main_sizer.Add(button_sizer)
+#         self.SetSizer(main_sizer)
+#         self.Fit()
+#
+#     def _button_sizer(self, frame):
+#         cmd_screenshot = wx.BitmapButton(self, -1, wx.Image("img/ws_win.png", wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+#         button_sizer = wx.BoxSizer(wx.VERTICAL)
+#         button_sizer.Add(cmd_screenshot)
+#         cmd_screenshot.Bind(wx.EVT_BUTTON, self.OnScrClick)
+#         self.Bind(wx.EVT_LEFT_DOWN, self.pnlDown)
+#         self.Bind(wx.EVT_MOTION, self.btnMove)
+#         self.Bind(wx.EVT_LEFT_UP, self.btnUp)
+#
+#         return button_sizer
+#
+#     def btnDownPen(self, event):
+#         # print("Down ", event)
+#         self.isDown = True
+#         self.x0 = event.x
+#         self.y0 = event.y
+#         window.tool = 1
+#
+#     def pnlDown(self, event):
+#         # print("Down ", event)
+#         self.isDown = True
+#         self.x0 = event.x
+#         self.y0 = event.y
+#
+#     def btnDownEr(self, event):
+#         # print("Down ", event)
+#         self.isDown = True
+#         self.x0 = event.x
+#         self.y0 = event.y
+#         window.tool = 2
+#
+#     def btnMove(self, event):
+#         if self.isDown:
+#             # print(event.x, event.y)
+#             widget = self.GetParent()
+#             px, py = widget.GetPosition()
+#             xx = px - self.x0 + event.x
+#             yy = py - self.y0 + event.y
+#             widget.SetPosition((xx, yy))
+#
+#     def btnUp(self, event):
+#         # print("Up ",event)
+#
+#         self.isDown = False
+#
+#     def OnBtnClose(self, event):
+#         self.close()
+#
+#     def SetPen(self, event):
+#         window.tool = 1
+#
+#     def SetErr(self, event):
+#         window.tool = 2
+#
+#     def OnScrClick(self, event):
+#         window.insert_screenshot()
+#
+#     def SetColor(self, event, color=(0, 0, 1, 1)):
+#         window.penColor = color
 
 
 # def resize_image(input_image_path,
@@ -426,7 +426,13 @@ class MyWindow(pyglet.window.Window):
         self.dash = 0
         self.page = 1
         self.lastCommand = 1
-        self.wxStart()
+        # self.wxStart()
+        # Тут запустимо програму-панель
+        if platform == "win32" or platform == "cygwin":
+            subprocess.Popen("lazexe\scrgrub.exe")
+        elif platform == "linux":
+            subprocess.Popen("lazexe/scrgrub")
+            # subprocess.Popen("lazexe/scrgrub")
         if len(argv) > 1:
             print(argv[1])
             z = zipfile.ZipFile(argv[1], 'r')
@@ -1008,7 +1014,7 @@ class MyWindow(pyglet.window.Window):
                         x1, y1, x2, y2 = border_polyline(fig['p'])
                         x1, y1 = self.canvas_to_screen(x1, y1)
                         x2, y2 = self.canvas_to_screen(x2, y2)
-                        #x-5,y0+5,x+25,y0-25
+                        # x-5,y0+5,x+25,y0-25
                         if ((x1 < x < x2) and (y1 < y < y2)):
                             flag4 = False
                         if ((x > x1) and (x < x2) and (y > y1) and (y < y2)) or (
@@ -1046,7 +1052,8 @@ class MyWindow(pyglet.window.Window):
                     if not flag and not flag2:
                         self.selFigs = []
                     # Починаємо виділення рамкою
-                    if not flag and not (self.isRotate or self.isMove or self.isResize) and not flag4 and len(self.selFigs)<1:
+                    if not flag and not (self.isRotate or self.isMove or self.isResize) and not flag4 and len(
+                            self.selFigs) < 1:
                         self.selectRamka = True
                         self.multiSelect = False
                         self.set_multisel()
@@ -1204,7 +1211,8 @@ class MyWindow(pyglet.window.Window):
                             p['x'] += dx
                             p['y'] += dy
                     # Умова для зміни розмірів #x-5,y0+5,x+25,y0-25
-                    elif (((cx2-5 < x < cx2 + 25) and (cy1 - 25 < y < cy1+5)) or self.isResize) and (not self.isRotate):
+                    elif (((cx2 - 5 < x < cx2 + 25) and (cy1 - 25 < y < cy1 + 5)) or self.isResize) and (
+                    not self.isRotate):
                         self.isResize = True
                         self.isMove = False
                         self.isRotate = False
@@ -1407,25 +1415,6 @@ class MyWindow(pyglet.window.Window):
     def on_draw(self):
         # Перевіряємо наявність зовнішніх даних та підвантажуємо їх за потребою
 
-        # file_name = "tmp/shedule.shf"
-        # if os.path.exists(file_name):
-        #     #print("#read data")
-        #     #read data
-        #     with open(file_name, "rb") as fp:  # Unpickling
-        #         data = pickle.load(fp)
-        #     nnam = data['image']
-        #     x0, y0, width, height = data['x0'], data['y0'], data['width'], data['height']
-        #     #print("Перед self.insert_image_from_file(")
-        #     self.insert_image_from_file( nnam, x0, y0, width, height)
-        #     #print("Після self.insert_image_from_file(")
-        #     # remove file
-        #     #print(" remove file")
-        #     os.remove(file_name)
-
-        # draw figures in visible part of window
-        # self.clear()
-        # if True:
-        # print("draw")
         self.drawRight = True
         if self.drawRight:
             w = self.width
@@ -1493,8 +1482,8 @@ class MyWindow(pyglet.window.Window):
 
                         image.blit(x0 + self.cx, y0 + self.cy)
                         # ----------------------
-                        texture = image.get_texture()
-                        print(texture)
+                        # texture = image.get_texture()
+                        # print(texture)
 
                         # ----------------------
 
@@ -1663,21 +1652,57 @@ class MyWindow(pyglet.window.Window):
 
         raise SystemExit
 
-    def wxStart(self):
-        app = wx.App()
-        frame = MainFrame()
-        # frame.SetWindowStyle(style=wx.STAY_ON_TOP)  # | wx.TAB_TRAVERSAL)
-        frame.SetSize(size=(35, 55))
-        frame.SetPosition((120, 600))
-        # frame.SetPosition((1200, 600))
-        frame.Show()
-        y = threading.Thread(target=app.MainLoop)
-        y.setDaemon(True)
-        y.start()
+    # def wxStart(self):
+    #     app = wx.App()
+    #     frame = MainFrame()
+    #     # frame.SetWindowStyle(style=wx.STAY_ON_TOP)  # | wx.TAB_TRAVERSAL)
+    #     frame.SetSize(size=(35, 55))
+    #     frame.SetPosition((120, 600))
+    #     # frame.SetPosition((1200, 600))
+    #     frame.Show()
+    #     y = threading.Thread(target=app.MainLoop)
+    #     y.setDaemon(True)
+    #     y.start()
 
     def on_show(self):
-        window.maximize()
+        self.maximize()
 
+    def on_activate(self):
+        file_name = "lazexe/tmp.bmp"
+        if os.path.exists(file_name):
+            self.set_page_right()
+            width = 600
+            # self.set_visible(True)
+
+            w = self.width
+            h = self.height
+            height = 9 * width // 16
+            x0, y0 = w - width - self.cx, h - height - self.cy
+            nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+            shutil.copy(file_name, nnam)
+            self.insert_image_from_file(nnam, x0, y0, width, height)
+            os.remove(file_name)
+        # else:
+        #     file_name = "tmp.bmp"
+        #     if os.path.exists(file_name):
+        #         self.set_page_right()
+        #         width = 600
+        #         # self.set_visible(True)
+        #         self.maximize()
+        #         w = self.width
+        #         h = self.height
+        #         height = 9 * width // 16
+        #         x0, y0 = w - width - self.cx, h - height - self.cy
+        #         nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+        #         shutil.copy(file_name, nnam)
+        #         self.insert_image_from_file(nnam, x0, y0, width, height)
+        #         os.remove(file_name)
+
+        # draw figures in visible part of window
+        # self.clear()
+        # if True:
+        # print("draw")
+        self.maximize()
 
 
 # window = None
@@ -1690,8 +1715,6 @@ def oglStart():
     context = window.context
     # config = context.config
     # config.double_buffer
-
-
 
     window.set_location(2, 24)
 
