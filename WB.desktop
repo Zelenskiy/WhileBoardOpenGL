@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Icon=mate-panel-launcher
+Icon[uk]=mate-panel-launcher
+Name[uk]=WB
+Exec='/home/alexandr/WhiteBoardOpenGL/start.sh'
+Name=WB
