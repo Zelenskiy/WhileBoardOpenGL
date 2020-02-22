@@ -523,6 +523,7 @@ class MyWindow(pyglet.window.Window):
         data['cy'] = self.cy
         data['id'] = self.id
         data['isGrid'] = self.isGrid
+        data['pageMax'] = self.pageMax
 
         with open("tmp/figures.wb", "wb") as fp:
             pickle.dump(data, fp)
@@ -609,6 +610,7 @@ class MyWindow(pyglet.window.Window):
 
         self.penWidth = data['penWidth']
         self.fonColor = data['fonColor']
+        self.pageMax = data['pageMax']
         self.id = data['id']
         self.cx = data['cx']
         self.cy = data['cy']
@@ -1504,12 +1506,28 @@ class MyWindow(pyglet.window.Window):
                     x = f['p'][1]['x']
                     y = f['p'][1]['y']
                     image = self.images[f['image']]
-                    # texture = image.get_transform(flip_x=False, flip_y=False, rotate=0)
-                    # print(texture)
+                    #TODO винести з on_draw
+                    #Перетворюємо на спрайт
+                    imageSprite = pyglet.sprite.Sprite(image)
+
+
+
                     # Це щоб не було засвітки
                     draw_line(-10000, -10000, -10001, -10001, (1, 1, 1, 1), thickness=1)
 
-                    image.blit(x0 + self.cx, y0 + self.cy)
+                    # image.blit(x0 + self.cx, y0 + self.cy)
+                    # Центр обертання
+                    imageSprite.image.anchor_x =x0 + self.cx + 300
+                    imageSprite.image.anchor_y =y0 + self.cy + 300
+
+                    imageSprite.rotation = 20
+
+                    # координати
+                    imageSprite.position = (x0 + self.cx, y0 + self.cy)
+
+                    imageSprite.draw()
+
+
                     # ----------------------
                     # texture = image.get_texture()
                     # print(texture)
