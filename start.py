@@ -211,6 +211,7 @@ class MyWindow(pyglet.window.Window):
         self.incr = 0
         self.screen_width = 0
         self.screen_height = 0
+
         # self.colorOrrange = (1.0, 0.5, 0.0, 1.0)
         # self.isGrid = True
         # self.isSmooth = False
@@ -693,9 +694,11 @@ class MyWindow(pyglet.window.Window):
         self.dragPanel = True
 
     def move_108(self):
+        self.clear()
         self.cx += 100
 
     def move_109(self):
+        self.clear()
         self.cx -= 100
 
     def move_110(self):
@@ -822,6 +825,7 @@ class MyWindow(pyglet.window.Window):
         k['angle'] = 0
         k['thickness'] = self.penWidth
         k['fordel'] = False
+        k['extrem'] = x0, y0, x0 + image.width, y0+image.height
         self.figures.append(k)
         self.clear()
 
@@ -1145,6 +1149,7 @@ class MyWindow(pyglet.window.Window):
                     # self.lenesPen.append({'x1':xx0, 'y1':yy0, 'x2':xx_, 'y2':yy_, 'color':color, 'thickness':pW, 'smooth':self.isSmooth})
                     draw_line_1(xx0, yy0, xx_, yy_, color=color, thickness=pW, smooth=self.isSmooth)
                     x0, y0 = x_, y_
+
                 self.x0, self.y0 = self.screen_to_canvas(x, y)
             # elif self.tool == 9:  # Витирання кольором фону
             #     # self.drawRight = True
@@ -1325,8 +1330,9 @@ class MyWindow(pyglet.window.Window):
                         k['id'] = self.id
                         k['name'] = 'polyline'
                         k['p'] = self.poly.copy()
-                        x0, y0 = self.x0, self.y0
+                        # x0, y0 = self.x0, self.y0
                         x0, y0, xx, yy = border_polyline(k['p'])
+                        k['extrem'] = x0, y0, xx, yy
                         xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
                         if self.tool == 1:
                             pW = self.penWidth
@@ -1338,6 +1344,7 @@ class MyWindow(pyglet.window.Window):
                         k['color'] = color
                         k['thickness'] = pW
                         k['fordel'] = False
+
                         self.figures.append(k)
                     # if self.tool == 9:
                     #     k = {}
@@ -1368,6 +1375,7 @@ class MyWindow(pyglet.window.Window):
                         k['arrow'] = self.arr
                         k['dash'] = self.dash
                         k['fordel'] = False
+                        k['extrem'] = min(x0,xx),min(y0,yy), max(x0,xx),max(y0,yy)
                         self.figures.append(k)
                     elif self.tool == 4:
                         k = {}
@@ -1392,6 +1400,7 @@ class MyWindow(pyglet.window.Window):
                         k['dash'] = self.dash
                         k['fill'] = self.isFill
                         k['fordel'] = False
+                        k['extrem'] = min(x0, xx), min(y0, yy), max(x0, xx), max(y0, yy)
                         self.figures.append(k)
                     elif self.tool == 6:
                         k = {}
@@ -1408,6 +1417,7 @@ class MyWindow(pyglet.window.Window):
                             k['name'] = 'polygone'
                         k['p'] = points
                         x0, y0, xx, yy = border_polyline(k['p'])
+                        k['extrem'] = x0, y0, xx, yy
                         xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
                         k['center'] = {'x': xcenter, 'y': ycenter}
                         # k['numVertex'] = self.numVertex
@@ -1439,8 +1449,11 @@ class MyWindow(pyglet.window.Window):
                         pSel = []
                         for selFig in self.selFigs:
                             fig = selFig['figobj']
+                            cx1, cy1, cx2, cy2 = border_polyline(fig['p'])
+                            fig['extrem'] = cx1, cy1, cx2, cy2
                             pSel += fig['p']
                         cx1, cy1, cx2, cy2 = border_polyline(pSel)
+
                         cx1, cy1 = self.canvas_to_screen(cx1, cy1)
                         cx2, cy2 = self.canvas_to_screen(cx2, cy2)
                         if len(self.selFigs) > 1:
@@ -1481,7 +1494,10 @@ class MyWindow(pyglet.window.Window):
         # print("len figures ", len(self.figures))
 
         for f in self.figures:
-            x_min, y_min, x_max, y_max = border_polyline(f['p'])
+            r = f['thickness'] // 2
+            self.x_min, self.y_min, self.x_max, self.y_max = f['extrem']
+            x_min, y_min, x_max, y_max = f['extrem']
+            # x_min, y_min, x_max, y_max = border_polyline(f['p'])
             x_min, y_min = self.canvas_to_screen(x_min, y_min)
             x_max, y_max = self.canvas_to_screen(x_max, y_max)
             # if x_min < w and x_max > 0 and y_min < h and y_max > 0:
@@ -1495,9 +1511,13 @@ class MyWindow(pyglet.window.Window):
                         y = p['y']
                         xx0, yy0 = self.canvas_to_screen(x0, y0)
                         xx, yy = self.canvas_to_screen(x, y)
-                        # xx0, yy0, xx, yy = longer_for_polyline(xx0, yy0, xx, yy, f['thickness'], 0.2)
+
+                        # draw_fill_circle(x0,y0,r,color=f['color'],thickness=1)
+                        # draw_fill_circle(xx,yy,r,color=f['color'],thickness=1)
                         draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'],
                                     smooth=self.isSmooth)
+                        # draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'],
+                        #             smooth=self.isSmooth)
                         x0, y0 = x, y
                 elif f['name'] == 'line':
                     x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
