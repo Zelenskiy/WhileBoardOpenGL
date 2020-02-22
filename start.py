@@ -1063,7 +1063,7 @@ class MyWindow(pyglet.window.Window):
                             xx2 = selDel['x2']
                             yy2 = selDel['y2']
                             if selDel != {}:
-                                if (x > xx1) and (x < xx2) and (y > yy1) and (y < yy2):
+                                if (x > xx1) and (x < xx2) and (y > yy1) and (y < yy2) and len(self.selFigs) == 1:
                                     # Вилучаємо
                                     fig['fordel'] = True
                                     self.update_fig()
@@ -1718,10 +1718,10 @@ class MyWindow(pyglet.window.Window):
                 cx1, cy1 = self.canvas_to_screen(cx1, cy1)
                 cx2, cy2 = self.canvas_to_screen(cx2, cy2)
                 x_center, y_center, = (cx1 + cx2) / 2, (cy1 + cy2) / 2
-                draw_ramka_top(cx1 - 2, cy1 - 2, cx2 + 2, cy2 + 2,
-                               center=(self.canvas_to_screen(x_center, y_center)),
-                               color=ramkaColorChild, thickness=self.ramkaThickness, rotate=False, resize=False,
-                               close=True)
+                # draw_ramka_top(cx1 - 2, cy1 - 2, cx2 + 2, cy2 + 2,
+                #                center=(self.canvas_to_screen(x_center, y_center)),
+                #                color=ramkaColorChild, thickness=self.ramkaThickness, rotate=False, resize=False,
+                #                close=False)
             x1, y1, x2, y2 = border_polyline(pSel)
             x_center, y_center, = (x1 + x2) / 2, (y1 + y2) / 2
             x1, y1 = self.canvas_to_screen(x1, y1)
@@ -1730,7 +1730,7 @@ class MyWindow(pyglet.window.Window):
             draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
                            center=(self.canvas_to_screen(x_center, y_center)),
                            color=self.ramkaColor, thickness=self.ramkaThickness, rotate=True, resize=True,
-                           close=False)
+                           close=len(self.selFigs)==1)
 
             draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
 
