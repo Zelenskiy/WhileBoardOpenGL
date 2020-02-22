@@ -1136,21 +1136,47 @@ class MyWindow(pyglet.window.Window):
                 self.poly.append({'x': xx, 'y': yy})
                 x0 = self.poly[0]['x']
                 y0 = self.poly[0]['y']
-                for p in self.poly:
-                    x_ = p['x']
-                    y_ = p['y']
-                    xx0, yy0 = self.canvas_to_screen(x0, y0)
-                    xx_, yy_ = self.canvas_to_screen(x_, y_)
+                if not self.isPartingPolylinu:
+                    for p in self.poly:
+                        x_ = p['x']
+                        y_ = p['y']
+                        xx0, yy0 = self.canvas_to_screen(x0, y0)
+                        xx_, yy_ = self.canvas_to_screen(x_, y_)
+                        if self.tool == 1:
+                            pW = self.penWidth
+                            color = self.penColor
+                        else:
+                            pW = self.errSize
+                            color = self.fonColor
+                        # xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, pW, 0.2)
+                        # self.lenesPen.append({'x1':xx0, 'y1':yy0, 'x2':xx_, 'y2':yy_, 'color':color, 'thickness':pW, 'smooth':self.isSmooth})
+                        draw_line_1(xx0, yy0, xx_, yy_, color=color, thickness=pW, smooth=self.isSmooth)
+                        x0, y0 = x_, y_
+                else:
+
+                    k = {}
+                    self.id += 1
+                    k['id'] = self.id
+                    k['name'] = 'polyline'
+                    x_0, y_0 = self.x0, self.y0
+
+                    k['p'] = [{'x': x_0, 'y': y_0}, {'x': xx, 'y': yy}, ]
+
+                    x0, y0, xx, yy = min(x_0, xx), min(y_0, yy), max(x_0, xx), max(y_0,yy)
+                    k['extrem'] = x0, y0, xx, yy
+                    xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
                     if self.tool == 1:
                         pW = self.penWidth
                         color = self.penColor
                     else:
                         pW = self.errSize
                         color = self.fonColor
-                    # xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, pW, 0.2)
-                    # self.lenesPen.append({'x1':xx0, 'y1':yy0, 'x2':xx_, 'y2':yy_, 'color':color, 'thickness':pW, 'smooth':self.isSmooth})
-                    draw_line_1(xx0, yy0, xx_, yy_, color=color, thickness=pW, smooth=self.isSmooth)
-                    x0, y0 = x_, y_
+                    k['center'] = {'x': xcenter, 'y': ycenter}
+                    k['color'] = color
+                    k['thickness'] = pW
+                    k['fordel'] = False
+
+                    self.figures.append(k)
 
                 self.x0, self.y0 = self.screen_to_canvas(x, y)
             # elif self.tool == 9:  # Витирання кольором фону
@@ -1304,9 +1330,9 @@ class MyWindow(pyglet.window.Window):
                                 b['y'] = cy2 - 20
                                 break
 
-    def parting(self, xs, parts):
-        part_len = ceil(len(xs) / parts)
-        return [xs[part_len * k:part_len * (k + 2)] for k in range(parts)]
+    # def parting(self, xs, parts):
+    #     part_len = ceil(len(xs) / parts)
+    #     return [xs[part_len * k:part_len * (k + 2)] for k in range(parts)]
 
     def on_mouse_release(self, x, y, button, modifiers):
         self.dragPanel = False
@@ -1361,30 +1387,31 @@ class MyWindow(pyglet.window.Window):
                         #     self.figures.append(k)
 
                         if self.isPartingPolylinu:
-                            x_0, y_0 = self.poly[0]['x'],self.poly[0]['y']
-                            for line in self.poly:
-                                k = {}
-                                self.id += 1
-                                k['id'] = self.id
-                                k['name'] = 'polyline'
-                                k['p'] = [{'x': x_0, 'y': y_0}, {'x': line['x'], 'y': line['y']}, ]
-                                x_0, y_0 = line['x'], line['y']
-                                # k['p'] = self.poly.copy()
-                                x0, y0, xx, yy = min(x_0, line['x']), min(y_0, line['y']), max(x_0, line['x']), max(y_0, line['y'])
-                                k['extrem'] = x0, y0, xx, yy
-                                xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
-                                if self.tool == 1:
-                                    pW = self.penWidth
-                                    color = self.penColor
-                                else:
-                                    pW = self.errSize
-                                    color = self.fonColor
-                                k['center'] = {'x': xcenter, 'y': ycenter}
-                                k['color'] = color
-                                k['thickness'] = pW
-                                k['fordel'] = False
-
-                                self.figures.append(k)
+                            pass
+                            # x_0, y_0 = self.poly[0]['x'],self.poly[0]['y']
+                            # for line in self.poly:
+                            #     k = {}
+                            #     self.id += 1
+                            #     k['id'] = self.id
+                            #     k['name'] = 'polyline'
+                            #     k['p'] = [{'x': x_0, 'y': y_0}, {'x': line['x'], 'y': line['y']}, ]
+                            #     x_0, y_0 = line['x'], line['y']
+                            #     # k['p'] = self.poly.copy()
+                            #     x0, y0, xx, yy = min(x_0, line['x']), min(y_0, line['y']), max(x_0, line['x']), max(y_0, line['y'])
+                            #     k['extrem'] = x0, y0, xx, yy
+                            #     xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                            #     if self.tool == 1:
+                            #         pW = self.penWidth
+                            #         color = self.penColor
+                            #     else:
+                            #         pW = self.errSize
+                            #         color = self.fonColor
+                            #     k['center'] = {'x': xcenter, 'y': ycenter}
+                            #     k['color'] = color
+                            #     k['thickness'] = pW
+                            #     k['fordel'] = False
+                            #
+                            #     self.figures.append(k)
 
                         else:
                             k = {}
