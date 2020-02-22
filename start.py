@@ -620,7 +620,7 @@ class MyWindow(pyglet.window.Window):
             if fig['name'] == 'image':
                 nnam_ = fig['image']
                 image = pyglet.image.load(nnam_)
-                self.images[nnam_] = image
+                self.images[nnam_] = pyglet.sprite.Sprite(image)
 
     def del_selected(self):
         for sel in self.selFigs:
@@ -807,10 +807,11 @@ class MyWindow(pyglet.window.Window):
         #     # rotates the image 90 degrees clockwise
         #     #rotate=90,
         # )
-        self.images[nnam_] = image
+        self.images[nnam_] = pyglet.sprite.Sprite(image)
         k['image'] = nnam_
         xcenter, ycenter = (x0 + x0 + width) / 2, (y0 + y0 + height) / 2
         k['center'] = {'x': xcenter, 'y': ycenter}
+        k['angle'] = 0
         k['thickness'] = self.penWidth
         k['fordel'] = False
         self.figures.append(k)
@@ -1152,7 +1153,7 @@ class MyWindow(pyglet.window.Window):
             #         x0, y0 = x_, y_
             #     self.x0, self.y0 = self.screen_to_canvas(x, y)
             elif self.tool == 2:
-                if self.incr%4==0: self.clear()
+                if self.incr % 4 == 0: self.clear()
                 draw_fill_rectangle(x + self.errSize // 2, y + self.errSize // 2, x - self.errSize // 2,
                                     y - self.errSize // 2, color=(1, 1, 0, 1))
                 # draw_line(x + self.errSize // 2, y + self.errSize // 2,
@@ -1220,8 +1221,8 @@ class MyWindow(pyglet.window.Window):
                     pSel = []
                     for selFig in self.selFigs:
                         fig = selFig['figobj']
-                        pSel += fig['p']
-                    cx1, cy1, cx2, cy2 = border_polyline(pSel)
+                        pSel.append({'coord': fig['p'], 'name': fig['name'],'figobj': fig})
+                    cx1, cy1, cx2, cy2 = border_polyline_1(pSel)
                     cx1, cy1 = self.canvas_to_screen(cx1, cy1)
                     cx2, cy2 = self.canvas_to_screen(cx2, cy2)
                     x_center, y_center, = (cx1 + cx2) / 2, (cy1 + cy2) / 2
@@ -1234,9 +1235,10 @@ class MyWindow(pyglet.window.Window):
                         self.isResize = False
                         self.isMove = True
                         self.isRotate = False
-                        for p in pSel:
-                            p['x'] += dx
-                            p['y'] += dy
+                        for fi in pSel:
+                            for p in fi['coord']:
+                                p['x'] += dx
+                                p['y'] += dy
                     # Умова для зміни розмірів #x-5,y0+5,x+25,y0-25
                     elif (((cx2 - 5 < x < cx2 + 25) and (cy1 - 25 < y < cy1 + 5)) or self.isResize) and (
                             not self.isRotate):
@@ -1247,11 +1249,12 @@ class MyWindow(pyglet.window.Window):
                         xx, yy = self.screen_to_canvas(x, y)
                         cx1, cy1 = self.screen_to_canvas(cx1, cy1)
                         cx2, cy2 = self.screen_to_canvas(cx2, cy2)
-                        for p in pSel:
-                            kx = (p['x'] - cx1) / (xx - cx1)
-                            ky = (p['y'] - cy2) / (yy - cy2)
-                            p['x'] += kx * dx
-                            p['y'] += ky * dy
+                        for fi in pSel:
+                            for p in fi['coord']:
+                                    kx = (p['x'] - cx1) / (xx - cx1)
+                                    ky = (p['y'] - cy2) / (yy - cy2)
+                                    p['x'] += kx * dx
+                                    p['y'] += ky * dy
 
 
                     # умова для обертання
@@ -1261,12 +1264,17 @@ class MyWindow(pyglet.window.Window):
                         self.isRotate = True
                         x0, y0 = self.screen_to_canvas(x_center, y_center)
                         angle = math.atan(-dx / 100)
-                        for p in pSel:
-                            xx, yy = p['x'], p['y']
-                            p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
-                            p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
+                        for fi in pSel:
+                            for p in fi['coord']:
+                                xx, yy = p['x'], p['y']
+                                if fi['name'] != 'image':
+                                    p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
+                                    p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
+                                else:
+                                    fi['figobj']['angle'] -= angle*180/math.pi
 
-                    cx1, cy1, cx2, cy2 = border_polyline(pSel)
+
+                    cx1, cy1, cx2, cy2 = border_polyline_1(pSel)
                     cx1, cy1 = self.canvas_to_screen(cx1, cy1)
                     cx2, cy2 = self.canvas_to_screen(cx2, cy2)
                     if len(self.selFigs) > 1:
@@ -1503,30 +1511,22 @@ class MyWindow(pyglet.window.Window):
                 elif f['name'] == 'image':
                     x0 = f['p'][0]['x']
                     y0 = f['p'][0]['y']
-                    x = f['p'][1]['x']
-                    y = f['p'][1]['y']
-                    image = self.images[f['image']]
-                    #TODO винести з on_draw
-                    #Перетворюємо на спрайт
-                    imageSprite = pyglet.sprite.Sprite(image)
-
-
+                    xcenter, ycenter = f['center']['x'], f['center']['y']
 
                     # Це щоб не було засвітки
                     draw_line(-10000, -10000, -10001, -10001, (1, 1, 1, 1), thickness=1)
 
-                    # image.blit(x0 + self.cx, y0 + self.cy)
-                    # Центр обертання
-                    imageSprite.image.anchor_x =x0 + self.cx + 300
-                    imageSprite.image.anchor_y =y0 + self.cy + 300
+                    # Центр обертання не працює сука...
+                    self.images[f['image']].anchor_x = xcenter + self.cx
+                    self.images[f['image']].anchor_y = ycenter + self.cy
 
-                    imageSprite.rotation = 20
+                    # Кут повороту
+                    self.images[f['image']].rotation = f['angle']
 
                     # координати
-                    imageSprite.position = (x0 + self.cx, y0 + self.cy)
+                    self.images[f['image']].position = (x0 + self.cx, y0 + self.cy)
 
-                    imageSprite.draw()
-
+                    self.images[f['image']].draw()
 
                     # ----------------------
                     # texture = image.get_texture()
@@ -1689,7 +1689,7 @@ class MyWindow(pyglet.window.Window):
         # print(self.cy)
         file_name = "lazexe/tmp.bmp"
         if os.path.exists(file_name):
-            self.pageMax +=1
+            self.pageMax += 1
             self.page = self.pageMax
             self.cx = self.page * 100000 - 100000
             self.cy = 0
@@ -1716,9 +1716,8 @@ class MyWindow(pyglet.window.Window):
             height = self.screen_height
             nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
             shutil.copy(file_name, nnam)
-            self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width-20, height-20)
+            self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width - 20, height - 20)
             os.remove(file_name)
-
 
         # else:
         #     file_name = "tmp.bmp"
@@ -1748,7 +1747,7 @@ def oglStart():
     w = display.get_screens()[0].width
     h = display.get_screens()[0].height
 
-    window = MyWindow(w, h-62, caption="WhiteBoard", resizable=True, visible=False)
+    window = MyWindow(w, h - 62, caption="WhiteBoard", resizable=True, visible=False)
     window.screen_width = w
     window.screen_height = h
     # context = window.context
