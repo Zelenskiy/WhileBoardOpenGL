@@ -618,9 +618,13 @@ class MyWindow(pyglet.window.Window):
         # Загрузка images
         for fig in self.figures:
             if fig['name'] == 'image':
-                nnam_ = fig['image']
+                nnam_ = fig['image_name']
                 image = pyglet.image.load(nnam_)
-                self.images[nnam_] = pyglet.sprite.Sprite(image)
+                image.anchor_x = image.width // 2
+                image.anchor_y = image.height // 2
+
+                self.images[nnam_] = {'sprite': pyglet.sprite.Sprite(image), 'image': image}
+
 
     def del_selected(self):
         for sel in self.selFigs:
@@ -695,9 +699,11 @@ class MyWindow(pyglet.window.Window):
         self.cx -= 100
 
     def move_110(self):
+        self.clear()
         self.cy += 100
 
     def move_111(self):
+        self.clear()
         self.cy -= 100
 
     # def alignToBottomRight(self, win):
@@ -780,14 +786,9 @@ class MyWindow(pyglet.window.Window):
         h = self.height
         height = 9 * width // 16
         x0, y0 = w - width - self.cx, h - height - self.cy
-        # data = {}
-        # data['image'] =  nnam
-        # data['x0'], data['y0'], data['width'], data['height'] = x0, y0, width, height
-        # file_name = "tmp/shedule.shf"
-        # with open(file_name, "wb") as fp:
-        #     pickle.dump(data, fp)
         self.insert_image_from_file(nnam, x0, y0, width, height)
         draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+        self.clear()
 
     def insert_image_from_file(self, nnam, x0, y0, width, height):
         k = {}
@@ -798,14 +799,14 @@ class MyWindow(pyglet.window.Window):
         nnam_ = nnam + ".resize.png"
         self.resize_image2(nnam, nnam_, (width, height))
         image = pyglet.image.load(nnam_)
-        # image.anchor_x = image.width // 2
-        # image.anchor_y = image.height // 2
+
+        image.anchor_x = image.width // 2
+        image.anchor_y = image.height // 2
         k['p'] = []
         k['p'].append({'x': x0, 'y': y0 })
-        k['p'].append({'x': x0 + width, 'y': y0+height })
+        k['p'].append({'x': x0 + image.width, 'y': y0+image.height })
 
-        xcenter, ycenter = (x0 + x0 + width) / 2, (y0 + y0 + height) / 2
-        # image.anchor_x, image.anchor_y = xcenter, ycenter
+        xcenter, ycenter = (x0 + x0 + image.width) / 2, (y0 + y0 + image.height) / 2
         k['center'] = {'x': xcenter, 'y': ycenter}
 
         # image = pyglet.resource.image(
@@ -822,6 +823,7 @@ class MyWindow(pyglet.window.Window):
         k['thickness'] = self.penWidth
         k['fordel'] = False
         self.figures.append(k)
+        self.clear()
 
     def update_fig(self):
         new_list = []
@@ -1279,6 +1281,11 @@ class MyWindow(pyglet.window.Window):
                                     p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
                                 else:
                                     fi['figobj']['angle'] -= angle * 180 / math.pi
+                                    # x0, y0 = x0 + (xx - x0), y0 + (yy - y0)
+                                    # p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
+                                    # p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
+
+
 
                     cx1, cy1, cx2, cy2 = border_polyline_1(pSel)
                     cx1, cy1 = self.canvas_to_screen(cx1, cy1)
@@ -1460,6 +1467,8 @@ class MyWindow(pyglet.window.Window):
 
         self.drawRight = True
         # if self.drawRight:
+
+
         w = self.screen_width
         h = self.screen_height
         count = 0
@@ -1475,8 +1484,8 @@ class MyWindow(pyglet.window.Window):
             x_min, y_min, x_max, y_max = border_polyline(f['p'])
             x_min, y_min = self.canvas_to_screen(x_min, y_min)
             x_max, y_max = self.canvas_to_screen(x_max, y_max)
-            if x_min < w and x_max > 0 and y_min < h and y_max > 0:
-
+            # if x_min < w and x_max > 0 and y_min < h and y_max > 0:
+            if x_min < self.width and x_max > 0 and y_min < self.height and y_max > 0:
                 count += 1
                 if f['name'] == 'polyline':
                     x0 = f['p'][0]['x']
@@ -1522,16 +1531,16 @@ class MyWindow(pyglet.window.Window):
                     # Це щоб не було засвітки
                     draw_line(-10000, -10000, -10001, -10001, (1, 1, 1, 1), thickness=1)
 
-                    # Центр обертання не працює сука...
-                    # self.images[f['image_name']]['image'].anchor_x = xcenter + self.cx
-                    # self.images[f['image_name']]['image'].anchor_y = ycenter + self.cy
-                    # self.images[f['image_name']]['sprite'] = pyglet.sprite.Sprite(self.images[f['image_name']]['image'])
+                    # Центр обертання.
+                    image = self.images[f['image_name']]['image']
+                    w = image.width // 2
+                    h = image.height // 2
 
                     # Кут повороту
                     self.images[f['image_name']]['sprite'].rotation = f['angle']
 
-                    # координати лівого нижнього кута
-                    self.images[f['image_name']]['sprite'].position = (x0 + self.cx, y0 + self.cy)
+                    # координати лівого нижнього кута з ккординат центра
+                    self.images[f['image_name']]['sprite'].position = (x0 + w + self.cx, y0 + h + self.cy)
 
                     self.images[f['image_name']]['sprite'].draw()
 
