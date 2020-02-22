@@ -15,7 +15,8 @@ type
 
   TForm1 = class(TForm)
     SpeedButton2: TSpeedButton;
-    SpeedButton3: TSpeedButton;
+    fullButton: TSpeedButton;
+    windButton: TSpeedButton;
     Timer1: TTimer;
     Timer2: TTimer;
     procedure FormCreate(Sender: TObject);
@@ -26,7 +27,8 @@ type
       Shift: TShiftState; X, Y: Integer);
 
     procedure SpeedButton2Click(Sender: TObject);
-    procedure SpeedButton3Click(Sender: TObject);
+    procedure fullButtonClick(Sender: TObject);
+    procedure windButtonClick(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
     procedure SetShotInWindow;
   private
@@ -38,6 +40,8 @@ type
     startDrag: boolean;
     X0, Y0: integer;
     os:string;
+    x:string;
+
 
   end;
 
@@ -51,6 +55,8 @@ implementation
 
 { TForm1 }
 uses LCLType, LCLIntf    ;
+
+
 
 procedure TForm1.SetShotInWindow;
 var tmpBitmap:TBitmap;
@@ -66,7 +72,10 @@ begin
   path := ExtractFilePath(Application.ExeName);
 
   //ShowMessage(path);
-  namefile:= path+'tmp.bmp';
+  if Form1.x='win' then
+     namefile:= path+'tmp.bmp'
+  else
+     namefile:= path+'tmp_f.bmp';
   ScreenDC := GetDC(0);
   tmpBitmap := TBitmap.Create;
   tmpBitmap.LoadFromDevice(ScreenDC);
@@ -75,11 +84,22 @@ begin
   Form1.Show;
 end;
 
-procedure TForm1.SpeedButton3Click(Sender: TObject);
+procedure TForm1.fullButtonClick(Sender: TObject);
 begin
   Form1.Hide;
+  Form1.x := 'full';
   SetShotInWindow;
   Timer2.Enabled:=true;
+
+end;
+
+procedure TForm1.windButtonClick(Sender: TObject);
+begin
+  Form1.Hide;
+  Form1.x := 'win';
+  SetShotInWindow;
+  Timer2.Enabled:=true;
+
 end;
 
 procedure TForm1.Timer2Timer(Sender: TObject);
@@ -97,11 +117,11 @@ begin
   startDrag := False;
   form1.FormStyle:=fsSystemStayOnTop;
   width :=38;
-  height := 100;
+  height := 160;
   form1.AlphaBlend:=true;
   form1.AlphaBlendValue:=127;{0-255}
   form1.Left := 30;
-  form1.Top := 590;
+  form1.Top := 520;
 end;
 
 procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton;

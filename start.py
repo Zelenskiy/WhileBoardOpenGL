@@ -30,6 +30,7 @@ import os.path
 import configparser
 import zipfile
 from sys import argv
+from math import ceil
 
 if platform == "win32" or platform == "cygwin":
     pass
@@ -207,6 +208,11 @@ class MyWindow(pyglet.window.Window):
         self.load_options()
 
         self.numVertex = 4
+        self.pageMax = 1
+        self.incr = 0
+        self.screen_width = 0
+        self.screen_height = 0
+
         # self.colorOrrange = (1.0, 0.5, 0.0, 1.0)
         # self.isGrid = True
         # self.isSmooth = False
@@ -224,6 +230,7 @@ class MyWindow(pyglet.window.Window):
         glClearColor(*self.fonColor)
         self.figures = []
         self.selectRamka = False
+        self.isPartingPolylinu = True
         self.isMove = False
         self.multiSelect = False
         self.isResize = False
@@ -419,6 +426,7 @@ class MyWindow(pyglet.window.Window):
         self.scS = False
         self.arrowPanelVisible = False
         self.images = {}
+        self.lenesPen = []
 
         # self.selDel = {}
         # self.selRes = {}
@@ -455,6 +463,7 @@ class MyWindow(pyglet.window.Window):
         # self.alignToBottomRight(frame)
 
         # frame.Show(True)
+        # pyglet.clock.schedule_interval(self.update, 1 / 10)
 
     # def show_screenshot_panel(self):
     #     # self.set_visible(False)
@@ -469,6 +478,9 @@ class MyWindow(pyglet.window.Window):
     #     else:
     #         #print("Cancel")
     #         self.set_visible(True)
+
+    def update(self):
+        self.clear()
 
     def draw_color_panel(self):
         for btn in self.colorPanelButtons:
@@ -514,6 +526,7 @@ class MyWindow(pyglet.window.Window):
         data['cy'] = self.cy
         data['id'] = self.id
         data['isGrid'] = self.isGrid
+        data['pageMax'] = self.pageMax
 
         with open("tmp/figures.wb", "wb") as fp:
             pickle.dump(data, fp)
@@ -600,6 +613,7 @@ class MyWindow(pyglet.window.Window):
 
         self.penWidth = data['penWidth']
         self.fonColor = data['fonColor']
+        self.pageMax = data['pageMax']
         self.id = data['id']
         self.cx = data['cx']
         self.cy = data['cy']
@@ -607,9 +621,13 @@ class MyWindow(pyglet.window.Window):
         # Загрузка images
         for fig in self.figures:
             if fig['name'] == 'image':
-                nnam_ = fig['image']
+                nnam_ = fig['image_name']
                 image = pyglet.image.load(nnam_)
-                self.images[nnam_] = image
+                image.anchor_x = image.width // 2
+                image.anchor_y = image.height // 2
+
+                self.images[nnam_] = {'sprite': pyglet.sprite.Sprite(image), 'image': image}
+
 
     def del_selected(self):
         for sel in self.selFigs:
@@ -662,6 +680,7 @@ class MyWindow(pyglet.window.Window):
     def set_page_right(self):
         self.clear()
         self.page += 1
+        if self.page > self.pageMax: self.pageMax = self.page
         self.cx = self.page * 100000 - 100000
         self.cy = 0
 
@@ -677,23 +696,27 @@ class MyWindow(pyglet.window.Window):
         self.dragPanel = True
 
     def move_108(self):
-        self.cx -= 50
+        self.clear()
+        self.cx += 100
 
     def move_109(self):
-        self.cx += 50
+        self.clear()
+        self.cx -= 100
 
     def move_110(self):
-        self.cy += 50
+        self.clear()
+        self.cy += 100
 
     def move_111(self):
-        self.cy -= 50
+        self.clear()
+        self.cy -= 100
 
-    def alignToBottomRight(self, win):
-        dw, dh = wx.DisplaySize()
-        w, h = win.GetSize()
-        x = dw - w
-        y = dh - h
-        win.SetPosition((x, y))
+    # def alignToBottomRight(self, win):
+    #     dw, dh = wx.DisplaySize()
+    #     w, h = win.GetSize()
+    #     x = dw - w
+    #     y = dh - h
+    #     win.SetPosition((x, y))
 
     def set_color(self):
         # For linux
@@ -749,45 +772,48 @@ class MyWindow(pyglet.window.Window):
         print(nnam)
 
         width = 600
-        w = window.width
-        h = window.height
+        w = self.width
+        h = self.height
         height = 9 * width // 16
         x0, y0 = w - width - self.cx, h - height - self.cy
-        window.insert_image_from_file(nnam, x0, y0, width, height)
+        self.insert_image_from_file(nnam, x0, y0, width, height)
 
     def insert_screenshot(self):
-        window.lastCommand = 11
-        window.set_visible(False)
+        self.lastCommand = 11
+        self.set_visible(False)
         nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
         grab.screenshot_to_file(nnam)
         width = 600
-        window.set_visible(True)
-        window.maximize()
+        self.set_visible(True)
+        # self.maximize()
 
-        w = window.width
-        h = window.height
+        w = self.width
+        h = self.height
         height = 9 * width // 16
         x0, y0 = w - width - self.cx, h - height - self.cy
-        # data = {}
-        # data['image'] =  nnam
-        # data['x0'], data['y0'], data['width'], data['height'] = x0, y0, width, height
-        # file_name = "tmp/shedule.shf"
-        # with open(file_name, "wb") as fp:
-        #     pickle.dump(data, fp)
-        window.insert_image_from_file(nnam, x0, y0, width, height)
+        self.insert_image_from_file(nnam, x0, y0, width, height)
         draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+        self.clear()
 
     def insert_image_from_file(self, nnam, x0, y0, width, height):
         k = {}
-        window.id += 1
+        self.id += 1
         k['id'] = self.id
         k['name'] = 'image'
-        k['p'] = []
-        k['p'].append({'x': x0, 'y': y0})
-        k['p'].append({'x': x0 + width, 'y': y0 + height})
+
         nnam_ = nnam + ".resize.png"
         self.resize_image2(nnam, nnam_, (width, height))
         image = pyglet.image.load(nnam_)
+
+        image.anchor_x = image.width // 2
+        image.anchor_y = image.height // 2
+        k['p'] = []
+        k['p'].append({'x': x0, 'y': y0 })
+        k['p'].append({'x': x0 + image.width, 'y': y0+image.height })
+
+        xcenter, ycenter = (x0 + x0 + image.width) / 2, (y0 + y0 + image.height) / 2
+        k['center'] = {'x': xcenter, 'y': ycenter}
+
         # image = pyglet.resource.image(
         #     # image name
         #     nnam_,
@@ -795,13 +821,15 @@ class MyWindow(pyglet.window.Window):
         #     # rotates the image 90 degrees clockwise
         #     #rotate=90,
         # )
-        self.images[nnam_] = image
-        k['image'] = nnam_
-        xcenter, ycenter = (x0 + x0 + width) / 2, (y0 + y0 + height) / 2
-        k['center'] = {'x': xcenter, 'y': ycenter}
+        self.images[nnam_] = {'sprite': pyglet.sprite.Sprite(image), 'image': image}
+        k['image_name'] = nnam_
+
+        k['angle'] = 0
         k['thickness'] = self.penWidth
         k['fordel'] = False
+        k['extrem'] = x0, y0, x0 + image.width, y0+image.height
         self.figures.append(k)
+        self.clear()
 
     def update_fig(self):
         new_list = []
@@ -900,6 +928,8 @@ class MyWindow(pyglet.window.Window):
             else:
                 self.isExit = False
         self.clear()
+        self.incr = 0
+        self.lenesPen = []
         if button == mouse.LEFT:
             self.f = True
             # Якщо панель ... видима
@@ -1065,7 +1095,7 @@ class MyWindow(pyglet.window.Window):
 
 
                 elif self.tool == 1 or self.tool == 9:
-                    self.drawRight = False
+                    self.drawRight = True
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
@@ -1092,14 +1122,16 @@ class MyWindow(pyglet.window.Window):
                 #     pass
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-
+        self.incr += 1
         # if self.drawRight: self.clear()
         if self.dragPanel:
             for b in self.btnPnl:
                 b['x'] -= dx
                 b['y'] += dy
+
         elif self.f:
             if self.tool == 1 or self.tool == 9:
+                # draw_circle(x,y,2,color=(1,0,0,1),thickness=1)
                 xx, yy = self.screen_to_canvas(x, y)
                 self.poly.append({'x': xx, 'y': yy})
                 x0 = self.poly[0]['x']
@@ -1116,8 +1148,10 @@ class MyWindow(pyglet.window.Window):
                         pW = self.errSize
                         color = self.fonColor
                     # xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, pW, 0.2)
+                    # self.lenesPen.append({'x1':xx0, 'y1':yy0, 'x2':xx_, 'y2':yy_, 'color':color, 'thickness':pW, 'smooth':self.isSmooth})
                     draw_line_1(xx0, yy0, xx_, yy_, color=color, thickness=pW, smooth=self.isSmooth)
                     x0, y0 = x_, y_
+
                 self.x0, self.y0 = self.screen_to_canvas(x, y)
             # elif self.tool == 9:  # Витирання кольором фону
             #     # self.drawRight = True
@@ -1135,8 +1169,11 @@ class MyWindow(pyglet.window.Window):
             #         x0, y0 = x_, y_
             #     self.x0, self.y0 = self.screen_to_canvas(x, y)
             elif self.tool == 2:
-                draw_line(x + self.errSize // 2, y + self.errSize // 2,
-                          x - self.errSize // 2, y - self.errSize // 2, color=(1, 1, 0, 1), thickness=self.errSize)
+                if self.incr % 4 == 0: self.clear()
+                draw_fill_rectangle(x + self.errSize // 2, y + self.errSize // 2, x - self.errSize // 2,
+                                    y - self.errSize // 2, color=(1, 1, 0, 1))
+                # draw_line(x + self.errSize // 2, y + self.errSize // 2,
+                #           x - self.errSize // 2, y - self.errSize // 2, color=(1, 1, 0, 1), thickness=self.errSize)
                 for f in self.figures:
                     x_min, y_min, x_max, y_max = border_polyline(f['p'])
                     x_min, y_min = self.canvas_to_screen(x_min, y_min)
@@ -1185,19 +1222,23 @@ class MyWindow(pyglet.window.Window):
             elif self.tool == 20:
                 self.cx += dx
                 self.cy += dy
+                self.clear()
             elif self.tool == 8:
                 self.clear()
                 if self.selectRamka:
-                    x0, y0 = self.canvas_to_screen(self.x0, self.y0)
+                    # x0, y0 = self.canvas_to_screen(self.x0, self.y0)
                     # print("222222222")
-                    draw_polygon([{'x': x0, 'y': y0}, {'x': x, 'y': y0}, {'x': x, 'y': y}, {'x': x0, 'y': y}],
-                                 color=self.ramkaColor, thickness=1, dash=1)
+                    draw_polygon([{'x': self.x0, 'y': self.y0},
+                                  {'x': x, 'y': self.y0},
+                                  {'x': x, 'y': y},
+                                  {'x': self.x0, 'y': y}],
+                                 color=self.ramkaColor, thickness=1, dash=0)
                 else:
                     pSel = []
                     for selFig in self.selFigs:
                         fig = selFig['figobj']
-                        pSel += fig['p']
-                    cx1, cy1, cx2, cy2 = border_polyline(pSel)
+                        pSel.append({'coord': fig['p'], 'name': fig['name'], 'figobj': fig})
+                    cx1, cy1, cx2, cy2 = border_polyline_1(pSel)
                     cx1, cy1 = self.canvas_to_screen(cx1, cy1)
                     cx2, cy2 = self.canvas_to_screen(cx2, cy2)
                     x_center, y_center, = (cx1 + cx2) / 2, (cy1 + cy2) / 2
@@ -1210,12 +1251,13 @@ class MyWindow(pyglet.window.Window):
                         self.isResize = False
                         self.isMove = True
                         self.isRotate = False
-                        for p in pSel:
-                            p['x'] += dx
-                            p['y'] += dy
+                        for fi in pSel:
+                            for p in fi['coord']:
+                                p['x'] += dx
+                                p['y'] += dy
                     # Умова для зміни розмірів #x-5,y0+5,x+25,y0-25
                     elif (((cx2 - 5 < x < cx2 + 25) and (cy1 - 25 < y < cy1 + 5)) or self.isResize) and (
-                    not self.isRotate):
+                            not self.isRotate):
                         self.isResize = True
                         self.isMove = False
                         self.isRotate = False
@@ -1223,11 +1265,13 @@ class MyWindow(pyglet.window.Window):
                         xx, yy = self.screen_to_canvas(x, y)
                         cx1, cy1 = self.screen_to_canvas(cx1, cy1)
                         cx2, cy2 = self.screen_to_canvas(cx2, cy2)
-                        for p in pSel:
-                            kx = (p['x'] - cx1) / (xx - cx1)
-                            ky = (p['y'] - cy2) / (yy - cy2)
-                            p['x'] += kx * dx
-                            p['y'] += ky * dy
+                        for fi in pSel:
+                            for p in fi['coord']:
+                                kx = (p['x'] - cx1) / (xx - cx1)
+                                ky = (p['y'] - cy2) / (yy - cy2)
+                                p['x'] += kx * dx
+                                p['y'] += ky * dy
+
 
                     # умова для обертання
                     elif ((cy2 - 20 < y < cy2) and (x_center - 10 < x < x_center + 10)) or self.isRotate:
@@ -1236,12 +1280,21 @@ class MyWindow(pyglet.window.Window):
                         self.isRotate = True
                         x0, y0 = self.screen_to_canvas(x_center, y_center)
                         angle = math.atan(-dx / 100)
-                        for p in pSel:
-                            xx, yy = p['x'], p['y']
-                            p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
-                            p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
+                        for fi in pSel:
+                            for p in fi['coord']:
+                                xx, yy = p['x'], p['y']
+                                if fi['name'] != 'image':
+                                    p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
+                                    p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
+                                else:
+                                    fi['figobj']['angle'] -= angle * 180 / math.pi
+                                    # x0, y0 = x0 + (xx - x0), y0 + (yy - y0)
+                                    # p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
+                                    # p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
 
-                    cx1, cy1, cx2, cy2 = border_polyline(pSel)
+
+
+                    cx1, cy1, cx2, cy2 = border_polyline_1(pSel)
                     cx1, cy1 = self.canvas_to_screen(cx1, cy1)
                     cx2, cy2 = self.canvas_to_screen(cx2, cy2)
                     if len(self.selFigs) > 1:
@@ -1251,9 +1304,14 @@ class MyWindow(pyglet.window.Window):
                                 b['y'] = cy2 - 20
                                 break
 
+    def parting(self, xs, parts):
+        part_len = ceil(len(xs) / parts)
+        return [xs[part_len * k:part_len * (k + 2)] for k in range(parts)]
+
     def on_mouse_release(self, x, y, button, modifiers):
         self.dragPanel = False
         self.drawRight = True
+        self.lenesPen = []
         if self.selectRamka:
             self.selectRamka = False
             xx, yy = self.screen_to_canvas(x, y)
@@ -1273,25 +1331,83 @@ class MyWindow(pyglet.window.Window):
                     # self.clear()
 
                     if self.tool == 1 or self.tool == 9:
-                        k = {}
-                        self.id += 1
-                        k['id'] = self.id
-                        k['name'] = 'polyline'
-                        k['p'] = self.poly.copy()
-                        x0, y0 = self.x0, self.y0
-                        x0, y0, xx, yy = border_polyline(k['p'])
-                        xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
-                        if self.tool == 1:
-                            pW = self.penWidth
-                            color = self.penColor
+                        # if self.isPartingPolylinu:
+                        #     parts = len(self.poly)  // 10
+                        #     if parts == 0: parts = 1
+                        # else:
+                        #     parts = 1
+                        # poly_s = self.parting(self.poly, parts)
+                        #
+                        # for poly in poly_s:
+                        #     k = {}
+                        #     self.id += 1
+                        #     k['id'] = self.id
+                        #     k['name'] = 'polyline'
+                        #     k['p'] = poly
+                        #     x0, y0, xx, yy = border_polyline(k['p'])
+                        #     k['extrem'] = x0, y0, xx, yy
+                        #     xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                        #     if self.tool == 1:
+                        #         pW = self.penWidth
+                        #         color = self.penColor
+                        #     else:
+                        #         pW = self.errSize
+                        #         color = self.fonColor
+                        #     k['center'] = {'x': xcenter, 'y': ycenter}
+                        #     k['color'] = color
+                        #     k['thickness'] = pW
+                        #     k['fordel'] = False
+                        #
+                        #     self.figures.append(k)
+
+                        if self.isPartingPolylinu:
+                            x_0, y_0 = self.poly[0]['x'],self.poly[0]['y']
+                            for line in self.poly:
+                                k = {}
+                                self.id += 1
+                                k['id'] = self.id
+                                k['name'] = 'polyline'
+                                k['p'] = [{'x': x_0, 'y': y_0}, {'x': line['x'], 'y': line['y']}, ]
+                                x_0, y_0 = line['x'], line['y']
+                                # k['p'] = self.poly.copy()
+                                x0, y0, xx, yy = min(x_0, line['x']), min(y_0, line['y']), max(x_0, line['x']), max(y_0, line['y'])
+                                k['extrem'] = x0, y0, xx, yy
+                                xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                                if self.tool == 1:
+                                    pW = self.penWidth
+                                    color = self.penColor
+                                else:
+                                    pW = self.errSize
+                                    color = self.fonColor
+                                k['center'] = {'x': xcenter, 'y': ycenter}
+                                k['color'] = color
+                                k['thickness'] = pW
+                                k['fordel'] = False
+
+                                self.figures.append(k)
+
                         else:
-                            pW = self.errSize
-                            color = self.fonColor
-                        k['center'] = {'x': xcenter, 'y': ycenter}
-                        k['color'] = color
-                        k['thickness'] = pW
-                        k['fordel'] = False
-                        self.figures.append(k)
+                            k = {}
+                            self.id += 1
+                            k['id'] = self.id
+                            k['name'] = 'polyline'
+                            k['p'] = self.poly.copy()
+                            # k['p'] = self.poly.copy()
+                            x0, y0, xx, yy = border_polyline(k['p'])
+                            k['extrem'] = x0, y0, xx, yy
+                            xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
+                            if self.tool == 1:
+                                pW = self.penWidth
+                                color = self.penColor
+                            else:
+                                pW = self.errSize
+                                color = self.fonColor
+                            k['center'] = {'x': xcenter, 'y': ycenter}
+                            k['color'] = color
+                            k['thickness'] = pW
+                            k['fordel'] = False
+
+                            self.figures.append(k)
                     # if self.tool == 9:
                     #     k = {}
                     #     self.id += 1
@@ -1321,6 +1437,7 @@ class MyWindow(pyglet.window.Window):
                         k['arrow'] = self.arr
                         k['dash'] = self.dash
                         k['fordel'] = False
+                        k['extrem'] = min(x0,xx),min(y0,yy), max(x0,xx),max(y0,yy)
                         self.figures.append(k)
                     elif self.tool == 4:
                         k = {}
@@ -1345,6 +1462,7 @@ class MyWindow(pyglet.window.Window):
                         k['dash'] = self.dash
                         k['fill'] = self.isFill
                         k['fordel'] = False
+                        k['extrem'] = min(x0, xx), min(y0, yy), max(x0, xx), max(y0, yy)
                         self.figures.append(k)
                     elif self.tool == 6:
                         k = {}
@@ -1361,6 +1479,7 @@ class MyWindow(pyglet.window.Window):
                             k['name'] = 'polygone'
                         k['p'] = points
                         x0, y0, xx, yy = border_polyline(k['p'])
+                        k['extrem'] = x0, y0, xx, yy
                         xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
                         k['center'] = {'x': xcenter, 'y': ycenter}
                         # k['numVertex'] = self.numVertex
@@ -1382,7 +1501,7 @@ class MyWindow(pyglet.window.Window):
                                             y0 = f['p'][0]['y']
                                             width = int(f['p'][1]['x'] - x0)
                                             height = int(f['p'][1]['y'] - y0)
-                                            ori_image_name = f['image'][:-11]
+                                            ori_image_name = f['image_name'][:-11]
                                             f['p'][1]['x'] = f['p'][0]['x'] + width
                                             f['p'][1]['y'] = f['p'][0]['y'] + height
                                             f['fordel'] = True
@@ -1392,8 +1511,11 @@ class MyWindow(pyglet.window.Window):
                         pSel = []
                         for selFig in self.selFigs:
                             fig = selFig['figobj']
+                            cx1, cy1, cx2, cy2 = border_polyline(fig['p'])
+                            fig['extrem'] = cx1, cy1, cx2, cy2
                             pSel += fig['p']
                         cx1, cy1, cx2, cy2 = border_polyline(pSel)
+
                         cx1, cy1 = self.canvas_to_screen(cx1, cy1)
                         cx2, cy2 = self.canvas_to_screen(cx2, cy2)
                         if len(self.selFigs) > 1:
@@ -1419,207 +1541,181 @@ class MyWindow(pyglet.window.Window):
         # Перевіряємо наявність зовнішніх даних та підвантажуємо їх за потребою
 
         self.drawRight = True
-        if self.drawRight:
-            w = self.width
-            h = self.height
-            count = 0
-            if self.isGrid:
-                for y in range(0, h, self.step):
-                    draw_line_1(0, y, w, y, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=0)
-                for x in range(0, w, self.step):
-                    draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=0)
+        # if self.drawRight:
 
-            # print("len figures ", len(self.figures))
-            for f in self.figures:
-                x_min, y_min, x_max, y_max = border_polyline(f['p'])
-                x_min, y_min = self.canvas_to_screen(x_min, y_min)
-                x_max, y_max = self.canvas_to_screen(x_max, y_max)
-                if x_min < w and x_max > 0 and y_min < h and y_max > 0:
-                    count += 1
-                    if f['name'] == 'polyline':
-                        x0 = f['p'][0]['x']
-                        y0 = f['p'][0]['y']
-                        for p in f['p']:
-                            x = p['x']
-                            y = p['y']
-                            xx0, yy0 = self.canvas_to_screen(x0, y0)
-                            xx, yy = self.canvas_to_screen(x, y)
-                            # xx0, yy0, xx, yy = longer_for_polyline(xx0, yy0, xx, yy, f['thickness'], 0.2)
-                            draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'],
-                                        smooth=self.isSmooth)
-                            x0, y0 = x, y
-                    elif f['name'] == 'line':
-                        x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
-                        x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
-                        draw_line_mod(x0, y0, x_, y_, color=f['color'], fon_color=self.fonColor,
-                                      thickness=f['thickness'], arrow=f['arrow'], dash=f['dash'])
-                    elif f['name'] == 'quadrangle_fill' or f['name'] == 'quadrangle':
-                        x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
-                        x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
-                        x3, y3 = self.canvas_to_screen(f['p'][2]['x'], f['p'][2]['y'])
-                        x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
-                        if f['fill']:
-                            fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, f['color'])
-                        else:
-                            points = [{'x': x1, 'y': y1}, {'x': x2, 'y': y2}, {'x': x3, 'y': y3}, {'x': x4, 'y': y4}]
-                            draw_polygon(points, color=f['color'], thickness=f['thickness'], dash=f['dash'])
-                    elif f['name'] == 'polygone' or f['name'] == 'polygone_fill':
-                        np = []
-                        for p in f['p']:
-                            x, y = self.canvas_to_screen(p['x'], p['y'])
-                            np.append({'x': x, 'y': y})
-                        if f['fill']:
-                            draw_fill_polygon(np, color=f['color'], thickness=f['thickness'])
-                        else:
-                            draw_polygon(np, color=f['color'], thickness=f['thickness'], dash=f['dash'])
-                    elif f['name'] == 'image':
-                        x0 = f['p'][0]['x']
-                        y0 = f['p'][0]['y']
-                        x = f['p'][1]['x']
-                        y = f['p'][1]['y']
-                        image = self.images[f['image']]
-                        # texture = image.get_transform(flip_x=False, flip_y=False, rotate=0)
-                        # print(texture)
-                        # Це щоб не було засвітки
-                        draw_line(-10000, -10000, -10001, -10001, (1, 1, 1, 1), thickness=1)
 
-                        image.blit(x0 + self.cx, y0 + self.cy)
-                        # ----------------------
-                        # texture = image.get_texture()
-                        # print(texture)
+        w = self.screen_width
+        h = self.screen_height
+        count = 0
+        if self.isGrid:
+            for y in range(0, h, self.step):
+                draw_line_1(0, y, w, y, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=0)
+            for x in range(0, w, self.step):
+                draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=0)
 
-                        # ----------------------
+        # print("len figures ", len(self.figures))
 
-                        # image.blit(x + self.cx, y + self.cy )
-            # Draw grid
-            # Це щоб не було засвітки на кнопках
-            draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
-            # Draw buttons
-            for btn in self.buttons:
-                if btn['align'] == 'right':
-                    x, y = self.width - btn['x'] - 35, btn['y']
-                else:
-                    x, y = btn['x'], btn['y']
-                if btn['image'] != None:
-                    btn['image'].blit(x, y)
-                if btn['sel']:
-                    draw_line(x + 2, y - 2, x + 28, y - 2, color=self.fonColor, thickness=2)
-                if btn['id'] == 3:
-                    draw_line(x + 2, y + 2, x + 28, y + 28, color=self.penColor, thickness=4)
+        for f in self.figures:
+            r = f['thickness'] // 2
+            self.x_min, self.y_min, self.x_max, self.y_max = f['extrem']
+            x_min, y_min, x_max, y_max = f['extrem']
+            # x_min, y_min, x_max, y_max = border_polyline(f['p'])
+            x_min, y_min = self.canvas_to_screen(x_min, y_min)
+            x_max, y_max = self.canvas_to_screen(x_max, y_max)
+            # if x_min < w and x_max > 0 and y_min < h and y_max > 0:
+            if x_min < self.width and x_max > 0 and y_min < self.height and y_max > 0:
+                count += 1
+                if f['name'] == 'polyline':
+                    x0 = f['p'][0]['x']
+                    y0 = f['p'][0]['y']
+                    for p in f['p']:
+                        x = p['x']
+                        y = p['y']
+                        xx0, yy0 = self.canvas_to_screen(x0, y0)
+                        xx, yy = self.canvas_to_screen(x, y)
 
-                if btn['id'] == 6:
-                    draw_poly(x + 2, y, x + 28, y + 28, id=self.numVertex, numPoints=self.numVertex,
-                              color=self.penColor, fon_color=self.fonColor, fill=self.isFill)
-                    draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+                        # draw_fill_circle(x0,y0,r,color=f['color'],thickness=1)
+                        # draw_fill_circle(xx,yy,r,color=f['color'],thickness=1)
+                        draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'],
+                                    smooth=self.isSmooth)
+                        # draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'],
+                        #             smooth=self.isSmooth)
+                        x0, y0 = x, y
+                elif f['name'] == 'line':
+                    x0, y0 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
+                    x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
+                    draw_line_mod(x0, y0, x_, y_, color=f['color'], fon_color=self.fonColor,
+                                  thickness=f['thickness'], arrow=f['arrow'], dash=f['dash'])
+                elif f['name'] == 'quadrangle_fill' or f['name'] == 'quadrangle':
+                    x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
+                    x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
+                    x3, y3 = self.canvas_to_screen(f['p'][2]['x'], f['p'][2]['y'])
+                    x4, y4 = self.canvas_to_screen(f['p'][3]['x'], f['p'][3]['y'])
+                    if f['fill']:
+                        fill_4poly(x1, y1, x2, y2, x3, y3, x4, y4, f['color'])
+                    else:
+                        points = [{'x': x1, 'y': y1}, {'x': x2, 'y': y2}, {'x': x3, 'y': y3}, {'x': x4, 'y': y4}]
+                        draw_polygon(points, color=f['color'], thickness=f['thickness'], dash=f['dash'])
+                elif f['name'] == 'polygone' or f['name'] == 'polygone_fill':
+                    np = []
+                    for p in f['p']:
+                        x, y = self.canvas_to_screen(p['x'], p['y'])
+                        np.append({'x': x, 'y': y})
+                    if f['fill']:
+                        draw_fill_polygon(np, color=f['color'], thickness=f['thickness'])
+                    else:
+                        draw_polygon(np, color=f['color'], thickness=f['thickness'], dash=f['dash'])
+                elif f['name'] == 'image':
+                    x0 = f['p'][0]['x']
+                    y0 = f['p'][0]['y']
+                    xcenter, ycenter = f['center']['x'], f['center']['y']
 
-                if btn['id'] == 112:
-                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=4,
-                                          color=(0, 0.5, 0.5, 0.5))
-                if btn['id'] == 108:
-                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=180, numPoints=3,
-                                          color=(0, 0.5, 0.5, 0.5))
-                if btn['id'] == 109:
-                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=3, color=(0, 0.5, 0.5, 0.5))
-                if btn['id'] == 110:
-                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=270, numPoints=3,
-                                          color=(0, 0.5, 0.5, 0.5))
-                if btn['id'] == 111:
-                    draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=90, numPoints=3,
-                                          color=(0, 0.5, 0.5, 0.5))
+                    # Це щоб не було засвітки
+                    draw_line(-10000, -10000, -10001, -10001, (1, 1, 1, 1), thickness=1)
 
-                if self.tool == btn['tool']:
-                    draw_fill_circle(x + 5, y + 34, 3, color=self.penColor)
-                    draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
-            draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
-            if self.figuresPanelVisible:
-                self.draw_figures_panel()
-            if self.colorPanelVisible:
-                self.draw_color_panel()
-            if self.widthPanelVisible:
-                self.draw_width_panel()
-            if self.arrowPanelVisible:
-                self.draw_arrow_panel()
-            if self.dashPanelVisible:
-                self.dash_arrow_panel()
-            # рамка виділення
-            if len(self.selFigs) > 0:
-                # for selFig in self.selFigs:
-                #     fig = selFig['figobj']
-                #     x1, y1, x2, y2 = border_polyline(fig['p'])
-                #     x1, y1 = self.canvas_to_screen(x1, y1)
-                #     x2, y2 = self.canvas_to_screen(x2, y2)
-                #     ff = fig['name'] != 'image'
-                #     draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
-                #                    center=(self.canvas_to_screen(fig['center']['x'], fig['center']['y'])),
-                #                    color=self.ramkaColor, thickness=self.ramkaThickness, rotate=ff)
-                #
-                #     draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
-                #     close_cross(selFig['selDel']['x1'] + 0, selFig['selDel']['y1'] + 0,
-                #                 selFig['selDel']['x2'] + 0, selFig['selDel']['y2'] + 0,
-                #                 color=self.ramkaColor, thickness=self.ramkaThickness
-                #                 )
-                #
-                #     resize_arr(selFig['selRes']['x1'] + 0, selFig['selRes']['y2'] + 0,
-                #                selFig['selRes']['x2'] + 0, selFig['selRes']['y1'] + 0,
-                #                color=self.ramkaColor, thickness=self.ramkaThickness)
-                pSel = []
-                r, g, b, a = self.ramkaColor
-                ramkaColorChild = ((1 + r) / 2, (1 + g) / 2, (1 + b) / 2, a)
-                for selFig in self.selFigs:
-                    fig = selFig['figobj']
-                    pSel += fig['p']
-                    cx1, cy1, cx2, cy2 = border_polyline(fig['p'])
-                    cx1, cy1 = self.canvas_to_screen(cx1, cy1)
-                    cx2, cy2 = self.canvas_to_screen(cx2, cy2)
-                    x_center, y_center, = (cx1 + cx2) / 2, (cy1 + cy2) / 2
-                    draw_ramka_top(cx1 - 2, cy1 - 2, cx2 + 2, cy2 + 2,
-                                   center=(self.canvas_to_screen(x_center, y_center)),
-                                   color=ramkaColorChild, thickness=self.ramkaThickness, rotate=False, resize=False,
-                                   close=True)
-                x1, y1, x2, y2 = border_polyline(pSel)
-                x_center, y_center, = (x1 + x2) / 2, (y1 + y2) / 2
-                x1, y1 = self.canvas_to_screen(x1, y1)
-                x2, y2 = self.canvas_to_screen(x2, y2)
-                # ff = fig['name'] != 'image'
-                draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
+                    # Центр обертання.
+                    image = self.images[f['image_name']]['image']
+                    w = image.width // 2
+                    h = image.height // 2
+
+                    # Кут повороту
+                    self.images[f['image_name']]['sprite'].rotation = f['angle']
+
+                    # координати лівого нижнього кута з ккординат центра
+                    self.images[f['image_name']]['sprite'].position = (x0 + w + self.cx, y0 + h + self.cy)
+
+                    self.images[f['image_name']]['sprite'].draw()
+
+
+
+        # Draw grid
+        # Це щоб не було засвітки на кнопках
+        draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+        # Draw buttons
+        for btn in self.buttons:
+            if btn['align'] == 'right':
+                x, y = self.width - btn['x'] - 35, btn['y']
+            else:
+                x, y = btn['x'], btn['y']
+            if btn['image'] != None:
+                btn['image'].blit(x, y)
+            if btn['sel']:
+                draw_line(x + 2, y - 2, x + 28, y - 2, color=self.fonColor, thickness=2)
+            if btn['id'] == 3:
+                draw_line(x + 2, y + 2, x + 28, y + 28, color=self.penColor, thickness=4)
+
+            if btn['id'] == 6:
+                draw_poly(x + 2, y, x + 28, y + 28, id=self.numVertex, numPoints=self.numVertex,
+                          color=self.penColor, fon_color=self.fonColor, fill=self.isFill)
+                draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+
+            if btn['id'] == 112:
+                draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=4,
+                                      color=(0, 0.5, 0.5, 0.5))
+            if btn['id'] == 108:
+                draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=180, numPoints=3,
+                                      color=(0, 0.5, 0.5, 0.5))
+            if btn['id'] == 109:
+                draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=3, color=(0, 0.5, 0.5, 0.5))
+            if btn['id'] == 110:
+                draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=270, numPoints=3,
+                                      color=(0, 0.5, 0.5, 0.5))
+            if btn['id'] == 111:
+                draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=90, numPoints=3,
+                                      color=(0, 0.5, 0.5, 0.5))
+
+            if self.tool == btn['tool']:
+                draw_fill_circle(x + 5, y + 34, 3, color=self.penColor)
+                draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+
+        draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
+        if self.figuresPanelVisible:
+            self.draw_figures_panel()
+        if self.colorPanelVisible:
+            self.draw_color_panel()
+        if self.widthPanelVisible:
+            self.draw_width_panel()
+        if self.arrowPanelVisible:
+            self.draw_arrow_panel()
+        if self.dashPanelVisible:
+            self.dash_arrow_panel()
+        # рамка виділення
+        if len(self.selFigs) > 0:
+            pSel = []
+            r, g, b, a = self.ramkaColor
+            ramkaColorChild = ((1 + r) / 2, (1 + g) / 2, (1 + b) / 2, a)
+            for selFig in self.selFigs:
+                fig = selFig['figobj']
+                pSel += fig['p']
+                cx1, cy1, cx2, cy2 = border_polyline(fig['p'])
+                cx1, cy1 = self.canvas_to_screen(cx1, cy1)
+                cx2, cy2 = self.canvas_to_screen(cx2, cy2)
+                x_center, y_center, = (cx1 + cx2) / 2, (cy1 + cy2) / 2
+                draw_ramka_top(cx1 - 2, cy1 - 2, cx2 + 2, cy2 + 2,
                                center=(self.canvas_to_screen(x_center, y_center)),
-                               color=self.ramkaColor, thickness=self.ramkaThickness, rotate=True, resize=True,
-                               close=False)
+                               color=ramkaColorChild, thickness=self.ramkaThickness, rotate=False, resize=False,
+                               close=True)
+            x1, y1, x2, y2 = border_polyline(pSel)
+            x_center, y_center, = (x1 + x2) / 2, (y1 + y2) / 2
+            x1, y1 = self.canvas_to_screen(x1, y1)
+            x2, y2 = self.canvas_to_screen(x2, y2)
+            # ff = fig['name'] != 'image'
+            draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
+                           center=(self.canvas_to_screen(x_center, y_center)),
+                           color=self.ramkaColor, thickness=self.ramkaThickness, rotate=True, resize=True,
+                           close=False)
 
-                draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
-                # Якщо виділено більше одної фігури малюємо кнопку вилучення виділених фігур
+            draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
 
-                draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
-
-                # close_cross(selFig['selDel']['x1'] + 0, selFig['selDel']['y1'] + 0,
-                #             selFig['selDel']['x2'] + 0, selFig['selDel']['y2'] + 0,
-                #             color=self.ramkaColor, thickness=self.ramkaThickness
-                #             )
-                #
-                # resize_arr(selFig['selRes']['x1'] + 0, selFig['selRes']['y2'] + 0,
-                #            selFig['selRes']['x2'] + 0, selFig['selRes']['y1'] + 0,
-                #            color=self.ramkaColor, thickness=self.ramkaThickness)
-
-            labelPage = pyglet.text.Label(str(self.page),
-                                          font_name='Arial',
-                                          font_size=24,
-                                          x=self.width - 60, y=22,
-                                          anchor_x='center', anchor_y='center')
-            labelPage.set_style("color", (3, 105, 25, 255))
-            labelPage.draw()
-            if self.isExit:
-                self.label.draw()
-
-            # glPushMatrix()
-            # glRotatef(0, 0, 0, 1)
-            # label2 = pyglet.text.Label("12345",
-            #                               font_name='Arial',
-            #                               font_size=24,
-            #                               x=200, y=200,
-            #                               anchor_x='center', anchor_y='center')
-            # label2.set_style("color", (3, 105, 25, 255))
-            # glPopMatrix()
-            # label2.draw()
+        labelPage = pyglet.text.Label(str(self.page),
+                                      font_name='Arial',
+                                      font_size=24,
+                                      x=self.width - 60, y=22,
+                                      anchor_x='center', anchor_y='center')
+        labelPage.set_style("color", (3, 105, 25, 255))
+        labelPage.draw()
+        if self.isExit:
+            self.label.draw()
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self.clear()
@@ -1652,28 +1748,28 @@ class MyWindow(pyglet.window.Window):
         filelist = glob.glob(os.path.join('tmp', "*.*"))
         for f in filelist:
             os.remove(f)
+        file_name = "lazexe/tmp_f.bmp"
+        if os.path.exists(file_name):
+            os.remove(file_name)
+        file_name = "lazexe/tmp.bmp"
+        if os.path.exists(file_name):
+            os.remove(file_name)
 
         raise SystemExit
 
-    # def wxStart(self):
-    #     app = wx.App()
-    #     frame = MainFrame()
-    #     # frame.SetWindowStyle(style=wx.STAY_ON_TOP)  # | wx.TAB_TRAVERSAL)
-    #     frame.SetSize(size=(35, 55))
-    #     frame.SetPosition((120, 600))
-    #     # frame.SetPosition((1200, 600))
-    #     frame.Show()
-    #     y = threading.Thread(target=app.MainLoop)
-    #     y.setDaemon(True)
-    #     y.start()
 
     def on_show(self):
-        self.maximize()
+        # self.maximize()
+        pass
 
     def on_activate(self):
         file_name = "lazexe/tmp.bmp"
         if os.path.exists(file_name):
-            self.set_page_right()
+            self.pageMax += 1
+            self.page = self.pageMax
+            self.cx = self.page * 100000 - 100000
+            self.cy = 0
+            # self.set_page_right()
             width = 600
             # self.set_visible(True)
 
@@ -1685,6 +1781,20 @@ class MyWindow(pyglet.window.Window):
             shutil.copy(file_name, nnam)
             self.insert_image_from_file(nnam, x0, y0, width, height)
             os.remove(file_name)
+
+        file_name = "lazexe/tmp_f.bmp"
+        if os.path.exists(file_name):
+            self.pageMax += 1
+            self.page = self.pageMax
+            self.cx = self.page * 100000 - 100000
+            self.cy = 0
+            width = self.screen_width
+            height = self.screen_height
+            nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+            shutil.copy(file_name, nnam)
+            self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width - 20, height - 20)
+            os.remove(file_name)
+
         # else:
         #     file_name = "tmp.bmp"
         #     if os.path.exists(file_name):
@@ -1705,15 +1815,18 @@ class MyWindow(pyglet.window.Window):
         # self.clear()
         # if True:
         # print("draw")
-        self.maximize()
-
-
+        # self.maximize()
 
 
 def oglStart():
-    global window
-    window = MyWindow(1920, 1080, caption="WhiteBoard", resizable=True, visible=False)
-    context = window.context
+    display = pyglet.canvas.get_display()
+    w = display.get_screens()[0].width
+    h = display.get_screens()[0].height
+
+    window = MyWindow(w, h - 62, caption="WhiteBoard", resizable=True, visible=False)
+    window.screen_width = w
+    window.screen_height = h
+    # context = window.context
     # config = context.config
     # config.double_buffer
 
