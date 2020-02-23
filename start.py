@@ -209,10 +209,10 @@ class MyWindow(pyglet.window.Window):
 
         self.load_options()
 
-
         # ============ End options ================
 
         self.tik = 0
+        self.tik_anti_blind = 0
         self.numVertex = 4
         self.pageMax = 1
         self.incr = 0
@@ -294,7 +294,7 @@ class MyWindow(pyglet.window.Window):
 
             {'id': 108, 'x': self.dragPanelx + 70, 'y': self.dragPanely + 100, 'text': '<', 'image': None, 'tool': 0,
              'sel': False, 'align': 'right', 'command': 'move_108'},
-            {'id': 109, 'x': self.dragPanelx , 'y': self.dragPanely + 100, 'text': '>', 'image': None, 'tool': 0,
+            {'id': 109, 'x': self.dragPanelx, 'y': self.dragPanely + 100, 'text': '>', 'image': None, 'tool': 0,
              'sel': False, 'align': 'right', 'command': 'move_109'},
             {'id': 112, 'x': self.dragPanelx + 35, 'y': self.dragPanely + 100, 'text': '...', 'image': None, 'tool': 0,
              'sel': False, 'align': 'right', 'command': 'drag_panel'},
@@ -311,7 +311,6 @@ class MyWindow(pyglet.window.Window):
         for b in self.buttons:
             if 108 <= b['id'] <= 112:
                 self.btnPnl.append(b)
-
 
         x = 5
         for b in self.buttons:
@@ -632,7 +631,6 @@ class MyWindow(pyglet.window.Window):
             del self.history[-1]
             self.clear()
 
-
     def set_shot(self):
         self.set_visible(False)
         time.sleep(2)
@@ -727,6 +725,7 @@ class MyWindow(pyglet.window.Window):
         return x_min < self.width and x_max > 0 and y_min < self.height and y_max > 0
 
     def update_figures_wo_del(self):
+        self.tik_anti_blind = 0
         for f in self.figures:
             f['visible'] = self.figure_on_screen(f['extrem'])
 
@@ -740,7 +739,6 @@ class MyWindow(pyglet.window.Window):
 
     def drag_panel(self):
         self.dragPanel = True
-
 
     # def alignToBottomRight(self, win):
     #     dw, dh = wx.DisplaySize()
@@ -864,8 +862,6 @@ class MyWindow(pyglet.window.Window):
         self.figures.append(k)
         self.clear()
 
-
-
     def on_key_press(self, symbol, modifiers):
         if symbol == key.ESCAPE:  # ESC
             self.closeApp()
@@ -877,15 +873,15 @@ class MyWindow(pyglet.window.Window):
         # elif symbol == 117:  # U    Open whiteboard
         #     self.load()
         #     self.clear()
-        elif symbol == key.DELETE:  # Delete
-            if self.selFigs != []:
-                for selFig in self.selFigs:
-                    for fig in self.figures:
-                        if fig['id'] == selFig['fig']:
-                            selFig = {}
-                            fig['fordel'] = True
-
-            self.update_figures()
+        # elif symbol == key.DELETE:  # Delete
+        #     if self.selFigs != []:
+        #         for selFig in self.selFigs:
+        #             for fig in self.figures:
+        #                 if fig['id'] == selFig['fig']:
+        #                     selFig = {}
+        #                     fig['fordel'] = True
+        #
+        #     self.update_figures()
 
         # elif symbol == 105:  # Insert image
         #     names = self.insert_screenshot().split('|')
@@ -913,14 +909,14 @@ class MyWindow(pyglet.window.Window):
         #     self.fullscr = True
         #     self.set_fullscreen(self.fullscr)
 
-
         else:
-            # print('A key was pressed')
-            # print(symbol)
+            print('A key was pressed')
+            print(symbol)
             pass
         self.clear()
 
     def on_mouse_press(self, x, y, button, modifier):
+        self.tik_anti_blind += 1
 
         # Перевіряємо чи треба виходити
         if self.isExit:
@@ -1126,6 +1122,7 @@ class MyWindow(pyglet.window.Window):
             self.history.append(self.figures.copy())
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        if self.tik_anti_blind < 5: self.clear()
         self.incr += 1
         # if self.drawRight: self.clear()
         if self.dragPanel:
@@ -1641,7 +1638,6 @@ class MyWindow(pyglet.window.Window):
 
             draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
 
-
     def on_draw(self):
         self.drawRight = True
 
@@ -1649,7 +1645,6 @@ class MyWindow(pyglet.window.Window):
         self.draw_figures()
         self.draw_buttons_and_panels()
         self.draw_sel_ramka()
-
 
         labelPage = pyglet.text.Label(str(self.page),
                                       font_name='Arial',
@@ -1669,8 +1664,6 @@ class MyWindow(pyglet.window.Window):
 
         if self.isExit:
             self.label.draw()
-
-
 
     def on_close(self):
         self.label = pyglet.text.Label('x',
