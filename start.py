@@ -239,7 +239,7 @@ class MyWindow(pyglet.window.Window):
         self.dragPanel = False
         self.selFigs = []
 
-        self.autosave = True
+
         self.isBtnClick = False
         self.colorPanelVisible = False
         self.widthPanelVisible = False
@@ -550,6 +550,8 @@ class MyWindow(pyglet.window.Window):
         data['ramkaThickness'] = self.ramkaThickness
         data['fonColor'] = self.fonColor
         data['gridColor'] = self.gridColor
+        data['autosave'] = self.autosave
+
 
         config = configparser.ConfigParser()
         config['MAIN'] = data
@@ -587,6 +589,7 @@ class MyWindow(pyglet.window.Window):
             self.penWidth = int(data['penwidth'])
             self.errSize = int(data['errSize'])
             self.fullscr = data['fullscr'] == 'True'
+            self.autosave = data['autosave'] == 'True'
             self.ramkaThickness = int(data['ramkathickness'])
 
         else:
@@ -594,6 +597,7 @@ class MyWindow(pyglet.window.Window):
             # self.numVertex = 4
             self.isGrid = True
             self.isSmooth = False
+            self.autosave = False
             self.penWidth = 7
             self.errSize = 20
             self.fullscr = False
@@ -1795,42 +1799,42 @@ class MyWindow(pyglet.window.Window):
             self.load(file_name)
 
 
-    def on_show(self):
-        # self.maximize()
-        pass
+    # def on_show(self):
+    #     # self.maximize()
+    #     pass
 
-    def on_activate(self):
-        file_name = "lazexe/tmp.bmp"
-        if os.path.exists(file_name):
-            self.pageMax += 1
-            self.page = self.pageMax
-            self.cx = self.page * 100000 - 100000
-            self.cy = 0
-            # self.set_page_right()
-            width = 600
-            # self.set_visible(True)
-
-            w = self.width
-            h = self.height
-            height = 9 * width // 16
-            x0, y0 = w - width - self.cx, h - height - self.cy
-            nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-            shutil.copy(file_name, nnam)
-            self.insert_image_from_file(nnam, x0, y0, width, height)
-            os.remove(file_name)
-
-        file_name = "lazexe/tmp_f.bmp"
-        if os.path.exists(file_name):
-            self.pageMax += 1
-            self.page = self.pageMax
-            self.cx = self.page * 100000 - 100000
-            self.cy = 0
-            width = self.screen_width
-            height = self.screen_height
-            nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-            shutil.copy(file_name, nnam)
-            self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width - 20, height - 20)
-            os.remove(file_name)
+    # def on_activate(self):
+        # file_name = "lazexe/tmp.bmp"
+        # if os.path.exists(file_name):
+        #     self.pageMax += 1
+        #     self.page = self.pageMax
+        #     self.cx = self.page * 100000 - 100000
+        #     self.cy = 0
+        #     # self.set_page_right()
+        #     width = 600
+        #     # self.set_visible(True)
+        #
+        #     w = self.width
+        #     h = self.height
+        #     height = 9 * width // 16
+        #     x0, y0 = w - width - self.cx, h - height - self.cy
+        #     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+        #     shutil.copy(file_name, nnam)
+        #     self.insert_image_from_file(nnam, x0, y0, width, height)
+        #     os.remove(file_name)
+        #
+        # file_name = "lazexe/tmp_f.bmp"
+        # if os.path.exists(file_name):
+        #     self.pageMax += 1
+        #     self.page = self.pageMax
+        #     self.cx = self.page * 100000 - 100000
+        #     self.cy = 0
+        #     width = self.screen_width
+        #     height = self.screen_height
+        #     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+        #     shutil.copy(file_name, nnam)
+        #     self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width - 20, height - 20)
+        #     os.remove(file_name)
 
         # else:
         #     file_name = "tmp.bmp"
@@ -1858,6 +1862,45 @@ class MyWindow(pyglet.window.Window):
             self.save()
             print("saved ", dt)
 
+        file_name = "lazexe/tmp.bmp"
+        if os.path.exists(file_name):
+            self.pageMax += 1
+            self.page = self.pageMax
+            self.cx = self.page * 100000 - 100000
+            self.cy = 0
+            # self.set_page_right()
+            width = 600
+            # self.set_visible(True)
+
+            w = self.width
+            h = self.height
+            height = 9 * width // 16
+            x0, y0 = w - width - self.cx, h - height - self.cy
+            nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+            shutil.copy(file_name, nnam)
+            self.insert_image_from_file(nnam, x0, y0, width, height)
+            os.remove(file_name)
+            self.set_fullscreen(True)
+            self.set_fullscreen(False)
+            self.clear()
+        file_name = "lazexe/tmp_f.bmp"
+        if os.path.exists(file_name):
+            self.pageMax += 1
+            self.page = self.pageMax
+            self.cx = self.page * 100000 - 100000
+            self.cy = 0
+            width = self.screen_width
+            height = self.screen_height
+            nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+            shutil.copy(file_name, nnam)
+            self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width - 20, height - 20)
+            os.remove(file_name)
+            self.set_fullscreen(True)
+            self.set_fullscreen(False)
+            self.clear()
+
+
+
 
 def oglStart():
     display = pyglet.canvas.get_display()
@@ -1877,7 +1920,7 @@ def oglStart():
     window.clear()
     window.on_draw()
     window.set_visible()
-    pyglet.clock.schedule_interval(window.update, 20)
+    pyglet.clock.schedule_interval(window.update, 5)
     pyglet.app.run()
 
 
