@@ -206,7 +206,7 @@ class MyWindow(pyglet.window.Window):
 
         # ============ Options ================
         self.load_options()
-
+        self.tik = 0
         self.numVertex = 4
         self.pageMax = 1
         self.incr = 0
@@ -230,6 +230,7 @@ class MyWindow(pyglet.window.Window):
         glClearColor(*self.fonColor)
         self.figures = []
         self.selectRamka = False
+        self.isMinimized = False
         self.isPartingPolylinu = True
         self.isMove = False
         self.multiSelect = False
@@ -238,7 +239,6 @@ class MyWindow(pyglet.window.Window):
         self.isFill = False
         self.dragPanel = False
         self.selFigs = []
-
 
         self.isBtnClick = False
         self.colorPanelVisible = False
@@ -552,7 +552,6 @@ class MyWindow(pyglet.window.Window):
         data['gridColor'] = self.gridColor
         data['autosave'] = self.autosave
 
-
         config = configparser.ConfigParser()
         config['MAIN'] = data
         with open(file_name, 'w') as configfile:
@@ -612,7 +611,7 @@ class MyWindow(pyglet.window.Window):
 
         self.figures = []
         self.images = {}
-        if file=='': file = 'tmp/figures.wb'
+        if file == '': file = 'tmp/figures.wb'
 
         with open(file, "rb") as fp:  # Unpickling
             data = pickle.load(fp)
@@ -635,7 +634,6 @@ class MyWindow(pyglet.window.Window):
                 image.anchor_y = image.height // 2
 
                 self.images[nnam_] = {'sprite': pyglet.sprite.Sprite(image), 'image': image}
-
 
     def del_selected(self):
         for sel in self.selFigs:
@@ -816,8 +814,8 @@ class MyWindow(pyglet.window.Window):
         image.anchor_x = image.width // 2
         image.anchor_y = image.height // 2
         k['p'] = []
-        k['p'].append({'x': x0, 'y': y0 })
-        k['p'].append({'x': x0 + image.width, 'y': y0+image.height })
+        k['p'].append({'x': x0, 'y': y0})
+        k['p'].append({'x': x0 + image.width, 'y': y0 + image.height})
 
         xcenter, ycenter = (x0 + x0 + image.width) / 2, (y0 + y0 + image.height) / 2
         k['center'] = {'x': xcenter, 'y': ycenter}
@@ -835,7 +833,7 @@ class MyWindow(pyglet.window.Window):
         k['angle'] = 0
         k['thickness'] = self.penWidth
         k['fordel'] = False
-        k['extrem'] = x0, y0, x0 + image.width, y0+image.height
+        k['extrem'] = x0, y0, x0 + image.width, y0 + image.height
         self.figures.append(k)
         self.clear()
 
@@ -1170,7 +1168,7 @@ class MyWindow(pyglet.window.Window):
 
                     k['p'] = [{'x': x_0, 'y': y_0}, {'x': xx, 'y': yy}, ]
 
-                    x0, y0, xx, yy = min(x_0, xx), min(y_0, yy), max(x_0, xx), max(y_0,yy)
+                    x0, y0, xx, yy = min(x_0, xx), min(y_0, yy), max(x_0, xx), max(y_0, yy)
                     k['extrem'] = x0, y0, xx, yy
                     xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
                     if self.tool == 1:
@@ -1326,8 +1324,6 @@ class MyWindow(pyglet.window.Window):
                                     # p['x'] = (xx - x0) * math.cos(angle) - (yy - y0) * math.sin(angle) + x0
                                     # p['y'] = (xx - x0) * math.sin(angle) + (yy - y0) * math.cos(angle) + y0
 
-
-
                     cx1, cy1, cx2, cy2 = border_polyline_1(pSel)
                     cx1, cy1 = self.canvas_to_screen(cx1, cy1)
                     cx2, cy2 = self.canvas_to_screen(cx2, cy2)
@@ -1472,7 +1468,7 @@ class MyWindow(pyglet.window.Window):
                         k['arrow'] = self.arr
                         k['dash'] = self.dash
                         k['fordel'] = False
-                        k['extrem'] = min(x0,xx),min(y0,yy), max(x0,xx),max(y0,yy)
+                        k['extrem'] = min(x0, xx), min(y0, yy), max(x0, xx), max(y0, yy)
                         self.figures.append(k)
                     elif self.tool == 4:
                         k = {}
@@ -1578,7 +1574,6 @@ class MyWindow(pyglet.window.Window):
         self.drawRight = True
         # if self.drawRight:
 
-
         w = self.screen_width
         h = self.screen_height
         count = 0
@@ -1661,8 +1656,6 @@ class MyWindow(pyglet.window.Window):
 
                     self.images[f['image_name']]['sprite'].draw()
 
-
-
         # Draw grid
         # Це щоб не було засвітки на кнопках
         draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
@@ -1738,7 +1731,7 @@ class MyWindow(pyglet.window.Window):
             draw_ramka_top(x1 - 2, y1 - 2, x2 + 2, y2 + 2,
                            center=(self.canvas_to_screen(x_center, y_center)),
                            color=self.ramkaColor, thickness=self.ramkaThickness, rotate=True, resize=True,
-                           close=len(self.selFigs)==1)
+                           close=len(self.selFigs) == 1)
 
             draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
 
@@ -1767,6 +1760,14 @@ class MyWindow(pyglet.window.Window):
         self.isExit = True
         self.label.draw()
 
+    def on_hide(self):
+        # print ('HIDE')
+        self.isMinimized = True
+
+    def on_activate(self):
+        # print('SHOW')
+        self.isMinimized = False
+
     def zipLesson(self):
         nnam = datetime.datetime.strftime(datetime.datetime.now(), 'lessons/' + "%Y_%m_%d_%H_%M_%S") + '.zip'
         z = zipfile.ZipFile(nnam, 'w')  # Создание нового архива
@@ -1793,113 +1794,110 @@ class MyWindow(pyglet.window.Window):
         raise SystemExit
 
     def autoload(self):
-        #figures.wb
+        # figures.wb
         file_name = "tmp/figures.wb"
         if os.path.exists(file_name):
             self.load(file_name)
-
 
     # def on_show(self):
     #     # self.maximize()
     #     pass
 
     # def on_activate(self):
-        # file_name = "lazexe/tmp.bmp"
-        # if os.path.exists(file_name):
-        #     self.pageMax += 1
-        #     self.page = self.pageMax
-        #     self.cx = self.page * 100000 - 100000
-        #     self.cy = 0
-        #     # self.set_page_right()
-        #     width = 600
-        #     # self.set_visible(True)
-        #
-        #     w = self.width
-        #     h = self.height
-        #     height = 9 * width // 16
-        #     x0, y0 = w - width - self.cx, h - height - self.cy
-        #     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-        #     shutil.copy(file_name, nnam)
-        #     self.insert_image_from_file(nnam, x0, y0, width, height)
-        #     os.remove(file_name)
-        #
-        # file_name = "lazexe/tmp_f.bmp"
-        # if os.path.exists(file_name):
-        #     self.pageMax += 1
-        #     self.page = self.pageMax
-        #     self.cx = self.page * 100000 - 100000
-        #     self.cy = 0
-        #     width = self.screen_width
-        #     height = self.screen_height
-        #     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-        #     shutil.copy(file_name, nnam)
-        #     self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width - 20, height - 20)
-        #     os.remove(file_name)
+    # file_name = "lazexe/tmp.bmp"
+    # if os.path.exists(file_name):
+    #     self.pageMax += 1
+    #     self.page = self.pageMax
+    #     self.cx = self.page * 100000 - 100000
+    #     self.cy = 0
+    #     # self.set_page_right()
+    #     width = 600
+    #     # self.set_visible(True)
+    #
+    #     w = self.width
+    #     h = self.height
+    #     height = 9 * width // 16
+    #     x0, y0 = w - width - self.cx, h - height - self.cy
+    #     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+    #     shutil.copy(file_name, nnam)
+    #     self.insert_image_from_file(nnam, x0, y0, width, height)
+    #     os.remove(file_name)
+    #
+    # file_name = "lazexe/tmp_f.bmp"
+    # if os.path.exists(file_name):
+    #     self.pageMax += 1
+    #     self.page = self.pageMax
+    #     self.cx = self.page * 100000 - 100000
+    #     self.cy = 0
+    #     width = self.screen_width
+    #     height = self.screen_height
+    #     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+    #     shutil.copy(file_name, nnam)
+    #     self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width - 20, height - 20)
+    #     os.remove(file_name)
 
-        # else:
-        #     file_name = "tmp.bmp"
-        #     if os.path.exists(file_name):
-        #         self.set_page_right()
-        #         width = 600
-        #         # self.set_visible(True)
-        #         self.maximize()
-        #         w = self.width
-        #         h = self.height
-        #         height = 9 * width // 16
-        #         x0, y0 = w - width - self.cx, h - height - self.cy
-        #         nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-        #         shutil.copy(file_name, nnam)
-        #         self.insert_image_from_file(nnam, x0, y0, width, height)
-        #         os.remove(file_name)
+    # else:
+    #     file_name = "tmp.bmp"
+    #     if os.path.exists(file_name):
+    #         self.set_page_right()
+    #         width = 600
+    #         # self.set_visible(True)
+    #         self.maximize()
+    #         w = self.width
+    #         h = self.height
+    #         height = 9 * width // 16
+    #         x0, y0 = w - width - self.cx, h - height - self.cy
+    #         nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+    #         shutil.copy(file_name, nnam)
+    #         self.insert_image_from_file(nnam, x0, y0, width, height)
+    #         os.remove(file_name)
 
-        # draw figures in visible part of window
-        # self.clear()
-        # if True:
-        # print("draw")
-        # self.maximize()
-    def update (self, dt):
-        if self.autosave:
+    # draw figures in visible part of window
+    # self.clear()
+    # if True:
+    # print("draw")
+    # self.maximize()
+    def update(self, dt):
+        self.tik += 1
+        if self.autosave and self.tik % 5 == 0:
             self.save()
-            print("saved ", dt)
+            # print("saved ", dt)
+            self.tik = 0
 
-        file_name = "lazexe/tmp.bmp"
-        if os.path.exists(file_name):
-            self.pageMax += 1
-            self.page = self.pageMax
-            self.cx = self.page * 100000 - 100000
-            self.cy = 0
-            # self.set_page_right()
-            width = 600
-            # self.set_visible(True)
-
-            w = self.width
-            h = self.height
-            height = 9 * width // 16
-            x0, y0 = w - width - self.cx, h - height - self.cy
-            nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-            shutil.copy(file_name, nnam)
-            self.insert_image_from_file(nnam, x0, y0, width, height)
-            os.remove(file_name)
-            self.set_fullscreen(True)
-            self.set_fullscreen(False)
-            self.clear()
-        file_name = "lazexe/tmp_f.bmp"
-        if os.path.exists(file_name):
-            self.pageMax += 1
-            self.page = self.pageMax
-            self.cx = self.page * 100000 - 100000
-            self.cy = 0
-            width = self.screen_width
-            height = self.screen_height
-            nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-            shutil.copy(file_name, nnam)
-            self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width - 20, height - 20)
-            os.remove(file_name)
-            self.set_fullscreen(True)
-            self.set_fullscreen(False)
-            self.clear()
-
-
+        if self.isMinimized:
+            file_name = "lazexe/tmp.bmp"
+            if os.path.exists(file_name):
+                self.pageMax += 1
+                self.page = self.pageMax
+                self.cx = self.page * 100000 - 100000
+                self.cy = 0
+                width = 600
+                w = self.width
+                h = self.height
+                height = 9 * width // 16
+                x0, y0 = w - width - self.cx, h - height - self.cy
+                nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+                shutil.copy(file_name, nnam)
+                self.insert_image_from_file(nnam, x0, y0, width, height)
+                os.remove(file_name)
+                self.set_fullscreen(True)
+                self.set_fullscreen(False)
+                self.clear()
+            file_name = "lazexe/tmp_f.bmp"
+            if os.path.exists(file_name):
+                self.pageMax += 1
+                self.page = self.pageMax
+                self.cx = self.page * 100000 - 100000
+                self.cy = 0
+                width = self.screen_width
+                height = self.screen_height
+                nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+                shutil.copy(file_name, nnam)
+                self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width - 20, height - 20)
+                os.remove(file_name)
+                self.set_fullscreen(True)
+                self.set_fullscreen(False)
+                self.clear()
 
 
 def oglStart():
