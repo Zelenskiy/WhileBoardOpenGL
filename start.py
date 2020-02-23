@@ -237,6 +237,7 @@ class MyWindow(pyglet.window.Window):
         self.widthPanelVisible = False
         self.figuresPanelVisible = False
         self.dashPanelVisible = False
+        self.history = []
         self.label = None
         self.pnlx = 75
         self.pnly = 75
@@ -259,8 +260,8 @@ class MyWindow(pyglet.window.Window):
              'align': 'left', 'command': 'set_fill'},
             {'id': 55, 'text': 'setMultiselect', 'image': self.imMultisel[0], 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'set_multisel'},
-            {'id': 26, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
-             'sel': False, 'align': 'left', 'command': 'set_shot'},
+            # {'id': 26, 'text': 'shot', 'image': pyglet.resource.image('img/shot.png'), 'tool': 26,
+            #  'sel': False, 'align': 'left', 'command': 'set_shot'},
             {'id': 101, 'text': 'color', 'image': pyglet.resource.image('img/palitra.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'set_colorpanel_visible'},
             {'id': 102, 'text': 'width', 'image': pyglet.resource.image('img/width.png'), 'tool': 0,
@@ -272,6 +273,19 @@ class MyWindow(pyglet.window.Window):
              'sel': False, 'align': 'left', 'command': 'set_arrowpanel_visible'},
             {'id': 107, 'text': 'dash', 'image': pyglet.resource.image('img/dot.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'set_dashpanel_visible'},
+            {'id': 117, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
+            {'id': 118, 'text': '', 'image': pyglet.resource.image('img/undo.png'), 'tool': 0,
+             'sel': False, 'align': 'left', 'command': 'undo'},
+
+
+            {'id': 114, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
+            {'id': 113, 'text': 'dash', 'image': pyglet.resource.image('img/minimize2.png'), 'tool': 0,
+             'sel': False, 'align': 'left', 'command': 'set_minimize'},
+            {'id': 116, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
+            {'id': 115, 'text': 'dash', 'image': pyglet.resource.image('img/closeApp.png'), 'tool': 0,
+             'sel': False, 'align': 'left', 'command': 'closeApp'},
+
+
             # {'id': 113, 'text': 'open', 'image': pyglet.resource.image('img/open.png'), 'tool': 0,
             #  'sel': False, 'align': 'left', 'command':''},
 
@@ -290,7 +304,7 @@ class MyWindow(pyglet.window.Window):
              'sel': False, 'align': 'right', 'command': 'move_110'},
             {'id': 111, 'x': self.dragPanelx + 35, 'y': self.dragPanely + 130, 'text': 'U', 'image': None, 'tool': 0,
              'sel': False, 'align': 'right', 'command': 'move_111'},
-#x, y = self.dragPanelx, self.dragPanely
+
             {'id': 56, 'x': -500, 'y': -500, 'text': 'del selected', 'image': pyglet.resource.image('img/close.png'),
              'tool': 0,
              'sel': False, 'align': '', 'command': 'del_selected'},
@@ -429,11 +443,17 @@ class MyWindow(pyglet.window.Window):
             # subprocess.Popen(homePath+"/lazexe/scrgrub")
             # subprocess.Popen("lazexe/scrgrub")
             pass
+        # Работаем
+        file_name = 'lazexe/is_work.txt'
+        f = open(file_name, 'tw', encoding='utf-8')
+        f.close()
+
         if len(argv) > 1:
             print(argv[1])
-            z = zipfile.ZipFile(argv[1], 'r')
-            z.extractall()
-            self.load()
+            if os.path.exists(argv[1]):
+                z = zipfile.ZipFile(argv[1], 'r')
+                z.extractall()
+                self.load()
         else:
             self.autoload()
 
@@ -607,6 +627,14 @@ class MyWindow(pyglet.window.Window):
                 b['y'] = -500
                 break
 
+    def undo(self):
+        self.figures = []
+        if self.history != []:
+            self.figures = self.history[-1].copy()
+            del self.history[-1]
+            self.clear()
+
+
     def set_shot(self):
         self.set_visible(False)
         time.sleep(2)
@@ -620,6 +648,9 @@ class MyWindow(pyglet.window.Window):
         if self.tool == 8 and self.selFigs != []:
             for selFig in self.selFigs:
                 selFig['figobj']['fill'] = self.isFill
+
+    def set_minimize(self):
+        self.minimize()
 
     def set_colorpanel_visible(self):
         self.colorPanelVisible = not self.colorPanelVisible
@@ -682,6 +713,7 @@ class MyWindow(pyglet.window.Window):
         self.update_figures_wo_del()
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+        # print(scroll_x, scroll_y)
         self.clear()
         self.cy -= scroll_y * 10
         self.lastCommand = 11
@@ -1092,7 +1124,8 @@ class MyWindow(pyglet.window.Window):
                     self.x0, self.y0 = self.screen_to_canvas(x, y)
                     self.poly.clear()
                     self.poly.append({'x': self.x0, 'y': self.y0})
-
+        if self.f:
+            self.history.append(self.figures.copy())
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         self.incr += 1
@@ -1300,6 +1333,7 @@ class MyWindow(pyglet.window.Window):
                                 break
 
     def on_mouse_release(self, x, y, button, modifiers):
+
         self.dragPanel = False
         self.drawRight = True
         self.lenesPen = []
@@ -1460,6 +1494,7 @@ class MyWindow(pyglet.window.Window):
 
     def draw_figures(self):
         for f in self.figures:
+            # print(f)
             if f['visible']:
                 if f['name'] == 'polyline':
                     x0 = f['p'][0]['x']
@@ -1626,7 +1661,7 @@ class MyWindow(pyglet.window.Window):
         labelPage.set_style("color", (3, 105, 25, 255))
         labelPage.draw()
 
-        # lab1 = pyglet.text.Label(str((ssq)),
+        # lab1 = pyglet.text.Label(str(len(self.history)),
         #                               font_name='Arial',
         #                               font_size=24,
         #                               x=500, y=500,
@@ -1650,12 +1685,16 @@ class MyWindow(pyglet.window.Window):
         self.label.draw()
 
     def on_hide(self):
-        # print ('HIDE')
         self.isMinimized = True
+        file_name = 'lazexe/flag.txt'
+        f = open(file_name, 'tw', encoding='utf-8')
+        f.close()
 
     def on_activate(self):
-        # print('SHOW')
         self.isMinimized = False
+        file_name = 'lazexe/flag.txt'
+        if os.path.exists(file_name):
+            os.remove(file_name)
 
     def zipLesson(self):
         nnam = datetime.datetime.strftime(datetime.datetime.now(), 'lessons/' + "%Y_%m_%d_%H_%M_%S") + '.zip'
@@ -1679,6 +1718,9 @@ class MyWindow(pyglet.window.Window):
         file_name = "lazexe/tmp.bmp"
         if os.path.exists(file_name):
             os.remove(file_name)
+        file_name = 'lazexe/is_work.txt'
+        if os.path.exists(file_name):
+            os.remove(file_name)
 
         raise SystemExit
 
@@ -1688,69 +1730,10 @@ class MyWindow(pyglet.window.Window):
         if os.path.exists(file_name):
             self.load(file_name)
 
-    # def on_show(self):
-    #     # self.maximize()
-    #     pass
-
-    # def on_activate(self):
-    # file_name = "lazexe/tmp.bmp"
-    # if os.path.exists(file_name):
-    #     self.pageMax += 1
-    #     self.page = self.pageMax
-    #     self.cx = self.page * 100000 - 100000
-    #     self.cy = 0
-    #     # self.set_page_right()
-    #     width = 600
-    #     # self.set_visible(True)
-    #
-    #     w = self.width
-    #     h = self.height
-    #     height = 9 * width // 16
-    #     x0, y0 = w - width - self.cx, h - height - self.cy
-    #     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-    #     shutil.copy(file_name, nnam)
-    #     self.insert_image_from_file(nnam, x0, y0, width, height)
-    #     os.remove(file_name)
-    #
-    # file_name = "lazexe/tmp_f.bmp"
-    # if os.path.exists(file_name):
-    #     self.pageMax += 1
-    #     self.page = self.pageMax
-    #     self.cx = self.page * 100000 - 100000
-    #     self.cy = 0
-    #     width = self.screen_width
-    #     height = self.screen_height
-    #     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-    #     shutil.copy(file_name, nnam)
-    #     self.insert_image_from_file(nnam, 2 - self.cx, 2 - self.cy, width - 20, height - 20)
-    #     os.remove(file_name)
-
-    # else:
-    #     file_name = "tmp.bmp"
-    #     if os.path.exists(file_name):
-    #         self.set_page_right()
-    #         width = 600
-    #         # self.set_visible(True)
-    #         self.maximize()
-    #         w = self.width
-    #         h = self.height
-    #         height = 9 * width // 16
-    #         x0, y0 = w - width - self.cx, h - height - self.cy
-    #         nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-    #         shutil.copy(file_name, nnam)
-    #         self.insert_image_from_file(nnam, x0, y0, width, height)
-    #         os.remove(file_name)
-
-    # draw figures in visible part of window
-    # self.clear()
-    # if True:
-    # print("draw")
-    # self.maximize()
     def update(self, dt):
         self.tik += 1
         if self.autosave and self.tik % 5 == 0:
             self.save()
-            # print("saved ", dt)
             self.tik = 0
 
         if self.isMinimized:
