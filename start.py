@@ -277,14 +277,12 @@ class MyWindow(pyglet.window.Window):
             {'id': 118, 'text': '', 'image': pyglet.resource.image('img/undo.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'undo'},
 
-
             {'id': 114, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
             {'id': 113, 'text': 'dash', 'image': pyglet.resource.image('img/minimize2.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'set_minimize'},
             {'id': 116, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
             {'id': 115, 'text': 'dash', 'image': pyglet.resource.image('img/closeApp.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'closeApp'},
-
 
             # {'id': 113, 'text': 'open', 'image': pyglet.resource.image('img/open.png'), 'tool': 0,
             #  'sel': False, 'align': 'left', 'command':''},
