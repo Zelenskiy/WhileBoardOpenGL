@@ -239,6 +239,7 @@ class MyWindow(pyglet.window.Window):
         self.dragPanel = False
         self.selFigs = []
 
+        self.autosave = True
         self.isBtnClick = False
         self.colorPanelVisible = False
         self.widthPanelVisible = False
@@ -449,6 +450,8 @@ class MyWindow(pyglet.window.Window):
             z = zipfile.ZipFile(argv[1], 'r')
             z.extractall()
             self.load()
+        else:
+            self.autoload()
 
             # self.appDialog = wx.App()
         # self.dialog = SubclassDialog()
@@ -601,12 +604,13 @@ class MyWindow(pyglet.window.Window):
             self.gridColor = (0.82, 0.82, 0.82, 0.2)
             self.save_options()
 
-    def load(self):
+    def load(self, file=''):
 
         self.figures = []
         self.images = {}
+        if file=='': file = 'tmp/figures.wb'
 
-        with open("tmp/figures.wb", "rb") as fp:  # Unpickling
+        with open(file, "rb") as fp:  # Unpickling
             data = pickle.load(fp)
         self.figures = data['figures']
         self.penColor = data['penColor']
@@ -1784,6 +1788,12 @@ class MyWindow(pyglet.window.Window):
 
         raise SystemExit
 
+    def autoload(self):
+        #figures.wb
+        file_name = "tmp/figures.wb"
+        if os.path.exists(file_name):
+            self.load(file_name)
+
 
     def on_show(self):
         # self.maximize()
@@ -1843,6 +1853,10 @@ class MyWindow(pyglet.window.Window):
         # if True:
         # print("draw")
         # self.maximize()
+    def update (self, dt):
+        if self.autosave:
+            self.save()
+            print("saved ", dt)
 
 
 def oglStart():
@@ -1863,6 +1877,7 @@ def oglStart():
     window.clear()
     window.on_draw()
     window.set_visible()
+    pyglet.clock.schedule_interval(window.update, 20)
     pyglet.app.run()
 
 
