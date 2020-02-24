@@ -7,7 +7,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Buttons,
-  ExtCtrls;
+  ExtCtrls, StdCtrls;
 
 type
 
@@ -87,7 +87,7 @@ end;
 
 procedure TForm1.fullButtonClick(Sender: TObject);
 begin
-  Form1.WindowState:=wsMinimized;
+  Form1.Visible:=False;
   Timer3.Enabled:=False;
   Form1.x := 'full';
 
@@ -102,10 +102,10 @@ var   file_name:string;
 begin
   file_name := Form1.path+'flag.txt';
   if FileExists(file_name) then begin
-     Form1.WindowState:=wsNormal;
+     Form1.Visible:=True;
   end
   else begin
-     Form1.WindowState:=wsMinimized
+     Form1.Visible:=False
   end;
 
 
@@ -122,7 +122,7 @@ end;
 
 procedure TForm1.windButtonClick(Sender: TObject);
 begin
-  Form1.WindowState:=wsMinimized;
+  Form1.Visible:=False;
   Timer3.Enabled:=False;
   Form1.x := 'win';
   Timer2.Enabled:=true;
@@ -136,15 +136,28 @@ begin
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
+var s, c:string;
+    i,j: integer;
 begin
   os:='windows';
   {$IFDEF linux}
   os:='linux';
   {$ENDIF}
-
-  Form1.path := ExtractFilePath(Application.ExeName);
+  s:= ExtractFilePath(Application.ExeName);
+  if os =  'windows' then c := '\' else c := '/';
+  j := length(s);
+  for i:=j-1 downto 1 do begin
+      if s[i] = c then begin
+         s := copy(s,1,i);
+         break;
+      end;
+  end;
+  //ShowMessage(s);
+  Form1.path := s;
   startDrag := False;
   form1.FormStyle:=fsSystemStayOnTop;
+  form1.WindowState:= wsNormal;
+  Form1.Visible:=True;
   width :=38;
   height := 120;
   form1.AlphaBlend:=true;

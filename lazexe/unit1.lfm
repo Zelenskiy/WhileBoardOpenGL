@@ -1,11 +1,11 @@
 object Form1: TForm1
   Left = 291
-  Height = 125
+  Height = 164
   Top = 127
   Width = 120
   BorderStyle = bsNone
   Caption = '__.__'
-  ClientHeight = 125
+  ClientHeight = 164
   ClientWidth = 120
   FormStyle = fsSystemStayOnTop
   OnCreate = FormCreate
@@ -13,7 +13,6 @@ object Form1: TForm1
   OnMouseMove = FormMouseMove
   OnMouseUp = FormMouseUp
   LCLVersion = '1.8.2.0'
-  WindowState = wsMinimized
   object fullButton: TSpeedButton
     Left = 0
     Height = 42
@@ -264,6 +263,7 @@ object Form1: TForm1
   end
   object Timer3: TTimer
     Enabled = False
+    Interval = 5000
     OnTimer = Timer3Timer
     left = 64
     top = 136
