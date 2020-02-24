@@ -65,6 +65,7 @@ begin
           clbBitmap .Assign(Clipboard) ;
           clbBitmap.SaveToFile(s+'image.bmp');
           clbBitmap.Free;
+          Clipboard.AsText:='Hello';
      end;
 
      file_name := 'is_work.txt';

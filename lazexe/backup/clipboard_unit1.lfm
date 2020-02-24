@@ -1,5 +1,5 @@
 object Clipboard_Form1: TClipboard_Form1
-  Left = 241
+  Left = 0
   Height = 42
   Top = 125
   Width = 649
@@ -8,6 +8,7 @@ object Clipboard_Form1: TClipboard_Form1
   LCLVersion = '1.8.2.0'
   WindowState = wsMinimized
   object Timer1: TTimer
+    Interval = 2000
     OnTimer = Timer1Timer
     left = 16
     top = 8
