@@ -63,8 +63,12 @@ begin
      clbBitmap:=TBitmap.Create;
      if Clipboard.HasFormat(CF_PICTURE) or Clipboard.HasFormat(CF_BITMAP)  then begin
           clbBitmap .Assign(Clipboard) ;
-          clbBitmap.SaveToFile(s+'image.bmp');
-          clbBitmap.Free;
+          if not FileExists(s+file_name) then begin
+              clbBitmap.SaveToFile(s+'image.bmp');
+              clbBitmap.Free;
+              Clipboard.AsText:='Hello';
+
+          end;
      end;
 
      file_name := 'is_work.txt';
