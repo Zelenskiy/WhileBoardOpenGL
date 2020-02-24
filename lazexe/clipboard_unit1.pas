@@ -44,6 +44,7 @@ var clbBitmap:TBitmap;
   i,j: integer;
   file_name:string;
 begin
+  visible := False;
      os:='windows';
   {$IFDEF linux}
   os:='linux';

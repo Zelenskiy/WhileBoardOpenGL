@@ -632,13 +632,20 @@ class MyWindow(pyglet.window.Window):
     def insert_image_from_clipboard(self):
 
         if platform == "linux":
-            self.insert_image_from_file('image.bmp',  300, 300, 600, 400)
-            self.tool = 8
+            file_name = 'image.bmp'
+            if os.path.exists(file_name):
+                nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+                image = pyglet.image.load(file_name)
+                image.save(nnam)
+                x,y = self.screen_to_canvas(300,300)
+                self.insert_image_from_file(nnam,  x, y, 600, 400)
+                self.tool = 8
         elif platform == "win32" or platform == "cygwin":
             from PIL import ImageGrab
             im = ImageGrab.grabclipboard()
             im.save('image.png', 'PNG')
-            self.insert_image_from_file('image.png',  300, 300, 600, 400)
+            x, y = self.cx + 300, self.cy + 300
+            self.insert_image_from_file('image.png',  x, y, 600, 400)
             self.tool = 8
 
     def undo(self):
@@ -811,18 +818,18 @@ class MyWindow(pyglet.window.Window):
         resized_image.save(output_image_path)
         # print("resize_image2 4")
 
-    # no order
-    def insert_from_clipboard(self):
-        nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-        grab.ins_from_clip(nnam)
-        print(nnam)
-
-        width = 600
-        w = self.width
-        h = self.height
-        height = 9 * width // 16
-        x0, y0 = w - width - self.cx, h - height - self.cy
-        self.insert_image_from_file(nnam, x0, y0, width, height)
+    # # no order
+    # def insert_from_clipboard(self):
+    #     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+    #     grab.ins_from_clip(nnam)
+    #     print(nnam)
+    #
+    #     width = 600
+    #     w = self.width
+    #     h = self.height
+    #     height = 9 * width // 16
+    #     x0, y0 = w - width - self.cx, h - height - self.cy
+    #     self.insert_image_from_file(nnam, x0, y0, width, height)
 
     def insert_screenshot(self):
         self.lastCommand = 11
@@ -1742,6 +1749,12 @@ class MyWindow(pyglet.window.Window):
         if os.path.exists(file_name):
             os.remove(file_name)
         file_name = 'is_work.txt'
+        if os.path.exists(file_name):
+            os.remove(file_name)
+        file_name = 'image.bmp'
+        if os.path.exists(file_name):
+            os.remove(file_name)
+        file_name = 'image.bmp.resize.png'
         if os.path.exists(file_name):
             os.remove(file_name)
 

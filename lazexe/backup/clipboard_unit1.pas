@@ -14,7 +14,6 @@ type
   { TClipboard_Form1 }
 
   TClipboard_Form1 = class(TForm)
-    Button1: TButton;
     Timer1: TTimer;
 
     procedure FormCreate(Sender: TObject);
@@ -43,6 +42,7 @@ procedure TClipboard_Form1.Timer1Timer(Sender: TObject);
 var clbBitmap:TBitmap;
   path,s,os,c:string;
   i,j: integer;
+  file_name:string;
 begin
      os:='windows';
   {$IFDEF linux}
@@ -65,7 +65,12 @@ begin
           clbBitmap.SaveToFile(s+'image.bmp');
           clbBitmap.Free;
      end;
-     Application.Terminate;
+
+     file_name := 'is_work.txt';
+     if not FileExists(s+file_name) then begin
+        Application.Terminate;
+     end;
+     //Application.Terminate;
 
 end;
 
