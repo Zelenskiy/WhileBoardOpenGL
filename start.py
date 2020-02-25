@@ -33,6 +33,7 @@ from sys import argv
 from math import ceil
 from pyglet.window import key
 
+
 if platform == "win32" or platform == "cygwin":
     pass
 elif platform == "linux":
@@ -211,6 +212,7 @@ class MyWindow(pyglet.window.Window):
 
         # ============ End options ================
 
+        self.isPaste = False
         self.tik = 0
         self.tik_anti_blind = 0
         self.numVertex = 4
@@ -242,6 +244,7 @@ class MyWindow(pyglet.window.Window):
         self.pnlx = 75
         self.pnly = 75
         self.imMultisel = [pyglet.resource.image('img/multisel_no.png'), pyglet.resource.image('img/multisel.png')]
+        self.imPaste = [pyglet.resource.image('img/paste_disable.png'), pyglet.resource.image('img/paste.png')]
         self.buttons = [
             {'id': 20, 'text': 'Hand', 'image': pyglet.resource.image('img/hand.png'), 'tool': 20,
              'sel': False, 'align': 'left', 'command': ''},
@@ -273,14 +276,17 @@ class MyWindow(pyglet.window.Window):
              'sel': False, 'align': 'left', 'command': 'set_arrowpanel_visible'},
             {'id': 107, 'text': 'dash', 'image': pyglet.resource.image('img/dot.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'set_dashpanel_visible'},
-            {'id': 117, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
+            {'id': 0, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
             {'id': 118, 'text': '', 'image': pyglet.resource.image('img/undo.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'undo'},
+            {'id': 0, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
+            {'id': 119, 'text': '', 'image': pyglet.resource.image('img/paste_disable.png'), 'tool': 0,
+             'sel': False, 'align': 'left', 'command': 'insert_image_from_clipboard'},
 
-            {'id': 114, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
+            {'id': 0, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
             {'id': 113, 'text': 'dash', 'image': pyglet.resource.image('img/minimize2.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'set_minimize'},
-            {'id': 116, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
+            {'id': 0, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
             {'id': 115, 'text': 'dash', 'image': pyglet.resource.image('img/closeApp.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'closeApp'},
 
@@ -317,7 +323,10 @@ class MyWindow(pyglet.window.Window):
             if b['align'] == 'left':
                 b['x'] = x
                 b['y'] = 5
-                x += 35
+                if b['id'] == 0:
+                    x += 14
+                else:
+                    x += 35
 
         self.colorPanelButtons = [
             {'id': 1, 'color': (1, 0, 0, 1)},
@@ -441,7 +450,7 @@ class MyWindow(pyglet.window.Window):
             # subprocess.Popen("lazexe/scrgrub")
             pass
         # Работаем
-        file_name = 'lazexe/is_work.txt'
+        file_name = 'is_work.txt'
         f = open(file_name, 'tw', encoding='utf-8')
         f.close()
 
@@ -454,8 +463,6 @@ class MyWindow(pyglet.window.Window):
         else:
             self.autoload()
 
-    def update(self):
-        self.clear()
 
     def draw_color_panel(self):
         for btn in self.colorPanelButtons:
@@ -623,6 +630,34 @@ class MyWindow(pyglet.window.Window):
                 b['x'] = -500
                 b['y'] = -500
                 break
+
+    def insert_image_from_clipboard(self):
+
+        if platform == "linux":
+            file_name = 'image.bmp'
+            if os.path.exists(file_name):
+                nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+                image = pyglet.image.load(file_name)
+                image.save(nnam)
+                if not self.multiSelect:
+                    os.remove(file_name)
+                x,y = self.screen_to_canvas(300,300)
+                w = 600
+                h = int(image.height/image.width*w)
+                self.insert_image_from_file(nnam,  x, y, w, h)
+                self.tool = 8
+        elif platform == "win32" or platform == "cygwin":
+            from PIL import ImageGrab
+            nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+            image = ImageGrab.grabclipboard()
+            image.save(nnam)
+            x, y = self.screen_to_canvas(300, 300)
+            w = 600
+            h = int(image.height / image.width * w)
+            self.insert_image_from_file(nnam, x, y, w, h)
+            self.tool = 8
+
+
 
     def undo(self):
         self.figures = []
@@ -794,18 +829,18 @@ class MyWindow(pyglet.window.Window):
         resized_image.save(output_image_path)
         # print("resize_image2 4")
 
-    # no order
-    def insert_from_clipboard(self):
-        nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
-        grab.ins_from_clip(nnam)
-        print(nnam)
-
-        width = 600
-        w = self.width
-        h = self.height
-        height = 9 * width // 16
-        x0, y0 = w - width - self.cx, h - height - self.cy
-        self.insert_image_from_file(nnam, x0, y0, width, height)
+    # # no order
+    # def insert_from_clipboard(self):
+    #     nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+    #     grab.ins_from_clip(nnam)
+    #     print(nnam)
+    #
+    #     width = 600
+    #     w = self.width
+    #     h = self.height
+    #     height = 9 * width // 16
+    #     x0, y0 = w - width - self.cx, h - height - self.cy
+    #     self.insert_image_from_file(nnam, x0, y0, width, height)
 
     def insert_screenshot(self):
         self.lastCommand = 11
@@ -985,12 +1020,16 @@ class MyWindow(pyglet.window.Window):
                         self.dash = btn['id']
                         self.dashPanelVisible = False
             for btn in self.buttons:
+                if btn['id'] == 0:
+                    ww = 16
+                else:
+                    ww = 32
                 btn['sel'] = False
                 if btn['align'] == 'right':
                     xx, yy = self.width - btn['x'] - 35, btn['y']
                 else:
                     xx, yy = btn['x'], btn['y']
-                if (xx < x < xx + 32) and (yy < y < yy + 32):
+                if (xx < x < xx + ww) and (yy < y < yy + 32):
                     btn['sel'] = True
                     # if btn['id'] == 4 or btn['id'] == 5:  # Fill figure
                     #     if self.tool == btn['tool']:
@@ -1557,31 +1596,34 @@ class MyWindow(pyglet.window.Window):
                 x, y = self.width - btn['x'] - 35, btn['y']
             else:
                 x, y = btn['x'], btn['y']
+            xx = x + 28
+            if btn['id'] == 0 : xx = x + 4
             if btn['image'] != None:
                 btn['image'].blit(x, y)
             if btn['sel']:
-                draw_line(x + 2, y - 2, x + 28, y - 2, color=self.fonColor, thickness=2)
+                draw_line(x + 2, y - 2, xx, y - 2, color=self.fonColor, thickness=2)
+
             if btn['id'] == 3:
-                draw_line(x + 2, y + 2, x + 28, y + 28, color=self.penColor, thickness=4)
+                draw_line(x + 2, y + 2, xx, y + 28, color=self.penColor, thickness=4)
 
             if btn['id'] == 6:
-                draw_poly(x + 2, y, x + 28, y + 28, id=self.numVertex, numPoints=self.numVertex,
+                draw_poly(x + 2, y, xx, y + 28, id=self.numVertex, numPoints=self.numVertex,
                           color=self.penColor, fon_color=self.fonColor, fill=self.isFill)
                 draw_line(-10000, -10000, -10001, -10001, self.fonColor, thickness=1)
 
             if btn['id'] == 112:
-                draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=4,
+                draw_fill_reg_polygon(x + 2, y + 28, xx, y, angleStart=0, numPoints=4,
                                       color=(0, 0.5, 0.5, 0.5))
             if btn['id'] == 108:
-                draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=180, numPoints=3,
+                draw_fill_reg_polygon(x + 2, y + 28, xx, y, angleStart=180, numPoints=3,
                                       color=(0, 0.5, 0.5, 0.5))
             if btn['id'] == 109:
-                draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=0, numPoints=3, color=(0, 0.5, 0.5, 0.5))
+                draw_fill_reg_polygon(x + 2, y + 28, xx, y, angleStart=0, numPoints=3, color=(0, 0.5, 0.5, 0.5))
             if btn['id'] == 110:
-                draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=270, numPoints=3,
+                draw_fill_reg_polygon(x + 2, y + 28, xx, y, angleStart=270, numPoints=3,
                                       color=(0, 0.5, 0.5, 0.5))
             if btn['id'] == 111:
-                draw_fill_reg_polygon(x + 2, y + 28, x + 28, y, angleStart=90, numPoints=3,
+                draw_fill_reg_polygon(x + 2, y + 28, xx, y, angleStart=90, numPoints=3,
                                       color=(0, 0.5, 0.5, 0.5))
 
             if self.tool == btn['tool']:
@@ -1665,6 +1707,8 @@ class MyWindow(pyglet.window.Window):
         if self.isExit:
             self.label.draw()
 
+
+
     def on_close(self):
         self.label = pyglet.text.Label('x',
                                        font_name='Wingdings',
@@ -1675,15 +1719,21 @@ class MyWindow(pyglet.window.Window):
         self.isExit = True
         self.label.draw()
 
+    def on_deactivate(self):
+        self.isMinimized = True
+        file_name = 'flag.txt'
+        f = open(file_name, 'tw', encoding='utf-8')
+        f.close()
+
     def on_hide(self):
         self.isMinimized = True
-        file_name = 'lazexe/flag.txt'
+        file_name = 'flag.txt'
         f = open(file_name, 'tw', encoding='utf-8')
         f.close()
 
     def on_activate(self):
         self.isMinimized = False
-        file_name = 'lazexe/flag.txt'
+        file_name = 'flag.txt'
         if os.path.exists(file_name):
             os.remove(file_name)
 
@@ -1703,13 +1753,19 @@ class MyWindow(pyglet.window.Window):
         filelist = glob.glob(os.path.join('tmp', "*.*"))
         for f in filelist:
             os.remove(f)
-        file_name = "lazexe/tmp_f.bmp"
+        file_name = "tmp_f.bmp"
         if os.path.exists(file_name):
             os.remove(file_name)
-        file_name = "lazexe/tmp.bmp"
+        file_name = "tmp.bmp"
         if os.path.exists(file_name):
             os.remove(file_name)
-        file_name = 'lazexe/is_work.txt'
+        file_name = 'is_work.txt'
+        if os.path.exists(file_name):
+            os.remove(file_name)
+        file_name = 'image.bmp'
+        if os.path.exists(file_name):
+            os.remove(file_name)
+        file_name = 'image.bmp.resize.png'
         if os.path.exists(file_name):
             os.remove(file_name)
 
@@ -1727,10 +1783,26 @@ class MyWindow(pyglet.window.Window):
             self.save()
             self.tik = 0
 
+        if platform == "win32" or platform == "cygwin":
+            for b in self.buttons:
+                if b['id']== 119:
+                    b['image'] = self.imPaste[1]
+                    break
+        elif platform == "linux":
+            file_name = "image.bmp"
+            for b in self.buttons:
+                if b['id']== 119:
+                    if os.path.exists(file_name):
+                        b['image'] = self.imPaste[1]
+                    else:
+                        b['image'] = self.imPaste[0]
+                    break
+
         if self.isMinimized:
             # Перевіряємо наявність зовнішніх даних та підвантажуємо їх за потребою
-            file_name = "lazexe/tmp.bmp"
+            file_name = "tmp.bmp"
             if os.path.exists(file_name):
+                image = pyglet.image.load(file_name)
                 self.pageMax += 1
                 self.page = self.pageMax
                 self.cx = self.page * 100000 - 100000
@@ -1738,7 +1810,7 @@ class MyWindow(pyglet.window.Window):
                 width = 600
                 w = self.width
                 h = self.height
-                height = 9 * width // 16
+                height = image.height * width // image.width
                 x0, y0 = w - width - self.cx, h - height - self.cy
                 nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
                 shutil.copy(file_name, nnam)
@@ -1748,7 +1820,7 @@ class MyWindow(pyglet.window.Window):
                 self.set_fullscreen(True)
                 self.set_fullscreen(False)
                 self.clear()
-            file_name = "lazexe/tmp_f.bmp"
+            file_name = "tmp_f.bmp"
             if os.path.exists(file_name):
                 self.pageMax += 1
                 self.page = self.pageMax
@@ -1764,7 +1836,6 @@ class MyWindow(pyglet.window.Window):
                 self.set_fullscreen(True)
                 self.set_fullscreen(False)
                 self.clear()
-
 
 def oglStart():
     display = pyglet.canvas.get_display()
@@ -1784,7 +1855,7 @@ def oglStart():
     window.clear()
     window.on_draw()
     window.set_visible()
-    pyglet.clock.schedule_interval(window.update, 5)
+    pyglet.clock.schedule_interval(window.update, 5.0/1.0)
     pyglet.app.run()
 
 
