@@ -212,6 +212,7 @@ class MyWindow(pyglet.window.Window):
 
         # ============ End options ================
 
+        self.isPaste = False
         self.tik = 0
         self.tik_anti_blind = 0
         self.numVertex = 4
@@ -243,6 +244,7 @@ class MyWindow(pyglet.window.Window):
         self.pnlx = 75
         self.pnly = 75
         self.imMultisel = [pyglet.resource.image('img/multisel_no.png'), pyglet.resource.image('img/multisel.png')]
+        self.imPaste = [pyglet.resource.image('img/paste_disable.png'), pyglet.resource.image('img/paste.png')]
         self.buttons = [
             {'id': 20, 'text': 'Hand', 'image': pyglet.resource.image('img/hand.png'), 'tool': 20,
              'sel': False, 'align': 'left', 'command': ''},
@@ -278,7 +280,7 @@ class MyWindow(pyglet.window.Window):
             {'id': 118, 'text': '', 'image': pyglet.resource.image('img/undo.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'undo'},
             {'id': 0, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
-            {'id': 119, 'text': '', 'image': pyglet.resource.image('img/paste.png'), 'tool': 0,
+            {'id': 119, 'text': '', 'image': pyglet.resource.image('img/paste_disable.png'), 'tool': 0,
              'sel': False, 'align': 'left', 'command': 'insert_image_from_clipboard'},
 
             {'id': 0, 'text': '', 'image': None, 'tool': 0, 'sel': False, 'align': 'left', 'command': ''},
@@ -1772,6 +1774,16 @@ class MyWindow(pyglet.window.Window):
         if self.autosave and self.tik % 5 == 0:
             self.save()
             self.tik = 0
+
+        file_name = "image.bmp"
+
+        for b in self.buttons:
+            if b['id']== 119:
+                if os.path.exists(file_name):
+                    b['image'] = self.imPaste[1]
+                else:
+                    b['image'] = self.imPaste[0]
+                break;
 
         if self.isMinimized:
             # Перевіряємо наявність зовнішніх даних та підвантажуємо їх за потребою
