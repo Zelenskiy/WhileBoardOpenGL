@@ -639,7 +639,8 @@ class MyWindow(pyglet.window.Window):
                 nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
                 image = pyglet.image.load(file_name)
                 image.save(nnam)
-                os.remove(file_name)
+                if not self.multiSelect:
+                    os.remove(file_name)
                 x,y = self.screen_to_canvas(300,300)
                 self.insert_image_from_file(nnam,  x, y, 600, 400)
                 self.tool = 8
