@@ -225,7 +225,7 @@ class MyWindow(pyglet.window.Window):
         self.figures = []
         self.selectRamka = False
         self.isMinimized = False
-        self.isPartingPolylinu = True
+        # self.isPartingPolylinu = True
         self.isMove = False
         self.multiSelect = False
         self.isResize = False
@@ -532,6 +532,7 @@ class MyWindow(pyglet.window.Window):
         data['autosave'] = self.autosave
         data['dragPanelx'] = self.dragPanelx
         data['dragPanely'] = self.dragPanely
+        data['isPartingPolylinu'] = self.isPartingPolylinu
 
         config = configparser.ConfigParser()
         config['MAIN'] = data
@@ -570,6 +571,7 @@ class MyWindow(pyglet.window.Window):
             self.errSize = int(data['errSize'])
             self.fullscr = data['fullscr'] == 'True'
             self.autosave = data['autosave'] == 'True'
+            self.isPartingPolylinu = data['isPartingPolylinu'] == 'True'
             self.ramkaThickness = int(data['ramkathickness'])
             self.dragPanelx = int(data['dragPanelx'])
             self.dragPanely = int(data['dragPanely'])
@@ -584,11 +586,12 @@ class MyWindow(pyglet.window.Window):
             self.penWidth = 7
             self.errSize = 20
             self.fullscr = False
+            self.isPartingPolylinu = True
             self.penColor = self.colorOrrange
             self.ramkaColor = (1, 0.5, 0, 1)
             self.ramkaThickness = 2
             self.fonColor = (0.91, 0.98, 0.79, 1.0)
-            self.gridColor = (0.82, 0.82, 0.82, 0.2)
+            self.gridColor = (0.82, 0.82, 0.82, 1.0)
             self.save_options()
 
     def load(self, file=''):
@@ -642,15 +645,22 @@ class MyWindow(pyglet.window.Window):
                 if not self.multiSelect:
                     os.remove(file_name)
                 x,y = self.screen_to_canvas(300,300)
-                self.insert_image_from_file(nnam,  x, y, 600, 400)
+                w = 600
+                h = int(image.height/image.width*w)
+                self.insert_image_from_file(nnam,  x, y, w, h)
                 self.tool = 8
         elif platform == "win32" or platform == "cygwin":
             from PIL import ImageGrab
-            im = ImageGrab.grabclipboard()
-            im.save('image.png', 'PNG')
-            x,y = self.screen_to_canvas(300,300)
-            self.insert_image_from_file('image.png',  x, y, 600, 400)
+            nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
+            image = ImageGrab.grabclipboard()
+            image.save(nnam)
+            x, y = self.screen_to_canvas(300, 300)
+            w = 600
+            h = int(image.height / image.width * w)
+            self.insert_image_from_file(nnam, x, y, w, h)
             self.tool = 8
+
+
 
     def undo(self):
         self.figures = []
@@ -955,7 +965,7 @@ class MyWindow(pyglet.window.Window):
                 # dialog.Destroy()
             else:
                 self.isExit = False
-        self.clear()
+        # self.clear()
         self.incr = 0
         self.lenesPen = []
         if button == mouse.LEFT:
@@ -1210,29 +1220,14 @@ class MyWindow(pyglet.window.Window):
                     k['thickness'] = pW
                     k['fordel'] = False
                     k['visible'] = self.figure_on_screen(k['extrem'])
-
+                    # draw_line(x_0,y_0,x,y,color=color, thickness=pW)
                     self.figures.append(k)
 
                 self.x0, self.y0 = self.screen_to_canvas(x, y)
-            # elif self.tool == 9:  # Витирання кольором фону
-            #     # self.drawRight = True
-            #     xx, yy = self.screen_to_canvas(x, y)
-            #     self.poly.append({'x': xx, 'y': yy})
-            #     x0 = self.poly[0]['x']
-            #     y0 = self.poly[0]['y']
-            #     for p in self.poly:
-            #         x_ = p['x']
-            #         y_ = p['y']
-            #         xx0, yy0 = self.canvas_to_screen(x0, y0)
-            #         xx_, yy_ = self.canvas_to_screen(x_, y_)
-            #         xx0, yy0, xx_, yy_ = longer_for_polyline(xx0, yy0, xx_, yy_, self.penWidth, 0.2)
-            #         draw_line_1(xx0, yy0, xx_, yy_, color=self.fonColor, thickness=self.errSize, smooth=False)
-            #         x0, y0 = x_, y_
-            #     self.x0, self.y0 = self.screen_to_canvas(x, y)
             elif self.tool == 2:
                 if self.incr % 4 == 0: self.clear()
-                draw_fill_rectangle(x + self.errSize // 2, y + self.errSize // 2, x - self.errSize // 2,
-                                    y - self.errSize // 2, color=(1, 1, 0, 1))
+                # draw_fill_rectangle(x + self.errSize // 2, y + self.errSize // 2, x - self.errSize // 2,
+                #                     y - self.errSize // 2, color=(1, 1, 0, 1))
                 # draw_line(x + self.errSize // 2, y + self.errSize // 2,
                 #           x - self.errSize // 2, y - self.errSize // 2, color=(1, 1, 0, 1), thickness=self.errSize)
                 for f in self.figures:
@@ -1340,7 +1335,7 @@ class MyWindow(pyglet.window.Window):
                         self.isMove = False
                         self.isRotate = True
                         x0, y0 = self.screen_to_canvas(x_center, y_center)
-                        angle = math.atan(-dx / 100)
+                        angle = math.atan(-dx / 300)
                         for fi in pSel:
                             for p in fi['coord']:
                                 xx, yy = p['x'], p['y']
@@ -1532,8 +1527,8 @@ class MyWindow(pyglet.window.Window):
                         xx0, yy0 = self.canvas_to_screen(x0, y0)
                         xx, yy = self.canvas_to_screen(x, y)
 
-                        # draw_fill_circle(x0,y0,r,color=f['color'],thickness=1)
-                        # draw_fill_circle(xx,yy,r,color=f['color'],thickness=1)
+                        # # draw_fill_circle(x0,y0,r,color=f['color'],thickness=1)
+                        # # draw_fill_circle(xx,yy,r,color=f['color'],thickness=1)
                         draw_line_1(xx0, yy0, xx, yy, color=f['color'], thickness=f['thickness'],
                                     smooth=self.isSmooth)
                         x0, y0 = x, y
@@ -1640,9 +1635,9 @@ class MyWindow(pyglet.window.Window):
         h = self.screen_height
         if self.isGrid:
             for y in range(0, h, self.step):
-                draw_line_1(0, y, w, y, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=0)
+                draw_line(0, y, w, y, color=self.gridColor, thickness=1)
             for x in range(0, w, self.step):
-                draw_line_1(x, 0, x, h, color=self.gridColor, thickness=1, smooth=self.isSmooth, dash=0)
+                draw_line(x, 0, x, h, color=self.gridColor, thickness=1)
 
     def draw_sel_ramka(self):
         # рамка виділення
@@ -1700,7 +1695,11 @@ class MyWindow(pyglet.window.Window):
         if self.isExit:
             self.label.draw()
 
+    # def on_resize(self, width, height):
 
+    #     if self.tik_anti_blind >5:
+    #         self.update_figures_wo_del()
+    #         self.maximize()
 
     def on_close(self):
         self.label = pyglet.text.Label('x',
@@ -1776,20 +1775,26 @@ class MyWindow(pyglet.window.Window):
             self.save()
             self.tik = 0
 
-        file_name = "image.bmp"
-
-        for b in self.buttons:
-            if b['id']== 119:
-                if os.path.exists(file_name):
+        if platform == "win32" or platform == "cygwin":
+            for b in self.buttons:
+                if b['id']== 119:
                     b['image'] = self.imPaste[1]
-                else:
-                    b['image'] = self.imPaste[0]
-                break;
+                    break
+        elif platform == "linux":
+            file_name = "image.bmp"
+            for b in self.buttons:
+                if b['id']== 119:
+                    if os.path.exists(file_name):
+                        b['image'] = self.imPaste[1]
+                    else:
+                        b['image'] = self.imPaste[0]
+                    break
 
         if self.isMinimized:
             # Перевіряємо наявність зовнішніх даних та підвантажуємо їх за потребою
             file_name = "tmp.bmp"
             if os.path.exists(file_name):
+                image = pyglet.image.load(file_name)
                 self.pageMax += 1
                 self.page = self.pageMax
                 self.cx = self.page * 100000 - 100000
@@ -1797,7 +1802,7 @@ class MyWindow(pyglet.window.Window):
                 width = 600
                 w = self.width
                 h = self.height
-                height = 9 * width // 16
+                height = image.height * width // image.width
                 x0, y0 = w - width - self.cx, h - height - self.cy
                 nnam = datetime.datetime.strftime(datetime.datetime.now(), 'tmp/' + "_%Y_%m_%d_%H_%M_%S") + '.png'
                 shutil.copy(file_name, nnam)
@@ -1832,9 +1837,12 @@ def oglStart():
     window = MyWindow(w, h - 62, caption="WhiteBoard", resizable=True, visible=False)
     window.screen_width = w
     window.screen_height = h
-    # context = window.context
-    # config = context.config
-    # config.double_buffer
+    ico = pyglet.image.load('img/ws1.ico')
+    window.set_icon(ico)
+
+    context = window.context
+    config = context.config
+    config.double_buffer
 
     window.set_location(2, 24)
 
