@@ -124,45 +124,43 @@ def rfpart(x):
 
 
 def draw_line_1(x0, y0, x1, y1, color=(0, 0, 1, 1), thickness=1, smooth=False, dash=0):
-    if smooth:
-        draw_vu_line(x0, y0, x1, y1, color=color, thickness=thickness)
+
+    if dash == 0:
+        draw_line(x0, y0, x1, y1, color=color, thickness=thickness, smooth=smooth)
     else:
-        if dash == 0:
-            draw_line(x0, y0, x1, y1, color=color, thickness=thickness)
+        dx = (x1 - x0)
+        dy = (y1 - y0)
+        if dx > 0:
+            sx = 1
         else:
-            dx = (x1 - x0)
-            dy = (y1 - y0)
-            if dx > 0:
-                sx = 1
-            else:
-                sx = -1
-            if dy > 0:
-                sy = 1
-            else:
-                sy = -1
-            if dx != 0:
-                tangle = math.atan(dy / dx)
-            else:
-                tangle = -sy * math.pi / 2
-            x_old, y_old = x0, y0
-            if dash == 1:
-                dash_len = thickness * 4
-            else:
-                dash_len = thickness * 1
-            dash_len_x = dash_len * math.cos(tangle)
-            dash_len_y = dash_len * math.sin(tangle)
-            l = math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2)
-            k = int(l / dash_len)
-            for e in range(1, k + 2):
-                x = x0 + sx * (e * dash_len_x - dash_len_x)
-                y = y0 + sx * (e * dash_len_y - dash_len_y)
-                if e % 2 != 1:
-                    draw_line(x_old, y_old, x, y, color=color, thickness=thickness)
-                x_old, y_old = x, y
-            # pass
-            # x_old = x0 + sx * (k * dash_len_x - dash_len_x)
-            # y_old = y0 + sx * (k * dash_len_y - dash_len_y)
-            # draw_line(x_old, y_old, x1, y1, color, thickness)
+            sx = -1
+        if dy > 0:
+            sy = 1
+        else:
+            sy = -1
+        if dx != 0:
+            tangle = math.atan(dy / dx)
+        else:
+            tangle = -sy * math.pi / 2
+        x_old, y_old = x0, y0
+        if dash == 1:
+            dash_len = thickness * 4
+        else:
+            dash_len = thickness * 1
+        dash_len_x = dash_len * math.cos(tangle)
+        dash_len_y = dash_len * math.sin(tangle)
+        l = math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2)
+        k = int(l / dash_len)
+        for e in range(1, k + 2):
+            x = x0 + sx * (e * dash_len_x - dash_len_x)
+            y = y0 + sx * (e * dash_len_y - dash_len_y)
+            if e % 2 != 1:
+                draw_line(x_old, y_old, x, y, color=color, thickness=thickness)
+            x_old, y_old = x, y
+        # pass
+        # x_old = x0 + sx * (k * dash_len_x - dash_len_x)
+        # y_old = y0 + sx * (k * dash_len_y - dash_len_y)
+        # draw_line(x_old, y_old, x1, y1, color, thickness)
 
 
 def draw_vu_line(x0, y0, x1, y1, color=(1, 1, 1, 1), thickness=1):
@@ -339,6 +337,10 @@ def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1, smooth=False, dash=
     # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)  # transparency
     glDisable(GL_LINE_STIPPLE)
     glDisable(GL_BLEND)
+    if smooth:
+        glEnable(GL_LINE_SMOOTH)
+    else:
+        glDisable(GL_LINE_SMOOTH)
     glColor4f(*color)
     glLineWidth(thickness)
     # if dash != 0:
@@ -350,7 +352,7 @@ def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1, smooth=False, dash=
     glVertex2f(x0, y0)
     glVertex2f(x, y)
     glEnd()
-    # glDisable(GL_LINE_STIPPLE)
+    glDisable(GL_LINE_SMOOTH)
 
 
 def dist_(x0, y0, x, y):
@@ -366,17 +368,17 @@ def draw_line_mod(x0, y0, x, y, color=(1, 0, 0, 1), fon_color=(1, 0, 0, 1), thic
     x_, y_ = x0 + (l - LineLen) * math.cos(angle), y0 - (l - LineLen) * math.sin(angle)
     x0_, y0_ = x - (l - LineLen) * math.cos(angle), y + (l - LineLen) * math.sin(angle)
     if arrow == 3:
-        draw_line_1(x0, y0, x_, y_, color=color, thickness=thickness, dash=dash)
+        draw_line_1(x0, y0, x_, y_, color=color, thickness=thickness, dash=dash, smooth=smooth)
         draw_arrow_head(x, y, angle, color=color, thickness=thickness)
     elif arrow == 2:
-        draw_line_1(x0_, y0_, x, y, color=color, thickness=thickness, dash=dash)
+        draw_line_1(x0_, y0_, x, y, color=color, thickness=thickness, dash=dash, smooth=smooth)
         draw_arrow_head(x0, y0, angle2, color=color, thickness=thickness)
     elif arrow == 1:
-        draw_line_1(x0_, y0_, x_, y_, color=color, thickness=thickness, dash=dash)
+        draw_line_1(x0_, y0_, x_, y_, color=color, thickness=thickness, dash=dash, smooth=smooth)
         draw_arrow_head(x, y, angle, color=color, thickness=thickness)
         draw_arrow_head(x0, y0, angle2, color=color, thickness=thickness)
     else:
-        draw_line_1(x0, y0, x, y, color=color, thickness=thickness, dash=dash)
+        draw_line_1(x0, y0, x, y, color=color, thickness=thickness, dash=dash, smooth=smooth)
 
 
 def draw_ramka_top(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1, center=(0, 0), rotate=True, resize=True, close=True):

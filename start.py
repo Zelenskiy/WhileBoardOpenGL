@@ -313,7 +313,7 @@ class MyWindow(pyglet.window.Window):
             {'id': 111, 'x': self.dragPanelx + 35, 'y': self.dragPanely + 130, 'text': 'U', 'image': None, 'tool': 0,
              'sel': False, 'align': 'right', 'command': 'move_111'},
 
-            {'id': 56, 'x': -500, 'y': -500, 'text': 'del selected', 'image': pyglet.resource.image('img/close.png'),
+            {'id': 56, 'x': -500, 'y': -500, 'text': 'del selected', 'image': pyglet.resource.image('img/trash32.png'),
              'tool': 0,
              'sel': False, 'align': '', 'command': 'del_selected'},
         ]
@@ -584,7 +584,7 @@ class MyWindow(pyglet.window.Window):
             # self.numVertex = 4
             self.dragPanelx, self.dragPanely = 5, 5
             self.isGrid = True
-            self.isSmooth = False
+            self.isSmooth = True
             self.autosave = True
             self.penWidth = 7
             self.errSize = 20
@@ -1224,6 +1224,7 @@ class MyWindow(pyglet.window.Window):
                     k['color'] = colr
                     k['thickness'] = pW
                     k['fordel'] = False
+                    k['smooth'] = self.isSmooth
                     k['arrow'] = 0
                     k['dash'] = self.dash
                     k['visible'] = self.figure_on_screen(k['extrem'])
@@ -1253,7 +1254,7 @@ class MyWindow(pyglet.window.Window):
             elif self.tool == 3:
                 self.clear()
                 draw_line_mod(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor, fon_color=self.fonColor,
-                              thickness=self.penWidth, arrow=self.arr, dash=self.dash)
+                              thickness=self.penWidth, arrow=self.arr, dash=self.dash, smooth=self.isSmooth)
                 # draw_line(self.x0 + self.cx, self.y0 + self.cy, x, y, color=self.penColor,
                 #           thickness=self.penWidth)
             # elif self.tool == 5:  # ellipse
@@ -1424,6 +1425,7 @@ class MyWindow(pyglet.window.Window):
                         k['center'] = {'x': xcenter, 'y': ycenter}
                         k['color'] = self.penColor
                         k['thickness'] = self.penWidth
+                        k['smooth'] = self.isSmooth
                         k['arrow'] = self.arr
                         k['dash'] = self.dash
                         k['fordel'] = False
@@ -1449,6 +1451,7 @@ class MyWindow(pyglet.window.Window):
                         k['center'] = {'x': xcenter, 'y': ycenter}
                         k['thickness'] = self.penWidth
                         k['dash'] = self.dash
+                        k['smooth'] = self.isSmooth
                         k['fill'] = self.isFill
                         k['fordel'] = False
                         k['extrem'] = min(x0, xx), min(y0, yy), max(x0, xx), max(y0, yy)
@@ -1474,6 +1477,7 @@ class MyWindow(pyglet.window.Window):
                         k['fill'] = self.isFill
                         k['dash'] = self.dash
                         k['color'] = self.penColor
+                        k['smooth'] = self.isSmooth
                         k['thickness'] = self.penWidth
                         k['fordel'] = False
                         k['visible'] = self.figure_on_screen(k['extrem'])
@@ -1554,7 +1558,7 @@ class MyWindow(pyglet.window.Window):
                 x_, y_ = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
                 # draw_line_1(x0, y0, x_, y_, color=f['color'], thickness=f['thickness'], dash=f['dash'])
                 draw_line_mod(x0, y0, x_, y_, color=f['color'], fon_color=self.fonColor,
-                              thickness=f['thickness'], arrow=f['arrow'], dash=f['dash'])
+                              thickness=f['thickness'], arrow=f['arrow'], dash=f['dash'], smooth=f['smooth'])
             elif f['name'] == 'quadrangle_fill' or f['name'] == 'quadrangle':
                 x1, y1 = self.canvas_to_screen(f['p'][0]['x'], f['p'][0]['y'])
                 x2, y2 = self.canvas_to_screen(f['p'][1]['x'], f['p'][1]['y'])
@@ -1701,8 +1705,9 @@ class MyWindow(pyglet.window.Window):
         if self.drawOk:
             self.draw_grid()
             self.draw_figures()
-            self.draw_buttons_and_panels()
             self.draw_sel_ramka()
+            self.draw_buttons_and_panels()
+
             # self.draw_grid()
             labelPage = pyglet.text.Label(str(self.page),
                                           font_name='Arial',
