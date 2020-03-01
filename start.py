@@ -236,6 +236,7 @@ class MyWindow(pyglet.window.Window):
         self.isExit = False
         self.isFill = False
         self.dragPanel = False
+        self.isFullscreen = True
         self.selFigs = []
 
         self.isBtnClick = False
@@ -1850,6 +1851,8 @@ class MyWindow(pyglet.window.Window):
                 self.maximize()
                 self.set_fullscreen(True)
                 self.set_fullscreen(False)
+                if self.fullscr:
+                    self.set_fullscreen(True)
                 self.clear()
             file_name = "tmp_f.bmp"
             if os.path.exists(file_name):
@@ -1866,6 +1869,8 @@ class MyWindow(pyglet.window.Window):
                 self.maximize()
                 self.set_fullscreen(True)
                 self.set_fullscreen(False)
+                if self.fullscr:
+                    self.set_fullscreen(True)
                 self.clear()
 
 
@@ -1878,6 +1883,7 @@ def oglStart():
     window = MyWindow(w, h - 62, caption="WhiteBoard", resizable=True, visible=False, config=config)
     window.screen_width = w
     window.screen_height = h
+    window.set_fullscreen(window.fullscr)
     ico = pyglet.image.load('img/ws1.ico')
     window.set_icon(ico)
     #
