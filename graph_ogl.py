@@ -308,7 +308,6 @@ def longer_for_polyline(xx0, yy0, xx, yy, thickness, k):
     x0_, y0_ = xx - (l - LineLen) * math.cos(angle), yy + (l - LineLen) * math.sin(angle)
     return x0_, y0_, x_, y_
 
-
 # def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
 #     glColor4f(*color)
 #     glLineWidth(thickness)

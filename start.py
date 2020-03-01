@@ -1871,6 +1871,7 @@ def oglStart():
 
     window.set_location(2, 24)
 
+
     # window.maximize()
     window.clear()
     window.on_draw()
