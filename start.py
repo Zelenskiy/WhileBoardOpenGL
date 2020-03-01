@@ -224,6 +224,7 @@ class MyWindow(pyglet.window.Window):
         self.figures_for_draw = []
 
         glClearColor(*self.fonColor)
+
         self.figures = []
         self.drawOk = True;
         self.selectRamka = False
@@ -584,7 +585,7 @@ class MyWindow(pyglet.window.Window):
             self.dragPanelx, self.dragPanely = 5, 5
             self.isGrid = True
             self.isSmooth = False
-            self.autosave = False
+            self.autosave = True
             self.penWidth = 7
             self.errSize = 20
             self.fullscr = False
@@ -954,6 +955,9 @@ class MyWindow(pyglet.window.Window):
         self.clear()
 
     def on_mouse_press(self, x, y, button, modifier):
+
+
+
         self.tik_anti_blind += 1
 
         # Перевіряємо чи треба виходити
@@ -1167,10 +1171,9 @@ class MyWindow(pyglet.window.Window):
             self.history.append(self.figures.copy())
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        glDisable(GL_LINE_STIPPLE)
         # if self.tik_anti_blind < 5: self.clear()
+
         self.incr += 1
-        # if self.drawRight: self.clear()
         if self.dragPanel:
             for b in self.btnPnl:
                 b['x'] -= dx
@@ -1181,6 +1184,7 @@ class MyWindow(pyglet.window.Window):
 
         elif self.f:
             if self.tool == 1 or self.tool == 9:
+                # if self.tool == 9: self.drawOk = True
                 xx, yy = self.screen_to_canvas(x, y)
                 self.poly.append({'x': xx, 'y': yy})
                 x0 = self.poly[0]['x']
@@ -1207,7 +1211,7 @@ class MyWindow(pyglet.window.Window):
                     k['name'] = 'line'
                     x_0, y_0 = self.x0, self.y0
                     k['p'] = [{'x': x_0, 'y': y_0}, {'x': xx, 'y': yy}, ]
-                    k['extrem'] =  min(x_0, xx), min(y_0, yy), max(x_0, xx), max(y_0, yy)
+                    k['extrem'] = min(x_0, xx), min(y_0, yy), max(x_0, xx), max(y_0, yy)
 
                     xcenter, ycenter = (x0 + xx) / 2, (y0 + yy) / 2
                     if self.tool == 1:
@@ -1224,8 +1228,8 @@ class MyWindow(pyglet.window.Window):
                     k['dash'] = self.dash
                     k['visible'] = self.figure_on_screen(k['extrem'])
                     # draw_polyline(k['p'],color=colr, thickness=pW, dash=self.dash)
-
-                    draw_line(x_0+self.cx, y_0+self.cy, xx+self.cx, yy+self.cy, color=colr, thickness=pW)
+                    # print(x_0 + self.cx, y_0 + self.cy, xx + self.cx, yy + self.cy)
+                    draw_line_mod(x_0 + self.cx, y_0 + self.cy, xx + self.cx, yy + self.cy, color=colr, thickness=pW)
                     self.figures.append(k)
                     self.x_00, self.y_00 = x, y
 
@@ -1361,6 +1365,7 @@ class MyWindow(pyglet.window.Window):
                                 break
 
     def on_mouse_release(self, x, y, button, modifiers):
+        # draw_fill_rectangle(0,0,1500,1000,color=self.fonColor)
         self.clear()
         self.dragPanel = False
         # self.drawRight = True
@@ -1527,6 +1532,7 @@ class MyWindow(pyglet.window.Window):
         #         self.figures_for_draw.append(f)
         # print (self.figures)
 
+
     def draw_figures(self):
         # for f in self.figures_for_draw:
         for f in self.figures:
@@ -1691,7 +1697,7 @@ class MyWindow(pyglet.window.Window):
             draw_line(-10000, -10000, -10001, -10001, color=self.fonColor, thickness=1)
 
     def on_draw(self):
-        # if self.tik_anti_blind < 10: self.drawOk = True
+        # if (self.tik_anti_blind < 10) : self.drawOk = True
         if self.drawOk:
             self.draw_grid()
             self.draw_figures()
@@ -1740,6 +1746,8 @@ class MyWindow(pyglet.window.Window):
         file_name = 'flag.txt'
         f = open(file_name, 'tw', encoding='utf-8')
         f.close()
+
+
 
     def on_hide(self):
         self.isMinimized = True
@@ -1795,6 +1803,8 @@ class MyWindow(pyglet.window.Window):
 
     def update(self, dt):
         self.tik += 1
+        print(self.tik)
+        print(self.autosave)
         if self.autosave and self.tik % 5 == 0:
             self.save()
             self.tik = 0
@@ -1858,19 +1868,18 @@ def oglStart():
     display = pyglet.canvas.get_display()
     w = display.get_screens()[0].width
     h = display.get_screens()[0].height
+    config = pyglet.gl.Config(double_buffer=False)
 
-    window = MyWindow(w, h - 62, caption="WhiteBoard", resizable=True, visible=False)
+    window = MyWindow(w, h - 62, caption="WhiteBoard", resizable=True, visible=False, config=config)
     window.screen_width = w
     window.screen_height = h
     ico = pyglet.image.load('img/ws1.ico')
     window.set_icon(ico)
     #
-    # context = window.context
-    # config = context.config
-    # config.double_buffer
+
+
 
     window.set_location(2, 24)
-
 
     # window.maximize()
     window.clear()
