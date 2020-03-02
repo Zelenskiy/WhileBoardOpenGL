@@ -7,15 +7,16 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Buttons,
-  ExtCtrls;
+  ExtCtrls, StdCtrls;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
-    SpeedButton2: TSpeedButton;
     fullButton: TSpeedButton;
+    Timer3: TTimer;
+    Timer4: TTimer;
     windButton: TSpeedButton;
     Timer1: TTimer;
     Timer2: TTimer;
@@ -28,6 +29,9 @@ type
 
     procedure SpeedButton2Click(Sender: TObject);
     procedure fullButtonClick(Sender: TObject);
+
+    procedure Timer3Timer(Sender: TObject);
+    procedure Timer4Timer(Sender: TObject);
     procedure windButtonClick(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
     procedure SetShotInWindow;
@@ -41,7 +45,7 @@ type
     X0, Y0: integer;
     os:string;
     x:string;
-
+    path:string;
 
   end;
 
@@ -63,65 +67,104 @@ var tmpBitmap:TBitmap;
     tmpHeight,tmpWidth:integer;
     ScreenDC: HDC;
       dirSeparator:char;
-      namefile, path:string;
+      namefile:string;
 begin
-  if os = 'linux' then
-    dirSeparator := '/'
-  else
-    dirSeparator := '\';
-  path := ExtractFilePath(Application.ExeName);
-
   //ShowMessage(path);
   if Form1.x='win' then
-     namefile:= path+'tmp.bmp'
+     namefile:= Form1.path+'tmp.bmp'
   else
-     namefile:= path+'tmp_f.bmp';
+     namefile:= Form1.path+'tmp_f.bmp';
+
   ScreenDC := GetDC(0);
   tmpBitmap := TBitmap.Create;
   tmpBitmap.LoadFromDevice(ScreenDC);
   tmpBitmap.SaveToFile(nameFile);
   tmpBitmap.Free;
-  Form1.Show;
+  Timer3.Enabled:=True;
+
+
 end;
 
 procedure TForm1.fullButtonClick(Sender: TObject);
 begin
-  Form1.Hide;
+  Form1.Visible:=False;
+  Timer3.Enabled:=False;
   Form1.x := 'full';
-  SetShotInWindow;
+
   Timer2.Enabled:=true;
 
 end;
 
+
+
+procedure TForm1.Timer3Timer(Sender: TObject);
+var   file_name:string;
+begin
+  file_name := Form1.path+'flag.txt';
+  if FileExists(file_name) then begin
+     Form1.Visible:=True;
+  end
+  else begin
+     Form1.Visible:=False
+  end;
+
+
+end;
+
+procedure TForm1.Timer4Timer(Sender: TObject);
+var   file_name:string;
+begin
+    file_name := Form1.path+'is_work.txt';
+  if not FileExists(file_name) then begin
+     Application.Terminate;
+  end;
+end;
+
 procedure TForm1.windButtonClick(Sender: TObject);
 begin
-  Form1.Hide;
+  Form1.Visible:=False;
+  Timer3.Enabled:=False;
   Form1.x := 'win';
-  SetShotInWindow;
   Timer2.Enabled:=true;
 
 end;
 
 procedure TForm1.Timer2Timer(Sender: TObject);
 begin
-      Form1.Show;
-      Timer2.Enabled:=false;
+    SetShotInWindow;
+    Timer2.Enabled:=false;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
+var s, c:string;
+    i,j: integer;
 begin
   os:='windows';
   {$IFDEF linux}
   os:='linux';
   {$ENDIF}
+  s:= ExtractFilePath(Application.ExeName);
+  if os =  'windows' then c := '\' else c := '/';
+  j := length(s);
+  for i:=j-1 downto 1 do begin
+      if s[i] = c then begin
+         s := copy(s,1,i);
+         break;
+      end;
+  end;
+  //ShowMessage(s);
+  Form1.path := s;
   startDrag := False;
   form1.FormStyle:=fsSystemStayOnTop;
+  form1.WindowState:= wsNormal;
+  Form1.Visible:=True;
   width :=38;
-  height := 160;
+  height := 120;
   form1.AlphaBlend:=true;
   form1.AlphaBlendValue:=127;{0-255}
   form1.Left := 30;
   form1.Top := 520;
+  Timer3.Enabled:=True;
 end;
 
 procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton;

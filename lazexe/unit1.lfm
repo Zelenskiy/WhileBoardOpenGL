@@ -1,33 +1,22 @@
 object Form1: TForm1
   Left = 291
-  Height = 239
+  Height = 164
   Top = 127
   Width = 120
   BorderStyle = bsNone
   Caption = '__.__'
-  ClientHeight = 239
+  ClientHeight = 164
   ClientWidth = 120
   FormStyle = fsSystemStayOnTop
   OnCreate = FormCreate
   OnMouseDown = FormMouseDown
   OnMouseMove = FormMouseMove
   OnMouseUp = FormMouseUp
-  LCLVersion = '1.8.4.0'
-  object SpeedButton2: TSpeedButton
-    Left = 0
-    Height = 42
-    Top = 0
-    Width = 120
-    Align = alTop
-    Caption = 'x'
-    Color = clRed
-    Flat = True
-    OnClick = SpeedButton2Click
-  end
+  LCLVersion = '1.8.2.0'
   object fullButton: TSpeedButton
     Left = 0
     Height = 42
-    Top = 42
+    Top = 0
     Width = 120
     Align = alTop
     Flat = True
@@ -147,7 +136,7 @@ object Form1: TForm1
   object windButton: TSpeedButton
     Left = 0
     Height = 42
-    Top = 84
+    Top = 42
     Width = 120
     Align = alTop
     Flat = True
@@ -267,8 +256,22 @@ object Form1: TForm1
     top = 192
   end
   object Timer2: TTimer
+    Enabled = False
     OnTimer = Timer2Timer
     left = 64
     top = 192
+  end
+  object Timer3: TTimer
+    Enabled = False
+    Interval = 5000
+    OnTimer = Timer3Timer
+    left = 64
+    top = 136
+  end
+  object Timer4: TTimer
+    Interval = 10000
+    OnTimer = Timer4Timer
+    left = 11
+    top = 139
   end
 end
