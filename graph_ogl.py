@@ -122,9 +122,7 @@ def rfpart(x):
 #     if dash != 0:  glDisable(GL_LINE_STIPPLE)
 
 
-
 def draw_line_1(x0, y0, x1, y1, color=(0, 0, 1, 1), thickness=1, smooth=False, dash=0):
-
     if dash == 0:
         draw_line(x0, y0, x1, y1, color=color, thickness=thickness, smooth=smooth)
     else:
@@ -306,6 +304,7 @@ def longer_for_polyline(xx0, yy0, xx, yy, thickness, k):
     x0_, y0_ = xx - (l - LineLen) * math.cos(angle), yy + (l - LineLen) * math.sin(angle)
     return x0_, y0_, x_, y_
 
+
 # def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1):
 #     glColor4f(*color)
 #     glLineWidth(thickness)
@@ -315,7 +314,6 @@ def longer_for_polyline(xx0, yy0, xx, yy, thickness, k):
 #     glEnd()
 
 def draw_polyline(ps, color=(1, 0, 0, 1), thickness=1, dash=0):
-
     glDisable(GL_LINE_STIPPLE)
     glDisable(GL_BLEND)
     glColor4f(*color)
@@ -353,6 +351,20 @@ def draw_line(x0, y0, x, y, color=(1, 0, 0, 1), thickness=1, smooth=False, dash=
     glVertex2f(x, y)
     glEnd()
     glDisable(GL_LINE_SMOOTH)
+def draw_line_grid(x0, y0, x, y, color=(0.5, 0.2, 0.4, 0.2)):
+    # glEnable(GL_BLEND)  # transparency
+    # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)  # transparency
+    glColor4f(*color)
+    glLineWidth(1)
+    glEnable(GL_LINE_STIPPLE)
+    glLineStipple(3, 666)
+    glBegin(GL_LINES)
+    glVertex2f(x0, y0)
+    glVertex2f(x, y)
+    glEnd()
+    glDisable(GL_BLEND)
+    glDisable(GL_LINE_STIPPLE)
+
 
 
 def dist_(x0, y0, x, y):
@@ -592,6 +604,16 @@ def draw_fill_regular_polygon(x0, y0, r, numPoints=3, angleStart=90, color=(0, 0
     circle = pyglet.graphics.vertex_list(numPoints, ('v2f', verts))
     glColor4f(*color)
     circle.draw(GL_LINE_LOOP)
+
+
+def draw_circle_fill(x0, y0, r, color=(0, 0, 0, 1)):
+    glColor4f(*color)
+    glLineWidth(1)
+    glBegin(GL_TRIANGLE_FAN)
+    for i in range(0, 50):
+        a = i / 50.0 * 3.1415 * 2.0
+        glVertex2f(math.cos(a) * r + x0, math.sin(a) * r + y0)
+    glEnd()
 
 
 def draw_fill_circle(x0, y0, r, color=(0, 0, 0, 1), thickness=1):
