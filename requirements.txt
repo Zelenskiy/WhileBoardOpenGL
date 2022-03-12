@@ -2,7 +2,7 @@ freeze==1.0.10
 future==0.17.1
 openpyxl==2.6.2
 patterns==0.3
-Pillow==6.1.0
+Pillow==9.0.1
 pipreqs==0.4.9
 python-docx==0.8.7
 pytz==2019.1
